@@ -8,10 +8,15 @@ node_modules/
 
 # Build output
 .next/
+.open-next/
 out/
 .vercel/
 .cache/
 *.tsbuildinfo
+cloudflare-env.d.ts
+
+# Platform CLI state
+.supabase/
 
 # OS and editor
 .DS_Store

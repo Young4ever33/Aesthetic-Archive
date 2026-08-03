@@ -172,14 +172,11 @@ pnpm check
 - `SUPABASE_SERVICE_ROLE_KEY`
 - `PROVIDER_ENCRYPTION_KEY`：Base64 编码的 32 字节密钥
 
-可选网络配置：
+可选运行时配置：
 
-- `AI_HTTP_PROXY`
-- `HTTP_PROXY`
-- `HTTPS_PROXY`
 - `AI_REQUEST_TIMEOUT_MS`
 
-Provider API Key 只在服务端加密保存，绝不能出现在 localStorage、浏览器备份、API 响应、日志或 Git 历史中。浏览器只能获得 `hasSecret` 等非敏感元数据。
+生产环境通过 Cloudflare 出站 `fetch` 调用 Provider，不要在 Worker 中配置桌面代理变量。Provider API Key 只在服务端加密保存，绝不能出现在 localStorage、浏览器备份、API 响应、日志或 Git 历史中。浏览器只能获得 `hasSecret` 等非敏感元数据。
 
 ## 图片资源与许可证
 

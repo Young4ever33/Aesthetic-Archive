@@ -1,4 +1,3 @@
-import { ProxyAgent, request } from 'undici';
 import { decryptProviderSecret } from './provider-vault';
 import { createSupabaseAdminClient } from './supabase/admin';
 import type { AiErrorCode, AiResponseMeta } from './contracts';
@@ -92,11 +91,6 @@ function upstreamDetail(value: unknown): string {
   return '';
 }
 
-function requestDispatcher() {
-  const proxyUrl = process.env.AI_HTTP_PROXY || process.env.HTTPS_PROXY || process.env.HTTP_PROXY || '';
-  return proxyUrl ? new ProxyAgent(proxyUrl) : undefined;
-}
-
 function requestTimeoutMs() {
   const configured = Number(process.env.AI_REQUEST_TIMEOUT_MS || 120_000);
   return Number.isFinite(configured) ? Math.min(300_000, Math.max(15_000, configured)) : 120_000;
@@ -104,29 +98,21 @@ function requestTimeoutMs() {
 
 async function requestJson(url: string, init: RequestInit): Promise<Record<string, unknown>> {
   const controller = new AbortController();
-  const dispatcher = requestDispatcher();
   const timeout = setTimeout(() => controller.abort(), requestTimeoutMs());
   try {
-    const response = await request(url, {
-      method: init.method || 'GET',
-      headers: init.headers as Record<string, string> | undefined,
-      body: typeof init.body === 'string' ? init.body : undefined,
-      signal: controller.signal,
-      ...(dispatcher ? { dispatcher } : {}),
-    });
-    const data: unknown = await response.body.json().catch(() => null);
-    if (response.statusCode < 200 || response.statusCode >= 300) throw upstreamError(response.statusCode, upstreamDetail(data));
+    const response = await fetch(url, { ...init, signal: controller.signal });
+    const data: unknown = await response.json().catch(() => null);
+    if (!response.ok) throw upstreamError(response.status, upstreamDetail(data));
     if (!data || typeof data !== 'object' || Array.isArray(data)) throw gatewayError('PROVIDER_INVALID_RESPONSE', 'The AI service returned an invalid response', 502);
     return data as Record<string, unknown>;
   } catch (error) {
     if (error instanceof Error && error.name === 'AbortError') throw gatewayError('PROVIDER_TIMEOUT', 'The AI service timed out', 504, true);
     if (error instanceof TypeError || (error instanceof Error && /fetch failed|network|socket|connect|reset|dns/i.test(error.message))) {
-      throw gatewayError('PROVIDER_UNAVAILABLE', 'Unable to reach the AI service. Check the Provider endpoint, local network, proxy, or firewall.', 502, true);
+      throw gatewayError('PROVIDER_UNAVAILABLE', 'Unable to reach the AI service. Check the Provider endpoint and Cloudflare outbound connectivity.', 502, true);
     }
     throw error;
   } finally {
     clearTimeout(timeout);
-    if (dispatcher) await dispatcher.close();
   }
 }
 

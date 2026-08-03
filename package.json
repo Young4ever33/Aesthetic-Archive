@@ -11,6 +11,13 @@
     "seed:prompts": "node scripts/update-seed-prompts.mjs",
     "github:check": "node scripts/github-check.mjs",
     "smoke:production": "node scripts/smoke-production.mjs",
+    "cloudflare:build": "opennextjs-cloudflare build",
+    "cloudflare:preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
+    "cloudflare:deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
+    "cloudflare:upload": "opennextjs-cloudflare build && opennextjs-cloudflare upload",
+    "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
+    "supabase:status": "supabase migration list --linked",
+    "supabase:push": "supabase db push --linked",
     "check": "pnpm lint && pnpm typecheck && pnpm github:check && pnpm build"
   },
   "dependencies": {
@@ -18,15 +25,17 @@
     "@supabase/supabase-js": "^2.111.0",
     "next": "latest",
     "react": "latest",
-    "react-dom": "latest",
-    "undici": "^8.9.0"
+    "react-dom": "latest"
   },
   "devDependencies": {
+    "@opennextjs/cloudflare": "^1.20.2",
     "@types/node": "latest",
     "@types/react": "latest",
     "@types/react-dom": "latest",
     "eslint": "^9.39.1",
     "eslint-config-next": "latest",
-    "typescript": "^5.9.3"
+    "supabase": "^2.111.0",
+    "typescript": "^5.9.3",
+    "wrangler": "^4.118.0"
   }
 }

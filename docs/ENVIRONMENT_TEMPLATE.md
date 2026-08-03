@@ -1,18 +1,31 @@
-# Environment Variable Template
+# Cloudflare Production Variables
 
-Create a local `.env.local` at the repository root for development, or configure the same variables in the production platform secret store. This file must never be committed. The current application is a root Next.js project; there is no `apps/web` directory.
+Aesthetic Archive production variables belong in **Cloudflare Dashboard → Worker → Settings → Variables and Secrets**. Do not create a local `.env`, `.env.local`, or `.dev.vars` for the production setup.
 
-```dotenv
-NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
-SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
-PROVIDER_ENCRYPTION_KEY=replace-with-base64-32-byte-key
-AI_HTTP_PROXY=
-HTTP_PROXY=
-HTTPS_PROXY=
+## Public Variables
+
+These values are intentionally available to the browser bundle:
+
+```text
+NEXT_PUBLIC_SUPABASE_URL=https://YOUR_PROJECT.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_KEY
 AI_REQUEST_TIMEOUT_MS=120000
 ```
 
-`PROVIDER_ENCRYPTION_KEY` must decode from Base64 to exactly 32 bytes. `SUPABASE_SERVICE_ROLE_KEY`, `PROVIDER_ENCRYPTION_KEY`, and proxy credentials are server-only secrets. They must not appear in browser storage, API responses, logs, screenshots, backups, or Git history.
+## Encrypted Secrets
 
-For production, configure these values in Vercel/Cloudflare/your hosting platform's encrypted environment settings, scoped to the production deployment. Set the Supabase Auth Site URL and callback URL to the HTTPS production domain before smoke testing. The workspace security policy blocks automated creation of files named `.env*`; when creating the local file manually, copy the variables above and keep the file outside version control.
+Mark these as encrypted Cloudflare secrets:
+
+```text
+SUPABASE_SERVICE_ROLE_KEY=YOUR_SERVER_ONLY_SERVICE_ROLE_KEY
+PROVIDER_ENCRYPTION_KEY=BASE64_ENCODED_32_BYTE_KEY
+```
+
+Security requirements:
+
+- `PROVIDER_ENCRYPTION_KEY` must decode from Base64 to exactly 32 bytes.
+- `SUPABASE_SERVICE_ROLE_KEY` and `PROVIDER_ENCRYPTION_KEY` must never appear in browser storage, API responses, logs, screenshots, GitHub Actions output, or repository history.
+- Do not configure `AI_HTTP_PROXY`, `HTTP_PROXY`, or `HTTPS_PROXY` in Cloudflare. Production Provider calls use Cloudflare outbound `fetch`.
+- Individual Provider API keys are entered by authenticated users, encrypted server-side, and stored in Supabase. They are not Cloudflare environment variables.
+
+After the final domain is available, configure the same HTTPS domain in Supabase Auth Site URL and add `/auth/callback` to the allowed redirect URLs.

@@ -2,35 +2,25 @@
 
 Aesthetic Archive uses Supabase Auth + Postgres + Storage for the first cloud beta.
 
-## Required environment variables
+## Required production variables
 
-Configure these in the local development environment or deployment platform secret manager. Do not commit the actual values.
+Configure the values from `docs/ENVIRONMENT_TEMPLATE.md` directly in Cloudflare Worker Variables and Secrets. Do not create a local environment file for the production setup.
 
-```text
-NEXT_PUBLIC_SUPABASE_URL=https://YOUR_PROJECT.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_KEY
-SUPABASE_SERVICE_ROLE_KEY=SERVER_ONLY_SERVICE_ROLE_KEY
-PROVIDER_ENCRYPTION_KEY=BASE64_ENCODED_32_BYTE_KEY
-```
-
-Generate the server-only encryption key locally:
-
-```bash
-node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
-```
-
-`NEXT_PUBLIC_*` values are public Supabase client configuration. `PROVIDER_ENCRYPTION_KEY` is server-only and must never be exposed to the browser, returned by an API, or written to logs.
+`NEXT_PUBLIC_*` values are public Supabase client configuration. `SUPABASE_SERVICE_ROLE_KEY` and `PROVIDER_ENCRYPTION_KEY` are server-only Cloudflare secrets; they must never be exposed to the browser, returned by an API, committed to GitHub, or written to logs.
 
 ## Database setup
 
-Apply the existing schema migrations in order, then apply the four production migrations:
+Use the Supabase CLI against the existing hosted project. Authenticate the CLI, link the project by its project ref, compare local and remote history, perform a dry run, and only then push:
 
-```text
-supabase/migrations/202608030001_production_security.sql
-supabase/migrations/202608030002_private_storage_and_runtime.sql
-supabase/migrations/202608030003_ai_usage_observability.sql
-supabase/migrations/202608030004_feedback_reports.sql
+```bash
+pnpm exec supabase login
+pnpm exec supabase link --project-ref YOUR_PROJECT_REF
+pnpm exec supabase migration list --linked
+pnpm exec supabase db push --linked --dry-run
+pnpm exec supabase db push --linked
 ```
+
+Migrations are applied from `supabase/migrations/` in filename order. The remote project is production data: never use `db reset`, and do not use `--include-all` until migration history and the existing schema have been reconciled.
 
 The production migrations:
 
@@ -49,18 +39,11 @@ The old migrations are retained as historical schema references. Do not restore 
 
 ## Session behavior
 
-`proxy.ts` refreshes the Supabase cookie session for `/app` and `/api`. Server code should use `requireUser()` from `lib/supabase/server.ts`; do not trust a user ID from request JSON or query parameters.
+`middleware.ts` refreshes the Supabase cookie session for `/app` and `/api`. It uses the Edge Middleware convention required by the Cloudflare OpenNext adapter. Server code should use `requireUser()` from `lib/supabase/server.ts`; do not trust a user ID from request JSON or query parameters.
 
-## Local AI proxy
+## Production Provider networking
 
-Node.js does not automatically use the desktop VPN HTTP proxy. For local Agnes or other Provider access, set the proxy only in the terminal that starts Next.js:
-
-```powershell
-$env:AI_HTTP_PROXY="http://127.0.0.1:7890"
-pnpm dev
-```
-
-Use the actual HTTP or mixed port shown by the VPN client. Do not put a Provider API key or a local proxy URL in browser code. Production should use a server network that can reach the Provider directly or a deployment-managed proxy, not a user's desktop VPN.
+Cloudflare Workers call configured AI Providers through outbound `fetch`. Do not configure desktop proxy addresses or `AI_HTTP_PROXY`, `HTTP_PROXY`, or `HTTPS_PROXY` in Cloudflare. Provider API keys remain encrypted per user in Supabase and are never stored as global Cloudflare variables.
 
 ## Provider secret behavior
 

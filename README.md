@@ -172,14 +172,11 @@ Required server values:
 - `SUPABASE_SERVICE_ROLE_KEY`
 - `PROVIDER_ENCRYPTION_KEY` (base64-encoded 32-byte key)
 
-Optional networking values:
+Optional runtime value:
 
-- `AI_HTTP_PROXY`
-- `HTTP_PROXY`
-- `HTTPS_PROXY`
 - `AI_REQUEST_TIMEOUT_MS`
 
-Provider API keys are encrypted and stored server-side. They must never appear in localStorage, browser backups, API responses, logs, or Git history. The browser receives only non-secret metadata such as `hasSecret`.
+Production Provider calls use Cloudflare outbound `fetch`; do not configure desktop proxy variables in the Worker. Provider API keys are encrypted and stored server-side. They must never appear in localStorage, browser backups, API responses, logs, or Git history. The browser receives only non-secret metadata such as `hasSecret`.
 
 ## Assets and License
 
