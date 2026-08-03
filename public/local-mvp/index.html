@@ -23,6 +23,7 @@
             <button type="button" data-language-option="en">EN</button>
           </div>
         </div>
+        <a class="notification-button" id="notification-button" href="/notifications" target="_top" aria-label="消息"><span aria-hidden="true">♡</span><b id="notification-count" hidden>0</b></a>
         <button class="login-lite account-button" type="button" data-login-open><span class="account-avatar" data-account-avatar>AA</span><span class="account-name" data-account-name>登录</span></button>
       </div>
     </header>
@@ -254,7 +255,7 @@
               <div class="settings-intro"><div><p class="eyebrow">个人设置 / Workspace Settings</p><h2>管理你的资料与工作区方法。</h2><p>个人资料、卡片生成规则和本地数据都保存在当前浏览器。Provider 只负责调用模型，卡片模板决定模型如何理解你的审美。</p></div><span class="local-badge">本地工作区 · Local only</span></div>
               <form class="settings-section settings-profile" id="settings-profile-form">
                 <div class="settings-section-head"><div><h3>个人资料</h3><p>为未来的账号、同步和服务扩展保留基础信息。</p></div><span class="settings-section-index">01</span></div>
-                <div class="profile-grid"><label class="avatar-field">头像 / Avatar<div class="avatar-picker"><div class="avatar-preview" id="setting-avatar-preview" aria-label="头像预览"></div><div class="avatar-picker-controls"><div class="avatar-choice-group"><span class="avatar-option-label">默认头像</span><div class="avatar-presets" id="setting-avatar-presets" aria-label="默认头像"></div></div><div class="avatar-upload-group"><span class="avatar-option-label">本地图片</span><label class="file-picker-button"><span class="file-picker-label" id="setting-avatar-file-label">选择图片</span><input id="setting-avatar-file" type="file" accept="image/jpeg,image/png,image/webp"></label></div><input id="setting-avatar" type="hidden"></div></div></label><label class="profile-name-field">名称 / Name<input id="setting-name" type="text" autocomplete="name" placeholder="你的名称"></label><label class="profile-email-field">邮箱 / Email<input id="setting-email" type="email" autocomplete="email" placeholder="name@example.com" readonly></label><label class="profile-contact-field">联系方式 / Contact<input id="setting-contact" type="text" placeholder="可选"></label><label class="profile-wide">设计方向 / Design focus<input id="setting-specialty" type="text" placeholder="例如：空间设计、品牌视觉、AI 生成"></label></div>
+                <div class="profile-grid"><label class="avatar-field">头像 / Avatar<div class="avatar-picker"><div class="avatar-preview" id="setting-avatar-preview" aria-label="头像预览"></div><div class="avatar-picker-controls"><div class="avatar-choice-group"><span class="avatar-option-label">默认头像</span><div class="avatar-presets" id="setting-avatar-presets" aria-label="默认头像"></div></div><div class="avatar-upload-group"><span class="avatar-option-label">本地图片</span><label class="file-picker-button"><span class="file-picker-label" id="setting-avatar-file-label">选择图片</span><input id="setting-avatar-file" type="file" accept="image/jpeg,image/png,image/webp"></label></div><input id="setting-avatar" type="hidden"></div></div></label><label class="profile-name-field">名称 / Name<input id="setting-name" type="text" autocomplete="name" placeholder="你的名称"></label><label class="profile-email-field">邮箱 / Email<input id="setting-email" type="email" autocomplete="email" placeholder="name@example.com" readonly></label><label class="profile-contact-field">联系方式 / Contact<input id="setting-contact" type="text" placeholder="仅保存在本地"></label><label class="profile-wide">公开简介 / Public bio<textarea id="setting-bio" rows="3" maxlength="500" placeholder="介绍你的审美研究与创作方向"></textarea></label><label class="profile-wide">设计方向 / Design focus<input id="setting-specialty" type="text" maxlength="300" placeholder="例如：空间设计、品牌视觉、AI 生成"></label></div>
                 <div class="settings-actions"><button class="button primary" type="submit">保存个人资料</button><span class="save-status" id="profile-status">资料保存在当前浏览器。</span></div>
               </form>
               <form class="settings-section" id="settings-form">
@@ -305,7 +306,7 @@
         <div class="gallery-thumbs" id="detail-thumbs"></div>
         <div class="gallery-note"><span>图册备注 / Gallery Notes</span><p id="detail-gallery-note">低饱和、结构清晰、适合沉淀为项目风格参考。</p></div>
         <button class="button ghost" type="button" id="detail-add-gallery">选择图片加入画板</button>
-        <div class="card-author detail-author" id="detail-author"><span class="card-author-avatar" id="detail-author-avatar">AA</span><span><strong id="detail-author-name">Aesthetic Archive</strong><small id="detail-author-role">系统策展</small></span></div>
+        <div class="detail-social-row"><a class="card-author detail-author" id="detail-author" href="#" target="_top"><span class="card-author-avatar" id="detail-author-avatar">AA</span><span><strong id="detail-author-name">系统作者yy</strong><small id="detail-author-role">系统策展</small></span></a><button class="detail-like-button" type="button" id="detail-like" aria-label="点赞"><span>♡</span><b id="detail-like-count">0</b></button></div>
       </div>
       <div class="detail-content" id="detail-content">
         <p class="eyebrow" id="detail-category">Style Case</p>

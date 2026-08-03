@@ -4,6 +4,7 @@ let cloudState = 'unknown';
 let cloudCards = [];
 let cloudPublicCards = [];
 let cloudSaved = new Set();
+let cardInteractions = new Map();
 let cloudBoardId = null;
 let cloudBoardSyncTimer = null;
 let cloudBoardSyncInFlight = false;
@@ -32,6 +33,10 @@ function cloudCardToLocal(card) {
     promptEn: card.prompt_en || '',
     negativePrompt: card.negative_prompt || '',
     author: card.author || null,
+    likeCount: Number(card.likeCount || 0),
+    likedByViewer: Boolean(card.likedByViewer),
+    savedCount: Number(card.savedCount || 0),
+    ownCard: Boolean(card.ownCard),
     createdAt: card.created_at,
     updatedAt: card.updated_at
   };
@@ -139,6 +144,8 @@ async function syncCloudWorkspace() {
     cloudState = 'online';
     cases = mergeDisplayCases(publicCases, cloudPublicCards, cloudCards);
     renderCards(); renderArchive(); updateSavedUI();
+    await syncCardInteractions();
+    await syncUnreadCount();
     await syncCloudBoard();
     renderCollage();
     return true;
@@ -146,6 +153,42 @@ async function syncCloudWorkspace() {
     cloudState = 'offline';
     return false;
   }
+}
+
+async function syncCardInteractions() {
+  if (cloudState !== 'online') return;
+  const keys = [...new Set(cases.map(item => item.id).filter(Boolean))].slice(0, 100);
+  if (!keys.length) return;
+  try {
+    const payload = await cloudRequest(`/api/cards/interactions?keys=${encodeURIComponent(keys.join(','))}`);
+    cardInteractions = new Map(Object.entries(payload || {}));
+    cases.forEach(item => {
+      const interaction = cardInteractions.get(item.id);
+      if (interaction) Object.assign(item, interaction);
+    });
+    renderCards(); renderArchive(); updateSavedUI();
+    if (state.selectedCase) {
+      const interaction = cardInteractions.get(state.selectedCase.id);
+      if (interaction) Object.assign(state.selectedCase, interaction);
+      renderDetailLike(state.selectedCase);
+      renderDetailAuthor(state.selectedCase);
+    }
+  } catch (error) { console.warn('Card interactions unavailable:', error); }
+}
+
+async function syncUnreadCount() {
+  const button = document.getElementById('notification-button');
+  const badge = document.getElementById('notification-count');
+  if (!button || !badge || cloudState !== 'online') return;
+  try {
+    const response = await fetch('/api/notifications/unread-count', { credentials: 'same-origin' });
+    if (!response.ok) return;
+    const payload = await response.json();
+    const count = Number(payload.data?.count || 0);
+    badge.textContent = count > 99 ? '99+' : String(count);
+    badge.hidden = count === 0;
+    button.setAttribute('aria-label', count ? `${count} 条未读消息` : '消息');
+  } catch {}
 }
 
 function cardDedupeKey(item) {
@@ -562,19 +605,19 @@ function defaultPreferences() {
 }
 
 function defaultProfile() {
-  return { avatar: '', name: '', email: '', contact: '', specialty: '' };
+  return { avatar: '', name: '', email: '', contact: '', bio: '', specialty: '' };
 }
 
 function defaultCardTemplate() {
-  return { id: 'system-default', name: 'Aesthetic Archive · 结构化视觉分析', scope: '空间设计 / 品牌视觉 / AI 生图', focus: '主体与动作、环境、构图与镜头、光线与氛围、材料与纹理、色彩、风格语言、文字与标志、可复用 Prompt', instructions: '先识别图像中可见的主体、动作、环境和空间关系；再提取构图、视角、景别、光线方向、色温、材质、纹理、色彩与风格语言。把可见事实、合理视觉推断和未知信息分开。不要虚构设计师、品牌、地点、年代、来源或不可见材料。输出结构化卡片，并生成包含主体、环境、构图、光线、材质、色彩、风格和输出约束的中英文生图 Prompt；Negative Prompt 只写与当前图像目标相关的可执行限制。保持短而高信号，避免堆砌同义形容词。', system: true, isDefault: true, version: 2, updatedAt: new Date().toISOString() };
+  return { id: 'system-default', name: '空间与建筑复现', scope: '建筑 / 室内 / 景观 / 展陈', focus: '空间主体、体量拓扑、结构节奏、镜头位置、透视、尺度参照、表面材料、反射粗糙度、光向、色温、主辅色比例', instructions: '只依据参考图可见证据，先锁定最能代表整组图册的一个具体生成场景。中英文 Prompt 都必须可直接复制生成：写明真实具体的主体、数量、位置关系、前中后景、镜头高度与方向、焦段感、透视、材料表面状态、主辅色比例、光线方向和强弱、空气与渲染质感。不得使用占位符、括号待填项、“用户提供的主体”、使用场景说明或模型参数。主体必须具体但可被用户直接改写；风格骨架、构图、色系和质感必须保持稳定。Negative Prompt 独立输出，排除破坏结构与材质一致性的错误。', system: true, isDefault: true, version: 3, updatedAt: new Date().toISOString() };
 }
 
 function builtInTemplates() {
   const base = defaultCardTemplate();
   return [base,
-    { id: 'template-spatial-material', name: '空间与材料研究', scope: '建筑 / 室内 / 材料板', focus: '主体空间、平面与体块、视角、动线、材料、接缝、触感、自然光、阴影、色彩与比例', instructions: '优先描述可见空间结构和材料证据。明确景别、相机高度、视线方向、主体与背景层级、光线来源和阴影关系。材料必须写出表面状态、尺度、接缝和反射。Prompt 按主体空间 → 环境 → 构图/镜头 → 材料 → 光线 → 色彩 → 氛围 → 输出约束组织。不要把“高级、极简、氛围感”当作唯一描述。', system: true, version: 1 },
-    { id: 'template-editorial-brand', name: '编辑与品牌视觉', scope: '品牌 / 海报 / 网页 / 编辑设计', focus: '信息层级、版式网格、主体视觉、字体特征、留白、对比、色彩、材质与品牌识别', instructions: '识别版式结构、对齐方式、文字层级、字体可见特征、图像与文字的比例及视觉锚点。对不可读文字只描述形态，不臆测内容。Prompt 按画面任务 → 主视觉 → 网格与留白 → 字体/图形语言 → 色彩 → 印刷或屏幕材质 → 输出比例组织。避免虚构品牌名称和文案。', system: true, version: 1 },
-    { id: 'template-cinematic-photo', name: '摄影与电影感场景', scope: '摄影 / 电影感 / 人物与场景', focus: '主体、动作、环境叙事、景别、镜头、焦段感、景深、光线、色调、时间与情绪', instructions: '先明确主体和动作，再描述环境叙事。使用可执行的摄影语言：景别、视角、镜头感、景深、焦点、光线方向、色温和动态范围。避免同时指定互相冲突的镜头和光线。Prompt 保持一到两段高信号描述，Negative Prompt 只排除模糊、畸变、错误主体、杂乱背景和不需要的文字水印。', system: true, version: 1 }
+    { id: 'template-editorial-brand', name: '品牌、平面与 UI 复现', scope: '品牌 / 海报 / 编辑 / 包装 / Web UI', focus: '画布比例、网格列数、信息密度、视觉锚点、文字块形态、字体分类与字重、对齐、留白、图文占比、色块比例、印刷或屏幕质感', instructions: '选择一个具体可生成的海报、封面、包装正面或界面作为主体。中英文 Prompt 必须直接写明画布结构、网格、主视觉位置、文字块数量与形态、字体类别、层级、对齐、留白、色彩面积比例、图像处理和介质质感。不可读文字只规定为简短清晰的无品牌标题，不臆造来源；不得使用占位符或“替换文案”等元文字。避免只写风格名，必须把风格拆成可见版式规则。', system: true, version: 3 },
+    { id: 'template-cinematic-photo', name: '摄影与影像复现', scope: '摄影 / 人像 / 静物 / 电影感场景', focus: '具体主体与动作、环境叙事、景别、机位、焦段感、景深、焦点、快门观感、主辅光、色温、动态范围、胶片或数字质感', instructions: '选择参考图中最具代表性的一个具体瞬间，生成 Prompt 时锁定主体外观与动作、空间关系、景别、机位、镜头方向、焦段感、景深、焦点、主辅光、时间、色温、色彩分级、颗粒和动态范围。中英文均为可直接执行的完整摄影指令，不含占位符、选项列表或互相冲突的镜头要求。负面约束重点排除错误肢体、焦点漂移、过度 HDR、塑料皮肤、杂乱背景和文字水印。', system: true, version: 3 },
+    { id: 'template-product-object', name: '产品、家具与装置复现', scope: '产品 / 家具 / 装置 / 时尚配饰', focus: '对象类别、轮廓比例、部件关系、结构节点、材料厚度、表面工艺、接缝、色彩分区、承托场景、镜头和商业光线', instructions: '选择一个具体产品或装置作为直接生成主体。Prompt 必须锁定整体轮廓、长宽高观感、关键部件数量与连接关系、边角、接缝、厚度、材料与表面工艺、颜色分区、摆放方式、背景、机位、镜头和光线。中英文均不得出现占位符、待填写变量或泛泛的“高级产品设计”；用户可直接改产品类别，但其余造型语法、材质、色系和质感应可复用。负面约束排除结构断裂、漂浮部件、错误接缝、廉价塑料感、品牌标志和水印。', system: true, version: 3 }
   ];
 }
 
@@ -625,7 +668,7 @@ function populateSettings() {
   set('setting-export-format', prefs.exportFormat === 'json' ? 'md' : prefs.exportFormat);
   set('setting-default-tab', prefs.defaultTab);
   set('setting-density', prefs.density);
-  set('setting-avatar', profile.avatar); set('setting-name', profile.name); set('setting-email', profile.email); set('setting-contact', profile.contact); set('setting-specialty', profile.specialty);
+  set('setting-avatar', profile.avatar); set('setting-name', profile.name); set('setting-email', profile.email); set('setting-contact', profile.contact); set('setting-bio', profile.bio); set('setting-specialty', profile.specialty);
   check('setting-publish-confirm', prefs.publishConfirm); check('setting-copyright-reminder', prefs.copyrightReminder); check('setting-source-reminder', prefs.sourceReminder);
   renderAvatarPicker(profile.avatar);
   renderTemplateSettings();
@@ -677,7 +720,7 @@ function renderAvatarPicker(value = '') {
 async function saveProfile(event) {
   event.preventDefault();
   const current = getProfile();
-  const profile = { avatar: formValue('setting-avatar'), name: formValue('setting-name'), email: formValue('setting-email') || current.email, contact: formValue('setting-contact'), specialty: formValue('setting-specialty') };
+  const profile = { avatar: formValue('setting-avatar'), name: formValue('setting-name'), email: formValue('setting-email') || current.email, contact: formValue('setting-contact'), bio: formValue('setting-bio').slice(0, 500), specialty: formValue('setting-specialty').slice(0, 300) };
   if (!saveJSON(STORAGE.profile, profile)) return;
   if (cloudState === 'online') {
     try { await cloudRequest('/api/profile', { method: 'PATCH', body: JSON.stringify({ ...profile, avatar: /^data:image\//i.test(profile.avatar) ? '' : profile.avatar }) }); } catch (error) { toast(`云端资料保存失败：${error.message}`); return; }
@@ -977,6 +1020,7 @@ function renderCards() {
         <div class="tag-row">${(item.styleTags || []).slice(0, 3).map(tag => `<span class="tag">${escapeHTML(tag)}</span>`).join('')}</div>
         <div class="palette">${paletteHTML(item)}</div>
         <div class="card-actions">
+          <button class="icon-action is-like-action ${item.likedByViewer ? 'is-active' : ''}" type="button" data-action="like" data-case-id="${escapeHTML(item.id)}" ${item.ownCard ? 'disabled title="不能点赞自己的卡片"' : ''}>${item.likedByViewer ? '♥' : '♡'} ${Number(item.likeCount || 0)}</button>
           <button class="icon-action is-save-action" type="button" data-action="save" data-case-id="${escapeHTML(item.id)}">${isSaved(item) ? ui('saved') : ui('save')}</button>
           ${item.source === 'private' ? '<button class="icon-action" type="button" data-action="edit-private" data-case-id="' + escapeHTML(item.id) + '">' + (isEnglish() ? 'Edit' : '编辑') + '</button>' : ''}
           <button class="icon-action" type="button" data-action="collage" data-case-id="${escapeHTML(item.id)}">+ ${ui('collage')}</button>
@@ -998,24 +1042,28 @@ function authorForCard(item) {
     return {
       name: profile.name || user.name || (isEnglish() ? 'Aesthetic Archive Member' : '审美库成员'),
       avatar: profile.avatar || user.avatar || item.author?.avatar || '',
-      role: user.role || item.author?.role || 'user'
+      role: user.role || item.author?.role || 'user',
+      publicId: item.author?.publicId || ''
     };
   }
   if (item?.author && typeof item.author === 'object') {
     return {
       name: item.author.name || (isEnglish() ? 'Aesthetic Archive Member' : '审美库成员'),
       avatar: item.author.avatar || '',
-      role: item.author.role || 'user'
+      role: item.author.role || 'user',
+      publicId: item.author.publicId || ''
     };
   }
   if (item?.source === 'private') {
     return {
       name: profile.name || user?.name || (isEnglish() ? 'Aesthetic Archive Member' : '审美库成员'),
       avatar: profile.avatar || user?.avatar || '',
-      role: user?.role || 'user'
+      role: user?.role || 'user',
+      publicId: item.author?.publicId || ''
     };
   }
-  return { name: 'Aesthetic Archive', avatar: '', role: 'curator' };
+  const interaction = cardInteractions.get(item?.id) || {};
+  return { name: '系统作者yy', avatar: '', role: 'curator', publicId: interaction.author?.publicId || '' };
 }
 
 function authorRoleLabel(role) {
@@ -1027,15 +1075,52 @@ function authorRoleLabel(role) {
 
 function renderDetailAuthor(item) {
   const author = authorForCard(item);
+  const link = document.getElementById('detail-author');
   const avatar = document.getElementById('detail-author-avatar');
   const name = document.getElementById('detail-author-name');
   const role = document.getElementById('detail-author-role');
   if (!avatar || !name || !role) return;
+  const publicId = author.publicId || item?.author?.publicId || '';
+  if (link) {
+    link.href = publicId ? `/authors/${encodeURIComponent(publicId)}` : '#';
+    link.classList.toggle('is-disabled', !publicId);
+    link.setAttribute('aria-disabled', publicId ? 'false' : 'true');
+  }
   name.textContent = author.name;
   role.textContent = authorRoleLabel(author.role);
   avatar.textContent = author.avatar ? '' : (author.name.trim().charAt(0).toUpperCase() || 'AA');
   avatar.style.backgroundImage = author.avatar ? `url("${String(author.avatar).replace(/"/g, '%22')}")` : '';
   avatar.classList.toggle('has-image', Boolean(author.avatar));
+}
+
+function renderDetailLike(item) {
+  const button = document.getElementById('detail-like');
+  const count = document.getElementById('detail-like-count');
+  if (!button || !count) return;
+  count.textContent = String(Number(item?.likeCount || 0));
+  button.classList.toggle('is-active', Boolean(item?.likedByViewer));
+  button.querySelector('span').textContent = item?.likedByViewer ? '♥' : '♡';
+  button.disabled = cloudState !== 'online' || Boolean(item?.ownCard) || (item?.source === 'private' && item?.publishStatus !== 'published');
+  button.title = item?.ownCard ? (isEnglish() ? 'You cannot like your own card' : '不能点赞自己的卡片') : '';
+}
+
+async function toggleLike(item) {
+  if (!item || cloudState !== 'online' || item.ownCard) return;
+  const wasLiked = Boolean(item.likedByViewer);
+  const oldCount = Number(item.likeCount || 0);
+  item.likedByViewer = !wasLiked;
+  item.likeCount = Math.max(0, oldCount + (wasLiked ? -1 : 1));
+  renderCards(); renderArchive(); renderDetailLike(item);
+  try {
+    const result = await cloudRequest(`/api/cards/${encodeURIComponent(item.id)}/like`, { method: wasLiked ? 'DELETE' : 'POST' });
+    item.likedByViewer = Boolean(result.liked);
+    item.likeCount = Number(result.likeCount || 0);
+    cardInteractions.set(item.id, { ...(cardInteractions.get(item.id) || {}), likedByViewer: item.likedByViewer, likeCount: item.likeCount });
+  } catch (error) {
+    item.likedByViewer = wasLiked; item.likeCount = oldCount;
+    toast(`点赞操作失败：${error.message}`);
+  }
+  renderCards(); renderArchive(); renderDetailLike(item); await syncUnreadCount();
 }
 
 function openDetail(item) {
@@ -1068,6 +1153,7 @@ function openDetail(item) {
   }
   renderDetailPalette(item);
   renderDetailAuthor(item);
+  renderDetailLike(item);
   renderGallery(0);
   els.galleryNote.textContent = item.summary || '低饱和、结构清晰、适合沉淀为项目风格参考。';
   els.overlay.classList.add('is-open');
@@ -1153,6 +1239,7 @@ function renderArchive(highlightId = '') {
         <small>${escapeHTML(secondaryTitle(item))}</small>
         <p>${escapeHTML(item.summary || (isEnglish() ? 'A private aesthetic card ready to edit and export.' : '审美卡片，可查看详情、编辑或导出。'))}</p>
         <div class="tag-row">${(item.styleTags || []).slice(0, 3).map(tag => `<span class="tag">${escapeHTML(tag)}</span>`).join('')} ${item.promptEngineering?.review ? `<span class="prompt-status is-${escapeHTML(item.promptEngineering.review.status)}">Prompt ${escapeHTML(item.promptEngineering.review.score)}/100</span>` : ''}</div>
+        <div class="owner-metrics"><span>♡ ${Number(item.likeCount || 0)} ${isEnglish() ? 'Likes' : '点赞'}</span><span>▣ ${Number(item.savedCount || 0)} ${isEnglish() ? 'Saves' : '收藏'}</span></div>
         <div class="palette">${paletteHTML(item)}</div>
         <div class="card-actions">
           <button class="icon-action" type="button" data-action="save" data-case-id="${escapeHTML(item.id)}">${isSaved(item) ? (isEnglish() ? 'Saved' : '已收藏') : (isEnglish() ? 'Save' : '收藏')}</button>
@@ -3045,6 +3132,7 @@ function bindEvents() {
       event.stopPropagation();
       const item = findCase(actionButton.dataset.caseId);
       if (actionButton.dataset.action === 'save') saveCase(item);
+      if (actionButton.dataset.action === 'like') toggleLike(item);
       if (actionButton.dataset.action === 'copy-private') copyPublicCaseToArchive(item);
       if (actionButton.dataset.action === 'edit-private') {
         fillArchiveForm(item);
@@ -3102,6 +3190,7 @@ function bindEvents() {
     });
   });
   document.getElementById('detail-save').addEventListener('click', () => saveCase(state.selectedCase));
+  document.getElementById('detail-like').addEventListener('click', () => toggleLike(state.selectedCase));
   document.getElementById('detail-copy-edit').addEventListener('click', () => {
     if (!state.selectedCase) return;
     if (state.selectedCase.source === 'private') {
@@ -3327,6 +3416,8 @@ function init() {
   loadProvider();
   bindEvents();
   syncCloudWorkspace().then(() => {
+    const requestedCard = params.get('card');
+    if (requestedCard) openDetail(findCase(requestedCard));
     fetch('/api/profile', { credentials: 'same-origin' }).then(response => response.ok ? response.json() : null).then(payload => {
         const profile = payload?.data;
         if (!profile) {
@@ -3339,7 +3430,7 @@ function init() {
         const localLooksLikeEmail = localName.includes('@') && localName === localProfile.email;
         const serverNameIsEmail = profile.email && serverName.toLowerCase() === profile.email.toLowerCase();
         const profileName = serverName && !serverNameIsEmail ? serverName : (localLooksLikeEmail ? '' : localName);
-        const mergedProfile = { ...localProfile, name: profileName, avatar: profile.avatar_url || localProfile.avatar || '', email: profile.email || localProfile.email || '' };
+        const mergedProfile = { ...localProfile, name: profileName, avatar: profile.avatar_url || localProfile.avatar || '', email: profile.email || localProfile.email || '', bio: profile.bio || '', specialty: profile.design_focus || localProfile.specialty || '' };
         saveJSON(STORAGE.profile, mergedProfile);
         setUser({ id: profile.id, provider: 'supabase', identity: profile.email || profile.id, name: profileName || profile.email?.split('@')[0] || 'Account', avatar: mergedProfile.avatar, role: profile.role || 'user', signedInAt: profile.created_at || new Date().toISOString() });
         document.querySelectorAll('.reviewer-only').forEach(node => { node.hidden = false; });
@@ -3361,6 +3452,7 @@ function init() {
   renderAuthState();
   populateSettings();
   if (params.get('login') === '1') openLogin();
+  window.addEventListener('focus', syncUnreadCount);
 }
 
 init();
