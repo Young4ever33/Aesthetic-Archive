@@ -23,7 +23,7 @@
             <button type="button" data-language-option="en">EN</button>
           </div>
         </div>
-        <button class="login-lite" type="button" data-login-open>登录</button>
+        <button class="login-lite account-button" type="button" data-login-open><span class="account-avatar" data-account-avatar>AA</span><span class="account-name" data-account-name>登录</span></button>
       </div>
     </header>
 
@@ -227,15 +227,15 @@
 
           <div class="tab-panel" data-panel="provider" id="ai-provider">
             <section class="provider-page">
-              <div class="provider-intro"><div><p class="eyebrow">自带 AI 服务 / Bring Your Own Provider</p><h2>连接模型，保留你的分析方法。</h2><p>Provider 决定使用哪个模型；卡片生成模板决定模型如何提取文化背景、设计元素和可复用 Prompt。所有配置只保存在当前浏览器。</p></div><span class="local-badge">API Key 仅本地保存</span></div>
+              <div class="provider-intro"><div><p class="eyebrow">自带 AI 服务 / Bring Your Own Provider</p><h2>连接模型，保留你的分析方法。</h2><p>Provider 决定使用哪个模型；卡片生成模板决定模型如何提取文化背景、设计元素和可复用 Prompt。API Key 经服务端加密后存入你的私有 Provider Vault。</p></div><span class="local-badge">服务端加密存储</span></div>
               <div class="provider-layout">
                 <section class="provider-panel-card provider-accounts"><div class="provider-section-head"><div><h3>已配置服务</h3><p>选择一个服务用于图片分析和 Prompt 生成。</p></div><span class="provider-section-index">01</span></div><div class="provider-count-row"><span>当前服务</span><strong id="provider-count">0 个</strong></div><div class="provider-list" id="provider-list"></div></section>
                 <form class="provider-panel-card provider-form" id="provider-form">
                   <div class="provider-section-head"><div><h3>服务配置</h3><p>保存后可在个人审美库中选择对应模型。</p></div><span class="provider-section-index">02</span></div>
-                  <fieldset class="provider-fieldset"><legend>基础连接</legend><div class="provider-fields-two"><label>服务名称 <small>Provider name</small><input id="provider-name" type="text" placeholder="例如：工作用 OpenAI / 个人 Gemini"></label><label>服务类型 <small>Provider type</small><select id="provider-type"><option>OpenAI</option><option>Gemini</option><option>OpenRouter</option><option>Custom Endpoint</option></select></label><label class="provider-wide">API 密钥 <small>仅保存在本地，备份时会脱敏</small><input id="provider-key" type="password" placeholder="密钥只保存在当前浏览器"></label><label class="provider-wide">接口地址 <small>Base URL</small><input id="provider-base-url" type="url" placeholder="只有自定义接口需要填写"></label></div></fieldset>
+                  <fieldset class="provider-fieldset"><legend>基础连接</legend><div class="provider-fields-two"><label>服务名称 <small>Provider name</small><input id="provider-name" type="text" maxlength="120" required placeholder="例如：工作用 OpenAI / 个人 Gemini"></label><label>服务类型 <small>Provider type</small><select id="provider-type"><option>OpenAI</option><option>Gemini</option><option>OpenRouter</option><option>Custom Endpoint</option></select></label><label class="provider-wide">API 密钥 <small>经服务端加密保存，编辑时留空表示不更换</small><input id="provider-key" type="password" maxlength="4096" autocomplete="new-password" placeholder="输入 Provider API Key"></label><label class="provider-wide">接口地址 <small>Base URL</small><input id="provider-base-url" type="url" placeholder="只有自定义接口需要填写"></label></div></fieldset>
                   <fieldset class="provider-fieldset"><legend>模型能力</legend><div class="provider-fields-two"><label>可识图模型 <small>每行一个</small><textarea id="provider-image-models" rows="4" placeholder="例如：gpt-4o\ngemini-1.5-pro"></textarea></label><label>文本模型 <small>每行一个</small><textarea id="provider-text-models" rows="4" placeholder="例如：gpt-4o-mini\nclaude-3.5-sonnet"></textarea></label></div><label class="checkbox-row"><input id="provider-image-capable" type="checkbox" checked> 此服务支持图片分析</label></fieldset>
                   <fieldset class="provider-fieldset"><legend>图片处理</legend><div class="provider-fields-two"><label>图片处理服务 <small>Image API</small><select id="provider-image-api"><option value="none">不使用</option><option value="removebg">remove.bg</option><option value="clipdrop">Clipdrop</option><option value="custom-remove-bg">自定义去背景接口</option></select></label><label>接口地址 <small>可选</small><input id="provider-image-api-url" type="url" placeholder="自定义去背景接口或代理地址"></label></div></fieldset>
-                  <div class="form-actions"><button class="button primary" type="submit">保存 AI 服务</button><button class="button ghost" type="button" id="provider-new-btn">新建服务</button></div>
+                  <div class="form-actions"><button class="button primary" type="submit">保存 AI 服务</button><button class="button ghost" type="button" id="provider-new-btn">新建服务</button></div><div class="save-status provider-save-status" id="provider-save-status" role="status">登录后可以安全保存 Provider 配置。</div>
                 </form>
               </div>
             </section>
@@ -264,7 +264,7 @@
               </form>
               <section class="settings-section settings-template-section">
                 <div class="settings-section-head"><div><h3>卡片生成模板</h3><p>决定 AI 如何从图片、主题和文化语境中提取信息，并生成可复用的结构化卡片与 Prompt。</p></div><span class="settings-section-index">03</span></div>
-                <div class="template-folders" id="setting-template-folders" aria-label="卡片生成模板列表"></div><div class="template-toolbar"><label>当前模板<select id="setting-template-select"></select></label><button class="button ghost" type="button" id="setting-template-copy">复制并编辑</button><button class="button ghost" type="button" id="setting-template-reset">恢复系统默认</button></div>
+                <div class="template-folders" id="setting-template-folders" aria-label="卡片生成模板列表"></div><div class="template-toolbar"><label>当前模板<select id="setting-template-select"></select></label><button class="button primary" type="button" id="setting-template-new">新建模板</button><button class="button ghost" type="button" id="setting-template-copy">复制并编辑</button><button class="button ghost" type="button" id="setting-template-reset">恢复系统默认</button></div>
                 <div class="template-editor-grid"><div class="template-options"><label>模板名称<input id="setting-template-name" type="text" placeholder="例如：住宅空间审美分析"></label><label>适用场景<input id="setting-template-scope" type="text" placeholder="空间设计 / 品牌视觉 / AI 生图"></label><label>分析重点<textarea id="setting-template-focus" rows="3" placeholder="文化背景、材料与工艺、空间关系、光线、构图、色彩"></textarea></label><label>生成规则<textarea id="setting-template-instructions" rows="8" placeholder="写下你希望 AI 遵守的分析和 Prompt 规则"></textarea></label></div><div class="template-preview"><div class="template-preview-head"><span>模板预览 / Template preview</span><span id="setting-template-state">系统默认</span></div><pre id="setting-template-preview"></pre><div class="template-test"><label>测试主题<input id="setting-template-test-topic" type="text" placeholder="例如：安静的住宅入口，天然石材与柔和自然光"></label><button class="button ghost" type="button" id="setting-template-test">生成测试 Prompt</button><pre id="setting-template-test-result">保存模板后，可以在这里检查 Prompt 是否具体、可复用。</pre></div></div></div>
                 <div class="settings-actions"><button class="button primary" type="button" id="setting-template-save">保存模板</button><span class="save-status" id="template-status">未修改系统默认模板。</span></div>
               </section>
@@ -305,6 +305,7 @@
         <div class="gallery-thumbs" id="detail-thumbs"></div>
         <div class="gallery-note"><span>图册备注 / Gallery Notes</span><p id="detail-gallery-note">低饱和、结构清晰、适合沉淀为项目风格参考。</p></div>
         <button class="button ghost" type="button" id="detail-add-gallery">选择图片加入画板</button>
+        <div class="card-author detail-author" id="detail-author"><span class="card-author-avatar" id="detail-author-avatar">AA</span><span><strong id="detail-author-name">Aesthetic Archive</strong><small id="detail-author-role">系统策展</small></span></div>
       </div>
       <div class="detail-content" id="detail-content">
         <p class="eyebrow" id="detail-category">Style Case</p>
@@ -332,7 +333,7 @@
     <div class="login-card" role="dialog" aria-modal="true" aria-label="Login options">
       <button class="login-close" type="button" id="login-close" aria-label="Close login">×</button>
       <h3 id="login-title">Login</h3>
-      <p id="login-copy">Use a local Open Beta profile to keep your archive state on this browser.</p>
+      <p id="login-copy">使用 Supabase 账号登录并同步你的私人工作区。</p>
       <form class="login-form" id="login-form">
         <label id="login-identity-label">Email or phone
           <input id="login-identity" type="text" autocomplete="email" placeholder="name@example.com / +86 138...">
@@ -341,7 +342,7 @@
       </form>
       <button class="login-provider" type="button" id="login-google-btn">Continue with Google</button>
       <button class="login-provider danger-text" type="button" id="logout-btn">Logout</button>
-      <p class="login-note" id="login-note">No real authentication yet. This stores only a local demo profile.</p>
+      <p class="login-note" id="login-note">登录后同步私人卡片、画板、个人资料和 Provider 配置。</p>
     </div>
   </div>
 

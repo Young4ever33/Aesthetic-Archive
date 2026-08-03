@@ -13,6 +13,13 @@ function response(requestId: string, status: number, data: unknown) {
 function id() { return `req_${crypto.randomUUID()}`; }
 async function withSignedImages<T extends Record<string, unknown>>(cards: T[]) {
   const admin = createSupabaseAdminClient();
+  const ownerIds = [...new Set(cards.map((card) => card.owner_id).filter((value): value is string => typeof value === 'string'))];
+  const profileMap = new Map<string, Record<string, unknown>>();
+  if (ownerIds.length) {
+    const { data: profiles } = await admin.from('profiles').select('id, display_name, avatar_url, role').in('id', ownerIds);
+    (profiles || []).forEach((profile) => profileMap.set(profile.id, profile));
+  }
+
   return Promise.all(cards.map(async card => {
     const rawImages = Array.isArray(card['card_images']) ? card['card_images'] : [];
     const images = await Promise.all(rawImages
@@ -23,8 +30,15 @@ async function withSignedImages<T extends Record<string, unknown>>(cards: T[]) {
         signedUrl: (await admin.storage.from('card-images').createSignedUrl(String(image.storage_path), 3600)).data?.signedUrl || null
       })));
     const gallery = images.map(image => image.signedUrl).filter((url): url is string => Boolean(url));
+    const ownerId = typeof card.owner_id === 'string' ? card.owner_id : '';
+    const profile = profileMap.get(ownerId);
+    const author = profile ? {
+      name: typeof profile.display_name === 'string' && profile.display_name.trim() ? profile.display_name.trim() : 'Aesthetic Archive Member',
+      avatar: typeof profile.avatar_url === 'string' ? profile.avatar_url : '',
+      role: typeof profile.role === 'string' ? profile.role : 'user',
+    } : null;
     const { card_images: _cardImages, ...rest } = card;
-    return { ...rest, image: gallery[0] || '', gallery };
+    return { ...rest, image: gallery[0] || '', gallery, author };
   }));
 }
 

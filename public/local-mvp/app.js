@@ -31,6 +31,7 @@ function cloudCardToLocal(card) {
     promptZh: card.prompt_zh || '',
     promptEn: card.prompt_en || '',
     negativePrompt: card.negative_prompt || '',
+    author: card.author || null,
     createdAt: card.created_at,
     updatedAt: card.updated_at
   };
@@ -292,6 +293,7 @@ const els = {
   settingsImport: document.getElementById('settings-import-file'),
   settingsClear: document.getElementById('settings-clear-btn'),
   settingsTemplateSelect: document.getElementById('setting-template-select'),
+  settingsTemplateNew: document.getElementById('setting-template-new'),
   settingsTemplateSave: document.getElementById('setting-template-save'),
   settingsTemplateCopy: document.getElementById('setting-template-copy'),
   settingsTemplateReset: document.getElementById('setting-template-reset'),
@@ -418,11 +420,11 @@ const i18n = {
     privateItems: 'Private aesthetic archive',
     savedTitle: 'Saved',
     loginTitle: 'Login',
-    loginCopy: 'Use a local Open Beta profile to keep your archive state on this browser.',
+    loginCopy: 'Sign in with Supabase to sync your private workspace.',
     identityLabel: 'Email or phone',
     continueIdentity: 'Continue with Email / Phone',
     continueGoogle: 'Continue with Google',
-    loginNote: 'No real authentication yet. This stores only a local demo profile.'
+    loginNote: 'Sign in to sync private cards, boards, profile, and Provider settings.'
   }
 };
 
@@ -680,6 +682,8 @@ async function saveProfile(event) {
   if (cloudState === 'online') {
     try { await cloudRequest('/api/profile', { method: 'PATCH', body: JSON.stringify({ ...profile, avatar: /^data:image\//i.test(profile.avatar) ? '' : profile.avatar }) }); } catch (error) { toast(`云端资料保存失败：${error.message}`); return; }
   }
+  const currentUser = getUser();
+  if (currentUser) setUser({ ...currentUser, name: profile.name || currentUser.name, avatar: profile.avatar || '' });
   renderAvatarPicker(profile.avatar);
   const status = document.getElementById('profile-status'); if (status) { status.className = 'save-status is-success'; status.textContent = isEnglish() ? 'Profile saved.' : '个人资料已保存。'; }
   toast(isEnglish() ? 'Profile saved' : '个人资料已保存');
@@ -719,11 +723,43 @@ function renderTemplateSettings() {
 
 function saveTemplateSettings() {
   const id = els.settingsTemplateSelect?.value || 'system-default'; const templates = getTemplates(); const current = templates.find(item => item.id === id) || defaultCardTemplate();
-  if (current.system) { toast('系统默认模板不可直接修改，请先复制并编辑。'); return; }
-  const next = { ...current, name: formValue('setting-template-name') || current.name, scope: formValue('setting-template-scope'), focus: formValue('setting-template-focus'), instructions: formValue('setting-template-instructions'), updatedAt: new Date().toISOString(), version: (current.version || 1) + 1 };
+  if (current.system) { toast(isEnglish() ? 'Copy a system template before editing it.' : '系统默认模板不可直接修改，请先复制并编辑。'); return; }
+  const name = formValue('setting-template-name');
+  const scope = formValue('setting-template-scope');
+  const focus = formValue('setting-template-focus');
+  const instructions = formValue('setting-template-instructions');
+  const invalid = !name || !scope || !focus || !instructions || name.length > 80 || scope.length > 300 || focus.length > 1000 || instructions.length > 6000;
+  if (invalid) {
+    const status = document.getElementById('template-status');
+    if (status) { status.className = 'save-status is-warning'; status.textContent = isEnglish() ? 'Complete all fields. Limits: name 80, scope 300, focus 1000, rules 6000 characters.' : '请填写全部字段。长度上限：名称 80、场景 300、重点 1000、规则 6000 字。'; }
+    return;
+  }
+  const next = { ...current, name, scope, focus, instructions, updatedAt: new Date().toISOString(), version: (current.version || 1) + 1 };
   const saved = templates.map(item => item.id === id ? next : item); saveJSON(STORAGE.templates, saved); renderTemplateSettings();
   const status = document.getElementById('template-status'); if (status) { status.className = 'save-status is-success'; status.textContent = isEnglish() ? 'Custom card template saved.' : '自定义卡片模板已保存。'; }
   toast(isEnglish() ? 'Card generation template saved' : '卡片生成模板已保存');
+}
+
+function newTemplateSettings() {
+  const en = isEnglish();
+  const template = {
+    id: `template-${Date.now()}`,
+    name: en ? 'My Prompt template' : '我的 Prompt 模板',
+    scope: '',
+    focus: '',
+    instructions: '',
+    system: false,
+    isDefault: false,
+    version: 1,
+    updatedAt: new Date().toISOString()
+  };
+  saveJSON(STORAGE.templates, [...getTemplates(), template]);
+  renderTemplateSettings();
+  if (els.settingsTemplateSelect) els.settingsTemplateSelect.value = template.id;
+  renderTemplateSettings();
+  renderArchiveTemplateSelect();
+  document.getElementById('setting-template-name')?.focus();
+  toast(en ? 'New editable template created' : '已新建可编辑模板');
 }
 
 function copyTemplateSettings() {
@@ -955,6 +991,53 @@ function findCase(id) {
   return cases.find(item => item.id === id);
 }
 
+function authorForCard(item) {
+  const profile = getProfile();
+  const user = getUser();
+  if (item?.ownerId && user?.id && item.ownerId === user.id) {
+    return {
+      name: profile.name || user.name || (isEnglish() ? 'Aesthetic Archive Member' : '审美库成员'),
+      avatar: profile.avatar || user.avatar || item.author?.avatar || '',
+      role: user.role || item.author?.role || 'user'
+    };
+  }
+  if (item?.author && typeof item.author === 'object') {
+    return {
+      name: item.author.name || (isEnglish() ? 'Aesthetic Archive Member' : '审美库成员'),
+      avatar: item.author.avatar || '',
+      role: item.author.role || 'user'
+    };
+  }
+  if (item?.source === 'private') {
+    return {
+      name: profile.name || user?.name || (isEnglish() ? 'Aesthetic Archive Member' : '审美库成员'),
+      avatar: profile.avatar || user?.avatar || '',
+      role: user?.role || 'user'
+    };
+  }
+  return { name: 'Aesthetic Archive', avatar: '', role: 'curator' };
+}
+
+function authorRoleLabel(role) {
+  const labels = isEnglish()
+    ? { admin: 'Administrator', reviewer: 'Reviewer', user: 'Member', curator: 'Curated reference' }
+    : { admin: '管理员', reviewer: '审核员', user: '创作者', curator: '系统策展' };
+  return labels[role] || labels.user;
+}
+
+function renderDetailAuthor(item) {
+  const author = authorForCard(item);
+  const avatar = document.getElementById('detail-author-avatar');
+  const name = document.getElementById('detail-author-name');
+  const role = document.getElementById('detail-author-role');
+  if (!avatar || !name || !role) return;
+  name.textContent = author.name;
+  role.textContent = authorRoleLabel(author.role);
+  avatar.textContent = author.avatar ? '' : (author.name.trim().charAt(0).toUpperCase() || 'AA');
+  avatar.style.backgroundImage = author.avatar ? `url("${String(author.avatar).replace(/"/g, '%22')}")` : '';
+  avatar.classList.toggle('has-image', Boolean(author.avatar));
+}
+
 function openDetail(item) {
   if (!item) return;
   recordUsage('cardsOpened');
@@ -984,6 +1067,7 @@ function openDetail(item) {
     els.detailCopyEdit.dataset.mode = isPrivate ? 'edit' : 'copy';
   }
   renderDetailPalette(item);
+  renderDetailAuthor(item);
   renderGallery(0);
   els.galleryNote.textContent = item.summary || '低饱和、结构清晰、适合沉淀为项目风格参考。';
   els.overlay.classList.add('is-open');
@@ -1318,11 +1402,21 @@ function setUser(user) {
 
 function renderAuthState() {
   const user = getUser();
+  const profile = getProfile();
   document.body.classList.toggle('is-authenticated', Boolean(user));
   const lang = document.documentElement.lang || 'zh-CN';
-  const label = user ? (user.name || user.identity || '').slice(0, 22) : (i18n[lang] || i18n['zh-CN']).login;
+  const label = user ? (profile.name || user.name || user.identity || '').slice(0, 22) : (i18n[lang] || i18n['zh-CN']).login;
   document.querySelectorAll('[data-login-open]').forEach(button => {
-    button.textContent = label;
+    const name = button.querySelector('[data-account-name]');
+    const avatar = button.querySelector('[data-account-avatar]');
+    if (name) name.textContent = label;
+    else button.textContent = label;
+    if (avatar) {
+      const avatarValue = profile.avatar || user?.avatar || '';
+      avatar.textContent = avatarValue ? '' : (user ? (label.trim().charAt(0).toUpperCase() || 'AA') : 'AA');
+      avatar.style.backgroundImage = avatarValue ? `url("${String(avatarValue).replace(/"/g, '%22')}")` : '';
+      avatar.classList.toggle('has-image', Boolean(avatarValue));
+    }
     button.title = user ? user.identity : 'Login';
   });
   if (els.loginIdentity) els.loginIdentity.value = user?.identity || '';
@@ -1421,20 +1515,20 @@ function optionText(selector, values) {
 function applyWorkspaceTranslations(lang) {
   const en = lang === 'en';
   const tr = en ? {
-    providerEyebrow: 'BRING YOUR OWN PROVIDER', providerTitle: 'Connect models, keep your method.', providerIntro: 'Provider selects the model. Card templates define how it extracts cultural context, design elements and reusable prompts. Everything stays in this browser.', localKey: 'API keys stay local', configured: 'Configured providers', configuredCopy: 'Choose a service for image analysis and Prompt generation.', current: 'Current providers', serviceConfig: 'Provider configuration', serviceConfigCopy: 'Saved services can be selected in My Archive.', basic: 'Connection', capabilities: 'Model capabilities', imageModels: 'Vision models', textModels: 'Text models', imageCapable: 'This service supports image analysis', imageProcessing: 'Image processing', saveProvider: 'Save provider', newProvider: 'New provider',
+    providerEyebrow: 'BRING YOUR OWN PROVIDER', providerTitle: 'Connect models, keep your method.', providerIntro: 'Provider selects the model. Card templates define how it extracts cultural context, design elements and reusable prompts. API keys are encrypted server-side in your private Provider Vault.', localKey: 'SERVER-SIDE ENCRYPTION', configured: 'Configured providers', configuredCopy: 'Choose a service for image analysis and Prompt generation.', current: 'Current providers', serviceConfig: 'Provider configuration', serviceConfigCopy: 'Saved services can be selected in My Archive.', basic: 'Connection', capabilities: 'Model capabilities', imageModels: 'Vision models', textModels: 'Text models', imageCapable: 'This service supports image analysis', imageProcessing: 'Image processing', saveProvider: 'Save provider', newProvider: 'New provider',
     settingsEyebrow: 'WORKSPACE SETTINGS', settingsTitle: 'Manage your profile and workspace method.', settingsIntro: 'Profile, card generation rules and local data stay in this browser. The Provider calls the model; the card template shapes how it understands your aesthetic.', localWorkspace: 'LOCAL WORKSPACE', profile: 'Profile', profileCopy: 'Keep the basics ready for future accounts, sync and services.', saveProfile: 'Save profile', workspace: 'Local workspace', workspaceCopy: 'These defaults affect new actions only. Existing cards are unchanged.', saveWorkspace: 'Save workspace settings', templates: 'Card generation templates', templatesCopy: 'Define how AI extracts information from images, topics and cultural context to create reusable cards and Prompts.', copyTemplate: 'Copy and edit', resetTemplate: 'Restore system default', templatePreview: 'Template preview', testPrompt: 'Test topic', testButton: 'Generate test Prompt', saveTemplate: 'Save template', usage: 'Usage data', usageCopy: 'Personal actions in this browser are recorded. Public Plaza metrics are not fabricated before account and server sync.', privacy: 'Privacy and rights', privacyCopy: 'Reminders help you confirm sources and permissions; they do not judge rights for you.', publishConfirm: 'Confirm before publishing', publishCopy: 'Review content and visibility before sending a private card to the shared Plaza.', copyright: 'Remind me to confirm image rights', copyrightCopy: 'Confirm image source and usage rights before publishing.', source: 'Remind me about sources on export', sourceCopy: 'Keep source information when exporting materials with external images.', localInfo: 'Local workspace', localInfoCopy: 'Private cards, saves, boards and settings stay in this browser. Provider API keys are redacted in backups and must be re-entered after import.', noUpload: 'Private data is not uploaded', redacted: 'API keys are redacted', rights: 'You own the rights decision', savePrivacy: 'Save privacy and rights', data: 'Data and backup', dataCopy: 'JSON is a machine-readable workspace backup, not a normal content export.', localLibrary: 'Local library', backupRules: 'Backup rules', exportBackup: 'Export workspace backup', importBackup: 'Import workspace backup', danger: 'Danger zone', dangerCopy: 'Clear one category at a time instead of deleting the whole workspace.', clearPrivate: 'Clear private archive', clearSaved: 'Clear saved cards', clearBoard: 'Clear Collage Board', clearAll: 'Clear entire local workspace', dangerNote: 'Clearing the entire workspace removes private cards, saves, board, providers, profile, templates and preferences. Public Plaza and project files are not deleted.',
     name: 'Name', email: 'Email', contact: 'Contact', specialty: 'Design focus', avatar: 'Avatar', language: 'Language', exportFormat: 'Default content export', defaultTab: 'Default opening page', density: 'Display density', templateName: 'Template name', templateScope: 'Use cases', templateFocus: 'Analysis focus', templateRules: 'Generation rules', testTopic: 'Test topic',
   } : {
-    providerEyebrow: '自带 AI 服务 / BRING YOUR OWN PROVIDER', providerTitle: '连接模型，保留你的分析方法。', providerIntro: 'Provider 决定使用哪个模型；卡片生成模板决定模型如何提取文化背景、设计元素和可复用 Prompt。所有配置只保存在当前浏览器。', localKey: 'API Key 仅本地保存', configured: '已配置服务', configuredCopy: '选择一个服务用于图片分析和 Prompt 生成。', current: '当前服务', serviceConfig: '服务配置', serviceConfigCopy: '保存后可在个人审美库中选择对应模型。', basic: '基础连接', capabilities: '模型能力', imageModels: '可识图模型', textModels: '文本模型', imageCapable: '此服务支持图片分析', imageProcessing: '图片处理', saveProvider: '保存 AI 服务', newProvider: '新建服务',
+    providerEyebrow: '自带 AI 服务 / BRING YOUR OWN PROVIDER', providerTitle: '连接模型，保留你的分析方法。', providerIntro: 'Provider 决定使用哪个模型；卡片生成模板决定模型如何提取文化背景、设计元素和可复用 Prompt。API Key 经服务端加密后存入你的私有 Provider Vault。', localKey: '服务端加密存储', configured: '已配置服务', configuredCopy: '选择一个服务用于图片分析和 Prompt 生成。', current: '当前服务', serviceConfig: '服务配置', serviceConfigCopy: '保存后可在个人审美库中选择对应模型。', basic: '基础连接', capabilities: '模型能力', imageModels: '可识图模型', textModels: '文本模型', imageCapable: '此服务支持图片分析', imageProcessing: '图片处理', saveProvider: '保存 AI 服务', newProvider: '新建服务',
     settingsEyebrow: '个人设置 / WORKSPACE SETTINGS', settingsTitle: '管理你的资料与工作区方法。', settingsIntro: '个人资料、卡片生成规则和本地数据都保存在当前浏览器。Provider 只负责调用模型，卡片模板决定模型如何理解你的审美。', localWorkspace: '本地工作区 · LOCAL ONLY', profile: '个人资料', profileCopy: '为未来的账号、同步和服务扩展保留基础信息。', saveProfile: '保存个人资料', workspace: '本地工作区', workspaceCopy: '只影响之后的新操作，不会改变已经保存的卡片。', saveWorkspace: '保存工作区设置', templates: '卡片生成模板', templatesCopy: '决定 AI 如何从图片、主题和文化语境中提取信息，并生成可复用的结构化卡片与 Prompt。', copyTemplate: '复制并编辑', resetTemplate: '恢复系统默认', templatePreview: '模板预览 / Template preview', testPrompt: '测试主题', testButton: '生成测试 Prompt', saveTemplate: '保存模板', usage: '使用数据', usageCopy: '记录当前浏览器内的个人操作；公共广场数据在接入账号和服务端前不会伪造。', privacy: '隐私与版权', privacyCopy: '提醒你确认来源和使用权限，但不会替你判断图片是否拥有授权。', publishConfirm: '公开前再次确认', publishCopy: '将私人卡片提交到共享广场前，先确认内容和可见范围。', copyright: '提醒确认图片授权', copyrightCopy: '公开卡片前提醒你确认图片来源和使用权。', source: '导出时提醒来源', sourceCopy: '导出包含外部图片的资料时，提醒保留来源信息。', localInfo: '本地工作区', localInfoCopy: '私人卡片、收藏、画板和设置保存在当前浏览器。Provider API Key 不会以明文进入备份，导入后需要重新填写。', noUpload: '不自动上传私人资料', redacted: 'API Key 备份时脱敏', rights: '版权判断由你负责', savePrivacy: '保存隐私与版权设置', data: '数据与备份', dataCopy: 'JSON 只用于机器可读的完整工作区备份，不是普通内容导出格式。', localLibrary: '本地文件库', backupRules: '备份规则', exportBackup: '导出工作区备份', importBackup: '导入工作区备份', danger: '危险操作', dangerCopy: '分开清理，避免为了删除一类资料而清空整个工作区。', clearPrivate: '清空私人审美库', clearSaved: '清空个人收藏', clearBoard: '清空 Collage 画板', clearAll: '清空整个本地工作区', dangerNote: '清空整个工作区会删除私人卡片、收藏、画板、Provider 配置、个人资料、模板和偏好；不会删除公开视觉库或项目文件。',
     name: '名称 / Name', email: '邮箱 / Email', contact: '联系方式 / Contact', specialty: '设计方向 / Design focus', avatar: '头像 / Avatar', language: '界面语言 / Language', exportFormat: '默认内容导出格式', defaultTab: '默认打开页面', density: '显示密度', templateName: '模板名称', templateScope: '适用场景', templateFocus: '分析重点', templateRules: '生成规则', testTopic: '测试主题',
   };
   const set = (selector, value) => text(selector, value);
   set('.provider-intro .eyebrow', tr.providerEyebrow); set('.provider-intro h2', tr.providerTitle); set('.provider-intro > div > p:not(.eyebrow)', tr.providerIntro); set('.provider-intro .local-badge', tr.localKey); set('.provider-accounts h3', tr.configured); set('.provider-accounts .provider-section-head p', tr.configuredCopy); set('.provider-count-row span', tr.current); set('.provider-form h3', tr.serviceConfig); set('.provider-form .provider-section-head p', tr.serviceConfigCopy); set('.provider-fieldset:nth-of-type(1) legend', tr.basic); set('.provider-fieldset:nth-of-type(2) legend', tr.capabilities); set('.provider-fieldset:nth-of-type(3) legend', tr.imageProcessing); labelText('provider-image-capable', tr.imageCapable); set('#provider-form button[type="submit"]', tr.saveProvider); set('#provider-new-btn', tr.newProvider);
-  set('.settings-intro .eyebrow', tr.settingsEyebrow); set('.settings-intro h2', tr.settingsTitle); set('.settings-intro p:not(.eyebrow)', tr.settingsIntro); set('.settings-intro .local-badge', tr.localWorkspace); set('.settings-profile h3', tr.profile); set('.settings-profile .settings-section-head p', tr.profileCopy); set('#settings-profile-form button[type="submit"]', tr.saveProfile); set('#settings-form .settings-section-head h3', tr.workspace); set('#settings-form .settings-section-head p', tr.workspaceCopy); set('#settings-form button[type="submit"]', tr.saveWorkspace); set('.settings-template-section h3', tr.templates); set('.settings-template-section .settings-section-head p', tr.templatesCopy); set('#setting-template-copy', tr.copyTemplate); set('#setting-template-reset', tr.resetTemplate); set('.template-preview-head span:first-child', tr.templatePreview); set('#setting-template-test', tr.testButton); set('#setting-template-save', tr.saveTemplate); set('[data-panel="settings"] .settings-section:nth-of-type(4) h3', tr.usage); set('[data-panel="settings"] .settings-section:nth-of-type(4) .settings-section-head p', tr.usageCopy); set('.settings-privacy-section h3', tr.privacy); set('.settings-privacy-section .settings-section-head p', tr.privacyCopy); set('.privacy-option:nth-child(1) strong', tr.publishConfirm); set('.privacy-option:nth-child(1) small', tr.publishCopy); set('.privacy-option:nth-child(2) strong', tr.copyright); set('.privacy-option:nth-child(2) small', tr.copyrightCopy); set('.privacy-option:nth-child(3) strong', tr.source); set('.privacy-option:nth-child(3) small', tr.sourceCopy); set('.local-info-heading strong', tr.localInfo); set('.local-info p', tr.localInfoCopy); set('.local-info-points span:nth-child(1)', tr.noUpload); set('.local-info-points span:nth-child(2)', tr.redacted); set('.local-info-points span:nth-child(3)', tr.rights); set('#settings-privacy-save', tr.savePrivacy); set('.settings-data-section h3', tr.data); set('.settings-data-section .settings-section-head p', tr.dataCopy); set('.data-grid > div:nth-child(1) strong', tr.localLibrary); set('.data-grid > div:nth-child(2) strong', tr.backupRules); set('#settings-export-btn', tr.exportBackup); const importText = document.querySelector('.settings-file-button'); if (importText?.firstChild) importText.firstChild.textContent = `${tr.importBackup} `; set('.settings-danger-section h3', tr.danger); set('.settings-danger-section .settings-section-head p', tr.dangerCopy); set('#settings-clear-private-btn', tr.clearPrivate); set('#settings-clear-saved-btn', tr.clearSaved); set('#settings-clear-board-btn', tr.clearBoard); set('#settings-clear-btn', tr.clearAll); set('.danger-note', tr.dangerNote);
+  set('.settings-intro .eyebrow', tr.settingsEyebrow); set('.settings-intro h2', tr.settingsTitle); set('.settings-intro p:not(.eyebrow)', tr.settingsIntro); set('.settings-intro .local-badge', tr.localWorkspace); set('.settings-profile h3', tr.profile); set('.settings-profile .settings-section-head p', tr.profileCopy); set('#settings-profile-form button[type="submit"]', tr.saveProfile); set('#settings-form .settings-section-head h3', tr.workspace); set('#settings-form .settings-section-head p', tr.workspaceCopy); set('#settings-form button[type="submit"]', tr.saveWorkspace); set('.settings-template-section h3', tr.templates); set('.settings-template-section .settings-section-head p', tr.templatesCopy); set('#setting-template-new', en ? 'New template' : '新建模板'); set('#setting-template-copy', tr.copyTemplate); set('#setting-template-reset', tr.resetTemplate); set('.template-preview-head span:first-child', tr.templatePreview); set('#setting-template-test', tr.testButton); set('#setting-template-save', tr.saveTemplate); set('[data-panel="settings"] .settings-section:nth-of-type(4) h3', tr.usage); set('[data-panel="settings"] .settings-section:nth-of-type(4) .settings-section-head p', tr.usageCopy); set('.settings-privacy-section h3', tr.privacy); set('.settings-privacy-section .settings-section-head p', tr.privacyCopy); set('.privacy-option:nth-child(1) strong', tr.publishConfirm); set('.privacy-option:nth-child(1) small', tr.publishCopy); set('.privacy-option:nth-child(2) strong', tr.copyright); set('.privacy-option:nth-child(2) small', tr.copyrightCopy); set('.privacy-option:nth-child(3) strong', tr.source); set('.privacy-option:nth-child(3) small', tr.sourceCopy); set('.local-info-heading strong', tr.localInfo); set('.local-info p', tr.localInfoCopy); set('.local-info-points span:nth-child(1)', tr.noUpload); set('.local-info-points span:nth-child(2)', tr.redacted); set('.local-info-points span:nth-child(3)', tr.rights); set('#settings-privacy-save', tr.savePrivacy); set('.settings-data-section h3', tr.data); set('.settings-data-section .settings-section-head p', tr.dataCopy); set('.data-grid > div:nth-child(1) strong', tr.localLibrary); set('.data-grid > div:nth-child(2) strong', tr.backupRules); set('#settings-export-btn', tr.exportBackup); const importText = document.querySelector('.settings-file-button'); if (importText?.firstChild) importText.firstChild.textContent = `${tr.importBackup} `; set('.settings-danger-section h3', tr.danger); set('.settings-danger-section .settings-section-head p', tr.dangerCopy); set('#settings-clear-private-btn', tr.clearPrivate); set('#settings-clear-saved-btn', tr.clearSaved); set('#settings-clear-board-btn', tr.clearBoard); set('#settings-clear-btn', tr.clearAll); set('.danger-note', tr.dangerNote);
   labelText('provider-name', en ? 'Service name' : '服务名称'); labelText('provider-type', en ? 'Service type' : '服务类型'); labelText('provider-key', en ? 'API key' : 'API 密钥'); labelText('provider-base-url', en ? 'Endpoint' : '接口地址'); labelText('provider-image-models', tr.imageModels); labelText('provider-text-models', tr.textModels); labelText('provider-image-api', en ? 'Image processing service' : '图片处理服务'); labelText('provider-image-api-url', en ? 'Processing endpoint' : '图片处理接口地址');
   labelText('setting-avatar', tr.avatar); labelText('setting-name', tr.name); labelText('setting-email', tr.email); labelText('setting-contact', tr.contact); labelText('setting-specialty', tr.specialty); labelText('setting-language', tr.language); labelText('setting-export-format', tr.exportFormat); labelText('setting-default-tab', tr.defaultTab); labelText('setting-density', tr.density); labelText('setting-template-name', tr.templateName); labelText('setting-template-scope', tr.templateScope); labelText('setting-template-focus', tr.templateFocus); labelText('setting-template-instructions', tr.templateRules); labelText('setting-template-test-topic', tr.testTopic);
-  placeholder('provider-name', en ? 'e.g. Work OpenAI / Personal Gemini' : '例如：工作用 OpenAI / 个人 Gemini'); placeholder('provider-key', en ? 'Stored only in this browser' : '密钥只保存在当前浏览器'); placeholder('provider-base-url', en ? 'Only required for a custom endpoint' : '只有自定义接口需要填写'); placeholder('provider-image-models', en ? 'e.g. gpt-4o\\ngemini-1.5-pro' : '例如：gpt-4o\\ngemini-1.5-pro'); placeholder('provider-text-models', en ? 'e.g. gpt-4o-mini\\nclaude-3.5-sonnet' : '例如：gpt-4o-mini\\nclaude-3.5-sonnet'); placeholder('provider-image-api-url', en ? 'Custom image-processing endpoint' : '自定义去背景接口或代理地址'); placeholder('setting-name', en ? 'Your name' : '你的名称'); placeholder('setting-email', 'name@example.com'); placeholder('setting-contact', en ? 'Optional' : '可选'); placeholder('setting-specialty', en ? 'e.g. spatial design, brand visual, AI generation' : '例如：空间设计、品牌视觉、AI 生成'); placeholder('setting-template-name', en ? 'e.g. Residential material study' : '例如：住宅空间审美分析'); placeholder('setting-template-scope', en ? 'Spatial design / Brand visual / AI image generation' : '空间设计 / 品牌视觉 / AI 生图'); placeholder('setting-template-focus', en ? 'Cultural context, materials, spatial relations, light, composition, palette' : '文化背景、材料与工艺、空间关系、光线、构图、色彩'); placeholder('setting-template-instructions', en ? 'Write the rules you want AI to follow.' : '写下你希望 AI 遵守的分析和 Prompt 规则'); placeholder('setting-template-test-topic', en ? 'e.g. quiet residential entrance, natural stone and soft daylight' : '例如：安静的住宅入口，天然石材与柔和自然光');
+  placeholder('provider-name', en ? 'e.g. Work OpenAI / Personal Gemini' : '例如：工作用 OpenAI / 个人 Gemini'); placeholder('provider-key', en ? 'Encrypted and stored server-side' : '经服务端加密保存'); placeholder('provider-base-url', en ? 'Only required for a custom endpoint' : '只有自定义接口需要填写'); placeholder('provider-image-models', en ? 'e.g. gpt-4o\\ngemini-1.5-pro' : '例如：gpt-4o\\ngemini-1.5-pro'); placeholder('provider-text-models', en ? 'e.g. gpt-4o-mini\\nclaude-3.5-sonnet' : '例如：gpt-4o-mini\\nclaude-3.5-sonnet'); placeholder('provider-image-api-url', en ? 'Custom image-processing endpoint' : '自定义去背景接口或代理地址'); placeholder('setting-name', en ? 'Your name' : '你的名称'); placeholder('setting-email', 'name@example.com'); placeholder('setting-contact', en ? 'Optional' : '可选'); placeholder('setting-specialty', en ? 'e.g. spatial design, brand visual, AI generation' : '例如：空间设计、品牌视觉、AI 生成'); placeholder('setting-template-name', en ? 'e.g. Residential material study' : '例如：住宅空间审美分析'); placeholder('setting-template-scope', en ? 'Spatial design / Brand visual / AI image generation' : '空间设计 / 品牌视觉 / AI 生图'); placeholder('setting-template-focus', en ? 'Cultural context, materials, spatial relations, light, composition, palette' : '文化背景、材料与工艺、空间关系、光线、构图、色彩'); placeholder('setting-template-instructions', en ? 'Write the rules you want AI to follow.' : '写下你希望 AI 遵守的分析和 Prompt 规则'); placeholder('setting-template-test-topic', en ? 'e.g. quiet residential entrance, natural stone and soft daylight' : '例如：安静的住宅入口，天然石材与柔和自然光');
   optionText('#setting-export-format', en ? { png: 'PNG image', jpg: 'JPG image', pdf: 'PDF document', html: 'HTML archive', md: 'Markdown archive' } : { png: 'PNG 图片', jpg: 'JPG 图片', pdf: 'PDF 文档', html: 'HTML 图文档案', md: 'Markdown 文本档案' }); optionText('#provider-type', en ? { OpenAI: 'OpenAI', Gemini: 'Gemini', OpenRouter: 'OpenRouter', 'Custom Endpoint': 'Custom Endpoint' } : { OpenAI: 'OpenAI', Gemini: 'Gemini', OpenRouter: 'OpenRouter', 'Custom Endpoint': 'Custom Endpoint' }); optionText('#provider-image-api', en ? { none: 'Not used', removebg: 'remove.bg', clipdrop: 'Clipdrop', 'custom-remove-bg': 'Custom remove-background endpoint' } : { none: '不使用', removebg: 'remove.bg', clipdrop: 'Clipdrop', 'custom-remove-bg': '自定义去背景接口' }); optionText('#setting-default-tab', en ? { plaza: 'Public Plaza', archive: 'My Archive', saved: 'Saved', collage: 'Collage Board' } : { plaza: '视觉库广场', archive: '个人审美库', saved: '个人收藏', collage: 'Collage 画板' }); optionText('#setting-density', en ? { compact: 'Compact', standard: 'Standard', spacious: 'Spacious' } : { compact: '紧凑', standard: '标准', spacious: '宽松' });
   set('#collage-summary span', en ? 'BOARD SUMMARY' : '画板总结 / Board Summary'); set('#collage-summary p', en ? 'Click + Collage from Plaza, My Archive or a detail view to add references to your project board.' : '从广场、私人审美库或详情页点击 + Collage，把参考图加入项目风格板。'); set('#collage-export-menu summary', en ? 'Export' : '导出'); set('#clear-collage-btn', en ? 'Clear Board' : '清空画板'); set('#collage-inspector', en ? 'Select an element to edit, duplicate, reorder or remove it.' : '选择一个元素后，可以编辑、复制、调整层级或移除。'); set('#detail-add-gallery', en ? 'Add gallery to Collage' : '将整组图片加入画板'); set('.gallery-note span', en ? 'GALLERY NOTES' : '图册备注 / Gallery Notes'); set('#detail-negative + *', ''); set('#detail-content .prompt-block.is-primary h3', en ? 'Chinese Prompt' : '中文提示词'); set('#detail-content .prompt-block.is-secondary h3', en ? 'English Prompt' : '英文提示词'); set('#detail-content .detail-block:nth-of-type(1) h3', en ? 'Negative Prompt' : '负面提示词'); set('#detail-content .detail-block:nth-of-type(2) h3', en ? 'Cultural Context' : '文化背景'); set('#detail-content .detail-block:nth-of-type(3) h3', en ? 'Design Elements' : '设计要素'); set('#detail-content .detail-block:nth-of-type(4) h3', en ? 'Palette' : '色卡'); set('#detail-content .detail-block:nth-of-type(5) h3', en ? 'Composition' : '构图方式'); set('#detail-content .detail-block:nth-of-type(6) h3', en ? 'Use Cases' : '使用场景'); set('#profile-status', en ? 'Profile is stored in this browser.' : '资料保存在当前浏览器。'); set('#template-status', en ? 'System default has not been edited.' : '未修改系统默认模板。'); set('#setting-template-test-result', en ? 'Save a template, then check whether its Prompt is specific and reusable.' : '保存模板后，可以在这里检查 Prompt 是否具体、可复用。'); set('#setting-template-state', en ? 'System default / Read only' : '系统默认 / Read only');
 }
@@ -1461,7 +1555,7 @@ function applyTranslations(lang) {
   const joinButtons = document.querySelectorAll('#join .button');
   if (joinButtons[0]) joinButtons[0].textContent = t.openApp;
   if (joinButtons[1]) joinButtons[1].textContent = t.connectProvider;
-  text('[data-login-open]', getUser() ? getUser().name : t.login);
+  renderAuthState();
   text('.sidebar-title strong', t.workspace);
   const nav = {
     plaza: t.plazaNav,
@@ -1636,11 +1730,18 @@ function setProviders(providers) {
   renderProviderSelectors();
 }
 
+function setProviderStatus(message, state = '') {
+  const status = document.getElementById('provider-save-status');
+  if (!status) return;
+  status.className = `save-status provider-save-status${state ? ` is-${state}` : ''}`;
+  status.textContent = message;
+}
+
 async function syncProvidersFromServer() {
   try {
     const response = await fetch('/api/providers', { credentials: 'same-origin' });
-    if (!response.ok) throw new Error(`Provider API ${response.status}`);
-    const payload = await response.json();
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(`${payload.error?.message || `Provider API HTTP ${response.status}`}${payload.requestId ? `（请求 ID：${payload.requestId}）` : ''}`);
     setProviders((payload.data || []).map(provider => ({
       ...provider,
       baseUrl: provider.base_url || '',
@@ -1656,9 +1757,11 @@ async function syncProvidersFromServer() {
       storage: 'server'
     })));
     providerSyncState = 'server';
+    setProviderStatus(isEnglish() ? 'Provider Vault is ready.' : 'Provider Vault 已就绪。', 'success');
     return true;
   } catch (error) {
     providerSyncState = 'local';
+    setProviderStatus(`${isEnglish() ? 'Provider Vault unavailable: ' : 'Provider Vault 暂不可用：'}${error.message}`, 'warning');
     return false;
   }
 }
@@ -2746,27 +2849,36 @@ async function saveProvider(event) {
   event.preventDefault();
   const editingId = els.providerForm.dataset.editingProvider || '';
   const nextProvider = providerFormData(editingId);
-  if (!editingId && !nextProvider.secret) return toast('请填写 API Key');
-  if (nextProvider.imageCapable && !nextProvider.imageModels.length) return toast('请至少填写一个 image-capable 模型');
-  if (providerSyncState !== 'server') return toast('请先登录并配置 Supabase，Provider 才能安全保存');
+  if (!editingId && !nextProvider.secret) { setProviderStatus('请填写 API Key。', 'warning'); return toast('请填写 API Key'); }
+  if (nextProvider.imageCapable && !nextProvider.imageModels.length) { setProviderStatus('请至少填写一个支持图片分析的模型。', 'warning'); return toast('请至少填写一个 image-capable 模型'); }
+  if (!nextProvider.imageModels.length && !nextProvider.textModels.length) { setProviderStatus('请至少填写一个模型。', 'warning'); return toast('请至少填写一个模型'); }
+  if (providerSyncState !== 'server') { setProviderStatus('请确认已登录，然后刷新页面以连接 Provider Vault。', 'warning'); return toast('Provider Vault 尚未连接'); }
   const payload = { ...nextProvider, secret: nextProvider.secret || undefined };
   delete payload.id;
   delete payload.createdAt;
   delete payload.updatedAt;
   delete payload.storage;
   try {
+    setProviderStatus(editingId ? '正在更新 Provider…' : '正在加密并保存 Provider…');
+    const submitButton = els.providerForm.querySelector('button[type="submit"]');
+    if (submitButton) submitButton.disabled = true;
     const response = await fetch(editingId ? `/api/providers?id=${encodeURIComponent(editingId)}` : '/api/providers', {
       method: editingId ? 'PATCH' : 'POST', credentials: 'same-origin',
       headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
     });
     const result = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error(result.error?.message || `Provider API HTTP ${response.status}`);
+    if (!response.ok) throw new Error(`${result.error?.message || `Provider API HTTP ${response.status}`}${result.requestId ? `（请求 ID：${result.requestId}）` : ''}`);
     await syncProvidersFromServer();
     resetProviderForm();
+    setProviderStatus(editingId ? 'Provider 已更新并安全保存。' : 'Provider 已加密保存，可以在个人审美库中选择。', 'success');
     toast(editingId ? 'AI Provider 已更新并安全保存' : 'AI Provider 已安全保存');
     setArchiveStatus('Ready · Provider 已通过服务端保存，浏览器不会持有 API Key。', 'success');
   } catch (error) {
+    setProviderStatus(`Provider 保存失败：${error.message}`, 'warning');
     toast(`Provider 保存失败：${error.message}`);
+  } finally {
+    const submitButton = els.providerForm.querySelector('button[type="submit"]');
+    if (submitButton) submitButton.disabled = false;
   }
 }
 
@@ -3091,6 +3203,7 @@ function bindEvents() {
   document.getElementById('settings-clear-board-btn')?.addEventListener('click', () => clearSettingData('board'));
   els.settingsTemplateSelect?.addEventListener('change', renderTemplateSettings);
   document.getElementById('setting-template-folders')?.addEventListener('click', event => { const folder = event.target.closest('[data-template-folder]'); if (!folder || !els.settingsTemplateSelect) return; els.settingsTemplateSelect.value = folder.dataset.templateFolder; renderTemplateSettings(); });
+  els.settingsTemplateNew?.addEventListener('click', newTemplateSettings);
   els.settingsTemplateSave?.addEventListener('click', saveTemplateSettings);
   els.settingsTemplateCopy?.addEventListener('click', copyTemplateSettings);
   els.settingsTemplateReset?.addEventListener('click', resetTemplateSettings);
@@ -3228,7 +3341,7 @@ function init() {
         const profileName = serverName && !serverNameIsEmail ? serverName : (localLooksLikeEmail ? '' : localName);
         const mergedProfile = { ...localProfile, name: profileName, avatar: profile.avatar_url || localProfile.avatar || '', email: profile.email || localProfile.email || '' };
         saveJSON(STORAGE.profile, mergedProfile);
-        setUser({ provider: 'supabase', identity: profile.email || profile.id, name: profileName || profile.email?.split('@')[0] || 'Account', role: profile.role || 'user', signedInAt: profile.created_at || new Date().toISOString() });
+        setUser({ id: profile.id, provider: 'supabase', identity: profile.email || profile.id, name: profileName || profile.email?.split('@')[0] || 'Account', avatar: mergedProfile.avatar, role: profile.role || 'user', signedInAt: profile.created_at || new Date().toISOString() });
         document.querySelectorAll('.reviewer-only').forEach(node => { node.hidden = false; });
         populateSettings();
         if (['admin', 'reviewer'].includes(profile.role || '')) loadReviewQueue();

@@ -117,7 +117,11 @@ async function requestJson(url: string, init: RequestInit): Promise<Record<strin
 }
 
 function baseUrl(provider: ProviderRecord) {
-  return (provider.base_url || 'https://api.openai.com/v1').replace(/\/$/, '');
+  const type = provider.type.trim().toLowerCase();
+  const defaultUrl = type === 'openrouter'
+    ? 'https://openrouter.ai/api/v1'
+    : 'https://api.openai.com/v1';
+  return (provider.base_url || defaultUrl).replace(/\/$/, '');
 }
 
 function extractOpenAiText(data: Record<string, unknown>): string {
