@@ -2,20 +2,11 @@
 
 [中文 README](./README.zh-CN.md)
 
+**Product Website:** [https://your-domain.com](https://your-domain.com) *(deployment URL placeholder)*
+
 > **Aesthetic Archive is an AI-powered aesthetic knowledge base for everyone who cares about aesthetics and design. It turns scattered visual references into a searchable, traceable, decomposable, and reusable system of design and aesthetic intelligence.**
 
 ![Aesthetic Archive visual reference wall](./public/marketing/hero-editorial.png)
-
-## Product Entry
-
-- **Product website:** production URL is not published yet. This README will be updated when the deployment domain is confirmed.
-- **GitHub repository:** [github.com/Young4ever33/Aesthetic-Archive](https://github.com/Young4ever33/Aesthetic-Archive)
-- **Local marketing page:** `http://localhost:5174/`
-- **Local workspace:** `http://localhost:5174/app`
-- **Local public plaza:** `http://localhost:5174/app?tab=plaza`
-- **Local personal archive:** `http://localhost:5174/app?tab=archive`
-
-Aesthetic Archive is currently an Open Beta / MVP foundation. The local product can be explored today; a public production URL will be added after Supabase, Provider, authentication, and deployment validation are complete.
 
 ## Product Introduction
 
@@ -72,23 +63,23 @@ Keep the reasoning behind successful references in a personal archive so the nex
 
 A moderated public library of aesthetic cases. Browse and search by style, color, composition, scene, use case, and prompt. Open a case, inspect its structured analysis, copy its prompts, save it, or add it to a Collage Board.
 
+![Public Plaza product interface](./docs/screenshots/public-plaza.png)
+
 ### Personal Generation and My Archive
 
 Upload a reference or create a card manually in a private archive. Connect an AI Provider through the server-side gateway, generate an analysis, edit the result, and decide whether the card stays private or enters the review workflow.
 
-![Reference collection and material analysis](./public/marketing/how-reference.png)
+![Personal generation and My Archive interface](./docs/screenshots/my-archive.png)
 
 ### Prompt Reuse
 
-Each analyzed card can produce Chinese and English prompts, negative prompts, and reusable style variables. The goal is to move from “write a new prompt every time” to a Prompt Pack that can be adapted across projects and tools.
-
-![A structured aesthetic card and visual direction](./public/marketing/how-card.png)
+Each analyzed card can produce Chinese and English prompts, negative prompts, and reusable style variables. The goal is to move from “write a new prompt every time” to a Prompt Pack that can be adapted across projects and tools. The generation form and editable aesthetic card keep analysis, bilingual prompts, and archive storage in one workflow.
 
 ### Collage Board
 
 Arrange references into a visual board, add notes, define a direction, and summarize the relationships between images. The board is designed to turn a moodboard into a project-ready visual argument.
 
-![A design collage and project board](./public/marketing/how-editorial.png)
+![Collage Board product interface](./docs/screenshots/collage-board.png)
 
 ### Saved Cases and Templates
 
@@ -112,8 +103,6 @@ The generation loop is:
 ```text
 Collect → Analyze → Edit → Generate Prompt → Arrange → Reuse or Share
 ```
-
-![A reference-to-direction workflow](./public/marketing/how-editorial.png)
 
 ## Long-Term Value
 
@@ -139,18 +128,6 @@ The long-term product loop is:
 - Explainability over impressive output. A useful card should tell a designer what to notice and how to act on it.
 - Source and rights matter. Public cases need source and rights information, and uncertain claims should remain marked as uncertain.
 - Aesthetic knowledge should compound. Every structured reference should make the next project faster and more intentional.
-
-## Current Stage
-
-The current Beta foundation includes:
-
-- a marketing page explaining the product story and workflow;
-- Public Plaza, My Archive, Saved, Collage, Provider, Settings, and Review Queue surfaces;
-- local browser drafts when Supabase is not configured;
-- Supabase Auth, Postgres, Storage, RLS, server-side APIs, Provider encryption, AI Gateway routes, and moderation foundations;
-- bilingual Chinese and English interface support.
-
-Production readiness still requires real Supabase credentials, deployed migrations, authenticated smoke tests, Provider validation, image-rights verification, and deployment configuration. See `docs/RELEASE_CHECKLIST.md` before treating the project as production-ready.
 
 ## Run Locally
 
@@ -199,17 +176,6 @@ Optional networking values:
 - `AI_REQUEST_TIMEOUT_MS`
 
 Provider API keys are encrypted and stored server-side. They must never appear in localStorage, browser backups, API responses, logs, or Git history. The browser receives only non-secret metadata such as `hasSecret`.
-
-## Supabase and Release Setup
-
-1. Create a Supabase project.
-2. Run the migrations in `supabase/migrations/` in filename order, or use `supabase/generated/apply_all_migrations.sql`.
-3. Configure the production Site URL, redirect URL, email provider, and SMTP.
-4. Create and verify admin and reviewer accounts.
-5. Configure the deployment server so it can reach the selected AI Provider.
-6. Run authenticated production-like smoke tests for login, cards, AI routes, saving, moderation, and feedback.
-
-See `docs/SUPABASE_SETUP.md`, `docs/DEPLOYMENT.md`, and `docs/RELEASE_CHECKLIST.md`.
 
 ## Assets and License
 

@@ -2,20 +2,11 @@
 
 [English README](./README.md)
 
+**产品网址：** [https://your-domain.com](https://your-domain.com) *（部署网址占位）*
+
 > **Aesthetic Archive 是一个面向所有审美者/设计师的 AI 审美知识库：把分散的视觉参考转化为可搜索、可溯源、可拆分、可复用的设计审美智能系统。**
 
 ![Aesthetic Archive 视觉参考墙](./public/marketing/hero-editorial.png)
-
-## 产品入口
-
-- **产品网址：** 目前尚未发布正式生产域名，确认部署地址后会在这里更新。
-- **GitHub 项目：** [github.com/Young4ever33/Aesthetic-Archive](https://github.com/Young4ever33/Aesthetic-Archive)
-- **本地宣传页：** `http://localhost:5174/`
-- **本地工作台：** `http://localhost:5174/app`
-- **本地视觉库广场：** `http://localhost:5174/app?tab=plaza`
-- **本地个人审美库：** `http://localhost:5174/app?tab=archive`
-
-Aesthetic Archive 当前处于 Open Beta / MVP 基础阶段。现在可以通过本地版本体验产品，待 Supabase、Provider、认证和部署验证完成后，再补充公开生产网址。
 
 ## 产品介绍
 
@@ -72,23 +63,23 @@ Aesthetic Archive 面向所有希望建立、理解和复用审美知识的人�
 
 经过审核的公开审美案例库。可以按风格、色彩、构图、场景、使用场景和 Prompt 浏览与搜索，打开案例查看结构化分析，复制 Prompt、收藏案例或加入 Collage 画板。
 
+![视觉库广场产品界面](./docs/screenshots/public-plaza.png)
+
 ### 个人生成与个人审美库 / My Archive
 
 在私人审美库中上传参考图或手动创建卡片。通过服务端 AI Gateway 连接自定义 AI Provider，生成分析结果，编辑卡片内容，并决定保持私有或提交审核。
 
-![参考收集与材料分析](./public/marketing/how-reference.png)
+![个人生成与个人审美库界面](./docs/screenshots/my-archive.png)
 
 ### 提示词复用 / Prompt Reuse
 
-每张分析卡片都可以生成中文 Prompt、英文 Prompt、Negative Prompt 和可复用的风格变量。目标是从“每次重新写一遍 Prompt”转向可以跨项目、跨工具调整的 Prompt Pack。
-
-![结构化审美卡片与视觉方向](./public/marketing/how-card.png)
+每张分析卡片都可以生成中文 Prompt、英文 Prompt、Negative Prompt 和可复用的风格变量。目标是从“每次重新写一遍 Prompt”转向可以跨项目、跨工具调整的 Prompt Pack。生成表单和可编辑审美卡片将分析、双语 Prompt 与审美库保存整合在同一条工作流中。
 
 ### 画板 / Collage Board
 
 将参考图排列为视觉画板，添加笔记，定义设计方向，并总结图片之间的关系。画板的目标不是停留在氛围展示，而是形成可以用于项目沟通的视觉论证。
 
-![设计拼贴与项目画板](./public/marketing/how-editorial.png)
+![Collage 画板产品界面](./docs/screenshots/collage-board.png)
 
 ### 收藏与模板 / Saved and Templates
 
@@ -112,8 +103,6 @@ AI 生成并不等于可以自动公开。Admin 和 Reviewer 可以查看提交�
 ```text
 收集 → 分析 → 编辑 → 生成 Prompt → 排列 → 复用或分享
 ```
-
-![从参考图到设计方向的工作流](./public/marketing/how-editorial.png)
 
 ## 长期价值
 
@@ -139,18 +128,6 @@ Aesthetic Archive 追求的是持续积累的价值，而不只是一次性的 A
 - **解释优先于炫技。** 一张有用的卡片应该告诉设计师该观察什么，以及下一步如何行动。
 - **来源和版权同样重要。** 公开案例需要来源和版权信息，不确定的判断必须保持不确定标记。
 - **审美知识应该持续复利。** 每一张结构化参考图，都应该让下一个项目更快、更有依据。
-
-## 当前阶段
-
-当前 Beta 基础版本已经包含：
-
-- 讲述产品构想与工作流的宣传页；
-- 视觉库广场、个人审美库、个人收藏、Collage、Provider、设置和审核队列；
-- 未配置 Supabase 时仍可使用的本地浏览器草稿能力；
-- Supabase Auth、Postgres、Storage、RLS、服务端 API、Provider 加密、AI Gateway 路由和审核基础设施；
-- 中文与英文双语界面。
-
-正式上线前仍需配置真实 Supabase、执行数据库迁移、完成认证 Smoke Test、验证 Provider、确认图片授权并完成部署配置。不要把当前代码直接视为生产就绪版本，请先阅读 `docs/RELEASE_CHECKLIST.md`。
 
 ## 本地运行
 
@@ -199,17 +176,6 @@ pnpm check
 - `AI_REQUEST_TIMEOUT_MS`
 
 Provider API Key 只在服务端加密保存，绝不能出现在 localStorage、浏览器备份、API 响应、日志或 Git 历史中。浏览器只能获得 `hasSecret` 等非敏感元数据。
-
-## Supabase 与发布设置
-
-1. 创建 Supabase 项目。
-2. 按文件名顺序执行 `supabase/migrations/`，或执行 `supabase/generated/apply_all_migrations.sql`。
-3. 配置生产 Site URL、Redirect URL、邮件服务和 SMTP。
-4. 创建并验证 admin、reviewer 账号。
-5. 配置部署服务器，使其能够访问指定的 AI Provider。
-6. 对登录、卡片、AI 路由、收藏、审核和反馈执行真实生产环境 Smoke Test。
-
-详见 `docs/SUPABASE_SETUP.md`、`docs/DEPLOYMENT.md` 和 `docs/RELEASE_CHECKLIST.md`。
 
 ## 图片资源与许可证
 
