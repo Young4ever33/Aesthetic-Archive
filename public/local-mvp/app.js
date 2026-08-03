@@ -2983,7 +2983,14 @@ async function saveProvider(event) {
   if (!editingId && !nextProvider.secret) { setProviderStatus('请填写 API Key。', 'warning'); return toast('请填写 API Key'); }
   if (nextProvider.imageCapable && !nextProvider.imageModels.length) { setProviderStatus('请至少填写一个支持图片分析的模型。', 'warning'); return toast('请至少填写一个 image-capable 模型'); }
   if (!nextProvider.imageModels.length && !nextProvider.generationModels.length && !nextProvider.textModels.length) { setProviderStatus('请至少填写一个模型。', 'warning'); return toast('请至少填写一个模型'); }
-  if (providerSyncState !== 'server') { setProviderStatus('请确认已登录，然后刷新页面以连接 Provider Vault。', 'warning'); return toast('Provider Vault 尚未连接'); }
+  if (providerSyncState !== 'server') {
+    const connected = await syncProvidersFromServer();
+    if (!connected) {
+      const status = document.getElementById('provider-save-status')?.textContent || '';
+      setProviderStatus(status.includes('401') || status.includes('登录') ? '当前页面没有有效登录会话，请先登录后刷新此工作台。' : `Provider Vault 连接失败：${status || '后端暂不可达，请检查 Worker 部署版本和浏览器 Network。'}`, 'warning');
+      return toast('Provider Vault 连接失败，请查看配置区提示');
+    }
+  }
   const payload = { ...nextProvider, secret: nextProvider.secret || undefined };
   delete payload.id;
   delete payload.createdAt;
@@ -2999,7 +3006,8 @@ async function saveProvider(event) {
     });
     const result = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(`${result.error?.message || `Provider API HTTP ${response.status}`}${result.requestId ? `（请求 ID：${result.requestId}）` : ''}`);
-    await syncProvidersFromServer();
+    const synced = await syncProvidersFromServer();
+    if (!synced) throw new Error('Provider 保存成功，但刷新 Provider Vault 失败，请刷新页面确认状态');
     resetProviderForm();
     setProviderStatus(editingId ? 'Provider 已更新并安全保存。' : 'Provider 已加密保存，可以在个人审美库中选择。', 'success');
     toast(editingId ? 'AI Provider 已更新并安全保存' : 'AI Provider 已安全保存');

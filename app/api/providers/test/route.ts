@@ -18,11 +18,11 @@ export async function POST(request: Request) {
     const provider = await getOwnedProvider(body.providerId, user.id);
     providerId = provider.id;
     model = resolveModel(provider, body.model, 'text');
-    const text = await callTextProvider(provider, model, 'Reply with exactly: AESTHETIC_ARCHIVE_PROVIDER_OK');
-    const ok = text.includes('AESTHETIC_ARCHIVE_PROVIDER_OK');
+    const text = await callTextProvider(provider, model, 'Reply with one short sentence confirming that this Provider connection is reachable.');
+    const ok = typeof text === 'string' && text.trim().length > 0;
     await logAiUsage(supabase, { ownerId: userId, providerId, route: '/api/providers/test', model, status: ok ? 'success' : 'error', requestId, durationMs: Date.now() - startedAt });
     if (!ok) return NextResponse.json({ requestId, error: { code: 'PROVIDER_INVALID_RESPONSE', message: 'Provider responded but did not complete the connection test' } }, { status: 502 });
-    return NextResponse.json({ requestId, data: { connected: true }, meta: providerMeta(provider, model) });
+    return NextResponse.json({ requestId, data: { connected: true, preview: text.trim().slice(0, 160) }, meta: providerMeta(provider, model) });
   } catch (error) {
     if (userId) {
       const { supabase } = await requireUser().catch(() => ({ supabase: null as never }));
