@@ -11,8 +11,10 @@ export type ProviderRecord = {
   base_url: string | null;
   image_capable: boolean;
   image_models: unknown;
+  generation_models: unknown;
   text_models: unknown;
   default_image_model: string | null;
+  default_generation_model: string | null;
   default_text_model: string | null;
 };
 
@@ -35,7 +37,7 @@ export async function getOwnedProvider(providerId: string, userId: string): Prom
   const admin = createSupabaseAdminClient();
   const { data, error } = await admin
     .from('ai_providers')
-    .select('id, owner_id, name, type, encrypted_api_key, base_url, image_capable, image_models, text_models, default_image_model, default_text_model')
+    .select('id, owner_id, name, type, encrypted_api_key, base_url, image_capable, image_models, generation_models, text_models, default_image_model, default_generation_model, default_text_model')
     .eq('id', providerId)
     .eq('owner_id', userId)
     .maybeSingle();
@@ -58,10 +60,10 @@ function modelList(value: unknown): string[] {
   return Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string' && item.length > 0) : [];
 }
 
-export function resolveModel(provider: ProviderRecord, requested: unknown, kind: 'image' | 'text'): string {
+export function resolveModel(provider: ProviderRecord, requested: unknown, kind: 'image' | 'generation' | 'text'): string {
   const requestedModel = typeof requested === 'string' ? requested.trim() : '';
-  const allowed = modelList(kind === 'image' ? provider.image_models : provider.text_models);
-  const fallback = kind === 'image' ? provider.default_image_model : provider.default_text_model;
+  const allowed = modelList(kind === 'image' ? provider.image_models : kind === 'generation' ? provider.generation_models : provider.text_models);
+  const fallback = kind === 'image' ? provider.default_image_model : kind === 'generation' ? provider.default_generation_model : provider.default_text_model;
   const model = requestedModel || fallback || allowed[0] || '';
   if (!model) throw gatewayError('INVALID_REQUEST', `No ${kind} model is configured`, 400);
   if (allowed.length > 0 && !allowed.includes(model)) throw gatewayError('FORBIDDEN', 'The requested model is not allowed', 403);
@@ -167,6 +169,29 @@ export async function callVisionProvider(provider: ProviderRecord, model: string
     body: JSON.stringify({ model, temperature: 0.2, messages: [{ role: 'user', content: [{ type: 'text', text: prompt }, { type: 'image_url', image_url: { url: `data:${image.mimeType};base64,${image.data}` } }] }] }),
   });
   return extractOpenAiText(data);
+}
+
+export async function callImageGenerationProvider(provider: ProviderRecord, model: string, prompt: string, options: { count: number; size: '1024x1024' | '1536x1024' | '1024x1536' }) {
+  const type = provider.type.trim().toLowerCase();
+  if (type !== 'openai' && type !== 'custom endpoint') {
+    throw gatewayError('INVALID_REQUEST', 'Image generation currently supports OpenAI and explicit OpenAI-compatible Custom Endpoints only', 400);
+  }
+  const secret = decryptProviderSecret(provider.encrypted_api_key);
+  const data = await requestJson(`${baseUrl(provider)}/images/generations`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${secret}` },
+    body: JSON.stringify({ model, prompt, n: options.count, size: options.size }),
+  });
+  const rows = Array.isArray(data.data) ? data.data : [];
+  const images = rows.map((item) => {
+    if (!item || typeof item !== 'object') return '';
+    const record = item as Record<string, unknown>;
+    if (typeof record.url === 'string' && /^https:\/\//i.test(record.url)) return record.url;
+    if (typeof record.b64_json === 'string' && record.b64_json.length > 0) return `data:image/png;base64,${record.b64_json}`;
+    return '';
+  }).filter(Boolean).slice(0, options.count);
+  if (!images.length) throw gatewayError('PROVIDER_INVALID_RESPONSE', 'The image service did not return an image URL or base64 image', 502);
+  return images;
 }
 
 export async function callTextProvider(provider: ProviderRecord, model: string, prompt: string) {

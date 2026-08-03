@@ -1189,6 +1189,10 @@ function openDetail(item) {
   renderDetailPalette(item);
   renderDetailAuthor(item);
   renderDetailLike(item);
+  const generationStatus = document.getElementById('detail-generation-status');
+  const generationResults = document.getElementById('detail-generation-results');
+  if (generationStatus) generationStatus.textContent = getProviders().some(provider => provider.hasSecret && provider.generationModels?.length) ? '选择中文或英文 Prompt，生成候选图进行相似度回测。' : '需要先配置支持生图的 Provider。';
+  if (generationResults) generationResults.innerHTML = '';
   renderGallery(0);
   els.galleryNote.textContent = item.summary || '低饱和、结构清晰、适合沉淀为项目风格参考。';
   els.overlay.classList.add('is-open');
@@ -1869,8 +1873,10 @@ async function syncProvidersFromServer() {
       baseUrl: provider.base_url || '',
       imageCapable: provider.image_capable !== false,
       imageModels: provider.image_models || [],
+      generationModels: provider.generation_models || [],
       textModels: provider.text_models || [],
       defaultImageModel: provider.default_image_model || '',
+      defaultGenerationModel: provider.default_generation_model || '',
       defaultTextModel: provider.default_text_model || '',
       imageApi: provider.image_api || 'none',
       imageApiUrl: provider.image_api_url || '',
@@ -2945,6 +2951,7 @@ function saveTextNode(event) {
 
 function providerFormData(existingId = '') {
   const imageModels = splitList(document.getElementById('provider-image-models').value);
+  const generationModels = splitList(document.getElementById('provider-generation-models').value);
   const textModels = splitList(document.getElementById('provider-text-models').value);
   const now = new Date().toISOString();
   return {
@@ -2955,10 +2962,12 @@ function providerFormData(existingId = '') {
     baseUrl: document.getElementById('provider-base-url').value.trim(),
     imageCapable: document.getElementById('provider-image-capable').checked,
     imageModels,
+    generationModels,
     textModels,
     imageApi: document.getElementById('provider-image-api').value,
     imageApiUrl: document.getElementById('provider-image-api-url').value.trim(),
     defaultImageModel: imageModels[0] || '',
+    defaultGenerationModel: generationModels[0] || '',
     defaultTextModel: textModels[0] || '',
     isDefault: !getProviders().length,
     createdAt: now,
@@ -2973,7 +2982,7 @@ async function saveProvider(event) {
   const nextProvider = providerFormData(editingId);
   if (!editingId && !nextProvider.secret) { setProviderStatus('请填写 API Key。', 'warning'); return toast('请填写 API Key'); }
   if (nextProvider.imageCapable && !nextProvider.imageModels.length) { setProviderStatus('请至少填写一个支持图片分析的模型。', 'warning'); return toast('请至少填写一个 image-capable 模型'); }
-  if (!nextProvider.imageModels.length && !nextProvider.textModels.length) { setProviderStatus('请至少填写一个模型。', 'warning'); return toast('请至少填写一个模型'); }
+  if (!nextProvider.imageModels.length && !nextProvider.generationModels.length && !nextProvider.textModels.length) { setProviderStatus('请至少填写一个模型。', 'warning'); return toast('请至少填写一个模型'); }
   if (providerSyncState !== 'server') { setProviderStatus('请确认已登录，然后刷新页面以连接 Provider Vault。', 'warning'); return toast('Provider Vault 尚未连接'); }
   const payload = { ...nextProvider, secret: nextProvider.secret || undefined };
   delete payload.id;
@@ -3011,6 +3020,7 @@ function resetProviderForm() {
   document.getElementById('provider-key').value = '';
   document.getElementById('provider-base-url').value = '';
   document.getElementById('provider-image-models').value = '';
+  document.getElementById('provider-generation-models').value = '';
   document.getElementById('provider-text-models').value = '';
   document.getElementById('provider-image-api').value = 'none';
   document.getElementById('provider-image-api-url').value = '';
@@ -3026,6 +3036,7 @@ function editProvider(id) {
   document.getElementById('provider-key').value = '';
   document.getElementById('provider-base-url').value = provider.baseUrl || '';
   document.getElementById('provider-image-models').value = (provider.imageModels || []).join('\n');
+  document.getElementById('provider-generation-models').value = (provider.generationModels || []).join('\n');
   document.getElementById('provider-text-models').value = (provider.textModels || []).join('\n');
   document.getElementById('provider-image-api').value = provider.imageApi || 'none';
   document.getElementById('provider-image-api-url').value = provider.imageApiUrl || '';
@@ -3051,6 +3062,43 @@ function setDefaultProvider(id) {
     .catch(error => toast(`默认 Provider 更新失败：${error.message}`));
 }
 
+async function testProviderConnection(id) {
+  const provider = getProviders().find(item => item.id === id);
+  if (!provider) return setProviderStatus('请先保存 Provider，再测试连接。', 'warning');
+  const model = provider.defaultTextModel || provider.textModels?.[0] || '';
+  if (!model) return setProviderStatus('连接测试需要至少一个文本模型。', 'warning');
+  try {
+    setProviderStatus('正在调用 Provider 测试连接…');
+    const response = await fetch('/api/providers/test', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ providerId: id, model }) });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(`${result.error?.message || '连接测试失败'}${result.requestId ? `（请求 ID：${result.requestId}）` : ''}`);
+    setProviderStatus(`连接成功 · ${result.meta?.model || model}`, 'success');
+    toast('Provider 连接测试成功');
+  } catch (error) { setProviderStatus(`连接测试失败：${error.message}`, 'warning'); }
+}
+
+async function generateDetailCandidate() {
+  const item = state.selectedCase;
+  if (!item) return;
+  const provider = getProviders().find(entry => entry.isDefault && entry.hasSecret && entry.generationModels?.length) || getProviders().find(entry => entry.hasSecret && entry.generationModels?.length);
+  const status = document.getElementById('detail-generation-status');
+  const results = document.getElementById('detail-generation-results');
+  if (!provider) { status.textContent = '请先在模型页面配置支持生图的 Provider 和生图模型。'; return; }
+  const language = document.getElementById('detail-generation-language').value;
+  const prompt = language === 'en' ? item.promptEn : item.promptZh;
+  if (!prompt || prompt.length < 80) { status.textContent = '当前卡片 Prompt 不完整，无法进行生图回测。'; return; }
+  const button = document.getElementById('detail-generate-image');
+  button.disabled = true; status.textContent = `正在使用 ${provider.name} / ${provider.defaultGenerationModel || provider.generationModels[0]} 生成候选图…`; results.innerHTML = '';
+  try {
+    const response = await fetch('/api/ai/generate-image', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ providerId: provider.id, model: provider.defaultGenerationModel || provider.generationModels[0], prompt, negativePrompt: item.negativePrompt || '', count: 1, size: '1536x1024' }) });
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(`${payload.error?.message || '生图失败'}${payload.requestId ? `（请求 ID：${payload.requestId}）` : ''}`);
+    results.innerHTML = (payload.data?.images || []).map((src, index) => `<figure><img src="${escapeHTML(src)}" alt="Generated candidate ${index + 1}"><figcaption>${escapeHTML(language === 'en' ? 'English Prompt' : '中文 Prompt')} · ${escapeHTML(payload.meta?.model || '')}</figcaption></figure>`).join('');
+    status.textContent = '候选图已生成。请与左侧参考图册按风格、构图、色系、材质与光感评分。';
+  } catch (error) { status.textContent = `生图失败：${error.message}`; }
+  finally { button.disabled = false; }
+}
+
 function renderProviders() {
   if (!els.providerList) return;
   const providers = getProviders();
@@ -3063,8 +3111,9 @@ function renderProviders() {
   els.providerList.innerHTML = providers.map(provider => `
     <article class="provider-card ${provider.isDefault ? 'is-default' : ''}">
       <div class="provider-card-top"><div><h4>${escapeHTML(provider.name || provider.type)}</h4><p>${escapeHTML(provider.type)} · ${provider.hasSecret ? (en ? 'API key stored securely' : 'API Key 已安全保存') : (en ? 'API key required' : '等待 API Key')}</p></div>${provider.isDefault ? `<span class="provider-status">${en ? 'Default' : '默认'}</span>` : ''}</div>
-      <div class="provider-capabilities"><span>${provider.imageCapable ? (en ? 'Image analysis' : '图片分析') : (en ? 'Text only' : '仅文本')}</span><span>${(provider.imageModels || []).length} ${en ? 'vision models' : '个图片模型'}</span><span>${(provider.textModels || []).length} ${en ? 'text models' : '个文本模型'}</span></div>
+      <div class="provider-capabilities"><span>${provider.imageCapable ? (en ? 'Image analysis' : '图片分析') : (en ? 'Text only' : '仅文本')}</span><span>${(provider.imageModels || []).length} ${en ? 'vision models' : '个识图模型'}</span><span>${(provider.generationModels || []).length} ${en ? 'generation models' : '个生图模型'}</span><span>${(provider.textModels || []).length} ${en ? 'text models' : '个文本模型'}</span></div>
       <div class="provider-card-actions">
+        <button class="icon-action" type="button" data-provider-test="${escapeHTML(provider.id)}">${en ? 'Test' : '测试连接'}</button>
         <button class="icon-action" type="button" data-provider-edit="${escapeHTML(provider.id)}">${en ? 'Edit' : '编辑'}</button>
         <button class="icon-action" type="button" data-provider-default="${escapeHTML(provider.id)}">${en ? 'Default' : '设为默认'}</button>
         <button class="icon-action" type="button" data-provider-delete="${escapeHTML(provider.id)}">${en ? 'Delete' : '删除'}</button>
@@ -3226,6 +3275,7 @@ function bindEvents() {
   });
   document.getElementById('detail-save').addEventListener('click', () => saveCase(state.selectedCase));
   document.getElementById('detail-like').addEventListener('click', () => toggleLike(state.selectedCase));
+  document.getElementById('detail-generate-image')?.addEventListener('click', generateDetailCandidate);
   document.getElementById('detail-copy-edit').addEventListener('click', () => {
     if (!state.selectedCase) return;
     if (state.selectedCase.source === 'private') {
@@ -3429,10 +3479,13 @@ function bindEvents() {
   });
   els.providerForm.addEventListener('submit', saveProvider);
   document.getElementById('provider-new-btn')?.addEventListener('click', resetProviderForm);
+  document.getElementById('provider-test-btn')?.addEventListener('click', () => testProviderConnection(els.providerForm.dataset.editingProvider || ''));
   els.providerList?.addEventListener('click', event => {
+    const test = event.target.closest('[data-provider-test]');
     const edit = event.target.closest('[data-provider-edit]');
     const remove = event.target.closest('[data-provider-delete]');
     const makeDefault = event.target.closest('[data-provider-default]');
+    if (test) testProviderConnection(test.dataset.providerTest);
     if (edit) editProvider(edit.dataset.providerEdit);
     if (remove) deleteProvider(remove.dataset.providerDelete);
     if (makeDefault) setDefaultProvider(makeDefault.dataset.providerDefault);
