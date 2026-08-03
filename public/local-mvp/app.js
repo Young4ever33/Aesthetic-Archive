@@ -630,7 +630,12 @@ function getTemplates() {
   }
   const builtIns = builtInTemplates();
   const known = new Map(stored.map(item => [item.id, item]));
-  return builtIns.map(item => known.get(item.id) || item).concat(stored.filter(item => !builtIns.some(base => base.id === item.id)));
+  const merged = builtIns.map(item => {
+    const existing = known.get(item.id);
+    return existing && Number(existing.version || 0) >= Number(item.version || 0) ? existing : item;
+  }).concat(stored.filter(item => !builtIns.some(base => base.id === item.id)));
+  if (JSON.stringify(merged) !== JSON.stringify(stored)) saveJSON(STORAGE.templates, merged);
+  return merged;
 }
 
 function getDefaultTemplate() {
