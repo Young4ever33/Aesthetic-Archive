@@ -59,6 +59,94 @@ Arrange references on a Collage Board, add notes and project intent, summarize t
 
 Keep the reasoning behind successful references in a personal archive so the next project starts with accumulated knowledge rather than a blank folder.
 
+## Prompt Evaluation in Practice
+
+Aesthetic Archive treats Prompt quality as an outcome to be tested, not a paragraph to be admired. The A-04 parametric architecture card was used as a controlled bilingual evaluation: the same three-image reference set, separate Chinese and English Prompts, the same text-to-image workflow, and four candidates per language.
+
+### What Changed Across Iterations
+
+The first version described the style, but left too much room for the image model to improvise. The early candidates drifted toward commercial complexes, gold facades, RGB lighting, advertisements, traffic, and unstable skybridges. The revised Prompt moved those constraints into the positive description as well as the Negative Prompt: a concrete civic building, two staggered towers, two complete enclosed skybridges, a continuous parametric rib system, cool gray materials, and a deliberately non-commercial setting.
+
+The result was a visible improvement in both control and visual language:
+
+| Version | Language | Best-candidate score | Observed result |
+| --- | --- | ---: | --- |
+| v3.0 baseline | Chinese | **about 60%** | Weak parametric identity; strong commercial and fantasy drift |
+| v3.0 baseline | English | **79.0%** | Better structure, but color, setting, and skybridge control remained unstable |
+| v3.1 revised | Chinese | **81.2%** | Stronger rib system, curved podium, and architectural identity; commercial lighting still appeared |
+| v3.1 revised | English | **82.8%** | More stable cool-gray palette, non-commercial setting, and two-skybridge composition |
+
+The weighted score is calculated as `style × 30% + composition × 25% + color × 20% + material/light/finish × 25%`. A strict Prompt gate also requires every dimension to reach at least 70%. The Chinese v3.1 result reached the required overall quality and became the stronger parametric-form reference, but the Jimeng Agent workflow still introduced commercial lighting and signage. The English v3.1 result was the more stable constraint-following candidate. This distinction is important: a visually strong image can still reveal a constraint that needs further work.
+
+#### Chinese: baseline → v3.1
+
+| v3.0 baseline · 60.0 | v3.1 best · 81.2 | v3.1 same-setting candidate |
+| --- | --- | --- |
+| ![A-04 Chinese baseline Prompt result](./docs/prompt-v3/validation/A-04/zh-v1-best.webp) | ![A-04 Chinese v3.1 best Prompt result](./docs/prompt-v3/validation/A-04/zh-v31-best.webp) | ![A-04 Chinese v3.1 additional candidate](./docs/prompt-v3/validation/A-04/zh-v31-candidate-01.webp) |
+
+The revised Chinese Prompt recovered the continuous rib system, flowing podium, and stronger parametric massing. Its remaining weakness was Agent-added commercial signage and colored lighting.
+
+#### English: baseline → v3.1
+
+| v3.0 baseline · 79.0 | v3.1 best · 82.8 | v3.1 same-setting candidate |
+| --- | --- | --- |
+| ![A-04 English baseline Prompt result](./docs/prompt-v3/validation/A-04/en-v1-best.webp) | ![A-04 English v3.1 best Prompt result](./docs/prompt-v3/validation/A-04/en-v31-best.webp) | ![A-04 English v3.1 additional candidate](./docs/prompt-v3/validation/A-04/en-v31-candidate-01.webp) |
+
+The revised English Prompt produced more stable cool-gray materials, non-commercial surroundings, and two complete skybridges across multiple candidates.
+
+The images above are raw Prompt-test evidence generated during development and retain platform watermarks. They are included to show the improvement in a real generation loop, not as licensed production artwork.
+
+### Multidimensional Review Rubric
+
+Every bilingual Prompt is reviewed against the same four dimensions:
+
+| Dimension | Weight | What we inspect |
+| --- | ---: | --- |
+| Style language and visual rhythm | 30% | Does the generation preserve the reference's geometry, rhythm, restraint, and visual grammar? |
+| Composition and spatial hierarchy | 25% | Are subject count, scale, foreground/midground/background, camera position, and spatial relationships stable? |
+| Color family and proportions | 20% | Are dominant, supporting, and accent colors preserved in the intended area proportions? |
+| Material, texture, light, and finish | 25% | Do surfaces, joints, roughness, reflections, light direction, atmosphere, and rendering finish remain coherent? |
+
+For a serious comparison, generate four candidates from each language Prompt with the same model, aspect ratio, and adapter settings. Save the raw images, score every candidate, keep the best weighted result, and record the reasons for failure. Static Prompt detail alone is not a generation pass.
+
+### Recommended AI Image Tools
+
+The archive is Provider-neutral. Copy a card's complete Prompt and its language-matched Negative Prompt into the tool that fits the job:
+
+- **Jimeng AI / 即梦 AI:** strong Chinese-language Agent workflow for fast architectural and visual exploration. Useful when you want the tool to help interpret a Chinese brief, search context, and produce several visual directions. Keep the Agent's added interpretation under review.
+- **Midjourney:** effective for visual direction, atmosphere, composition studies, and fast style exploration. Use the English Prompt for more predictable structural wording; use image references only when you intentionally want reference-image influence.
+- **Adobe Firefly:** useful for teams already working in Adobe workflows and for controlled commercial image exploration. Keep the Prompt concrete and use the tool's explicit reference and style controls when available.
+- **Stable Diffusion / ComfyUI:** best when reproducibility, seed control, checkpoints, ControlNet, LoRA, and local or hosted pipelines matter. Use the neutral Prompt as the semantic layer and keep model-specific syntax in a separate adapter layer.
+- **OpenAI image generation and other compatible image APIs:** useful for application-integrated tests. Use the card Prompt as the provider-neutral input and keep size, count, model, and endpoint options outside the Prompt.
+
+Availability, model names, copyright terms, and interface labels change by region and plan. Check the provider's current terms before public or commercial use.
+
+| Goal | Workflow | Reference image | Prompt changes | Generation settings |
+| --- | --- | --- | --- | --- |
+| Controlled Prompt evaluation | Text-to-image | Off | None between candidates | Lock model, aspect ratio, and all available controls; generate four candidates |
+| Reproduce a card's direction | Text-to-image first; add reference only when needed | Optional and explicitly recorded | Preserve subject, camera, palette, material, light, and constraints | Keep a baseline run before tuning reference strength |
+| Adapt to a project brief | Text-to-image or image-guided generation | Optional | Replace the subject/use state first; preserve visual grammar and failure constraints | Change one major variable per iteration and record it |
+
+### Jimeng Example: From Card to Image
+
+1. Open a reviewed card in Public Plaza or My Archive and copy the complete Chinese Prompt. Copy the Chinese Negative Prompt separately; do not merge the two fields.
+2. Decide whether the card should be reproduced or adapted. For reproduction, keep the concrete subject, camera, palette, material, and light unchanged. For adaptation, edit only the subject or project context first, then keep the style grammar and negative constraints stable.
+3. In Jimeng Agent, choose a text-to-image workflow. For a Prompt test, do not add a reference image, keep the same 16:9 canvas, use the same model and settings for all four candidates, and avoid adding generic boosters such as `masterpiece`, `best quality`, `8K`, or `cinematic`.
+4. Paste the positive Prompt into the main Prompt field and paste the language-matched Negative Prompt into the negative field. Keep the Prompt language consistent: Chinese with Chinese negative constraints, English with English negative constraints.
+5. Generate four consecutive candidates. Record the model, date, aspect ratio, settings, filenames, and four-dimensional scores. Do not select the prettiest image only; check whether the structural and color constraints actually held.
+6. Iterate one failure at a time. If towers become equal height, strengthen the measurable height relationship. If advertising appears, add a positive non-commercial setting and a specific negative exclusion. If a bridge disappears, define its count, height, enclosure, endpoints, and visible connection again.
+
+A practical adaptation pattern is:
+
+```text
+Card Prompt = stable visual grammar + concrete test scene
+Project edit = replace only the subject, use state, or setting
+Negative Prompt = preserve structural, material, color, identity, text, and watermark exclusions
+Tool settings = model, aspect ratio, count, seed, reference strength, and adapter controls
+```
+
+This separation keeps a reusable aesthetic card portable across tools while making each tool's settings explicit and reproducible.
+
 ## Product Features
 
 ### Public Plaza

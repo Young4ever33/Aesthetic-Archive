@@ -911,3 +911,29 @@ body[data-density="spacious"] .app-main { padding: 34px 42px 56px; } body[data-d
   .app-main .plaza-hero h1, .app-main .review-intro h2 { font-size: 1.65rem; }
   .app-main .app-sidebar { text-align: left; }
 }
+
+/* Card detail: contained desktop dialog with a complete, uncropped main image. */
+@media (min-width: 981px) {
+  .detail-overlay { padding: 28px; }
+  .detail-panel { width: min(1320px, calc(100vw - 56px)); height: min(860px, calc(100dvh - 56px)); max-width: 1320px; max-height: 860px; grid-template-columns: minmax(470px,.96fr) minmax(0,1.04fr); border-radius: 10px; }
+  .detail-gallery { height: 100%; min-width: 0; padding: 20px 22px 18px; overflow: hidden; }
+  .gallery-main { position: relative; flex: 1 1 auto; width: 100%; min-height: 260px; max-height: 470px; overflow: hidden; background: #f3f3f3; }
+  .gallery-main img { position: absolute !important; inset: 0 !important; display: block !important; width: 100% !important; height: 100% !important; max-width: none !important; max-height: none !important; object-fit: contain !important; object-position: center !important; }
+  .gallery-thumbs { display: flex; flex: 0 0 58px; gap: 6px; min-height: 0; margin-top: 8px; padding-bottom: 3px; overflow-x: auto; overflow-y: hidden; scrollbar-width: thin; }
+  .thumb { flex: 0 0 72px; width: 72px; height: 54px; aspect-ratio: auto; }
+  .thumb img { object-fit: contain; }
+  .gallery-note { flex: 0 0 auto; margin: 9px 0; padding: 10px 12px; }
+  .gallery-note p { margin-top: 4px; font-size: 11px; line-height: 1.45; }
+  .detail-gallery > .button { min-height: 34px; }
+  .detail-social-row { margin-top: 9px; padding-top: 9px; }
+  .detail-content { height: 100%; max-height: none; padding: 28px 34px 40px; }
+}
+@media (max-width: 980px) {
+  .detail-panel { width: min(760px, calc(100vw - 24px)); height: min(94dvh,900px); max-height: 94dvh; overflow-y: auto; }
+  .detail-gallery { height: auto; overflow: visible; }
+  .gallery-main { position: relative; min-height: 0; height: min(52dvh,460px); }
+  .gallery-main img { position: absolute !important; inset: 0 !important; display: block !important; width: 100% !important; height: 100% !important; max-width: none !important; max-height: none !important; object-fit: contain !important; object-position: center !important; }
+  .gallery-thumbs { display: flex; overflow-x: auto; }
+  .thumb { flex: 0 0 72px; width: 72px; height: 54px; aspect-ratio: auto; }
+  .detail-content { height: auto; max-height: none; overflow: visible; }
+}

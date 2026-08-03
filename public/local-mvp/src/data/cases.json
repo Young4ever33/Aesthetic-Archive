@@ -68,22 +68,39 @@
     "crossReferences": [
       "G-01 新粗野主义"
     ],
-    "promptZh": "【主体】\n以用户提供的主体描述为画面主体\n【风格与语境】\n[空间描述]。粗野主义建筑与裸露派室内设计风格。大体量清水混凝土结构，模板印痕清晰可见，明装管道与结构梁柱，悬挑几何形体，重复模块单元。混凝土灰、生铁黑、裸砖红，低饱和度工业色调。强烈侧光营造深重阴影，工业感照明，拒绝任何装饰性覆盖，呈现以材料本身重量感与结构诚实为核心的粗野美学。\n【构图与镜头】\n大体量几何形体，悬挑结构，重复的模块单元，室内保留原始混凝土肌理，明装管道与结构梁柱，工业感照明。\n【材质、光线与色彩】\n清水混凝土肌理特写，模板印痕，锈蚀钢铁，强烈的侧光与阴影，黑白或低饱和度摄影。；混凝土灰 #808080、生铁黑 #4D4D4D、裸砖红 #A0522D、砂浆米 #C8B89A\n【使用约束】\n适用场景：spatial moodboard、project concept、AI image generation",
-    "promptEn": "[SUBJECT]\nUse the user-provided subject description as the visual subject\n[STYLE AND CONTEXT]\n[Space description]. Brutalism architecture and raw interior design style. Large-volume exposed concrete structure with visible formwork impressions, exposed pipes and structural beams, cantilevered geometric forms, repetitive modular units. Concrete grey, raw iron black, bare brick red, low-saturation industrial palette. Strong raking light creating deep shadows, industrial lighting, rejecting all decorative covering, presenting a raw aesthetic centered on material weight and structural honesty.\n[COMPOSITION AND CAMERA]\n大体量几何形体，悬挑结构，重复的模块单元，室内保留原始混凝土肌理，明装管道与结构梁柱，工业感照明。\n[MATERIALS, LIGHT, AND COLOR]\n清水混凝土肌理特写，模板印痕，锈蚀钢铁，强烈的侧光与阴影，黑白或低饱和度摄影。；混凝土灰 #808080、生铁黑 #4D4D4D、裸砖红 #A0522D、砂浆米 #C8B89A\n[CONSTRAINTS]\nUse cases: spatial moodboard, project concept, AI image generation",
-    "negativePrompt": "generic decoration, unrelated objects, invented provenance, inconsistent materials, weak hierarchy, unreadable text, low-resolution, watermark, malformed geometry",
+    "promptZh": "一座由清水混凝土构成的粗野主义城市文化馆入口大厅，包含一座悬挑的方形上层体量、双层通高公共空间、宽阔混凝土楼梯和少量黑钢栏杆。 采用街道层略低机位的24毫米建筑摄影视角，镜头正对入口并稍向右偏；楼梯从左下通向中央入口，悬挑体量压住画面上半部，两名小人物提供尺度，竖线保持垂直。 外露混凝土保留木模板纹、拉杆孔和细小色差，局部裸砖与氧化黑钢只作次要点缀；混凝土灰约占七成，生铁黑约两成，裸砖红和砂浆米合计约一成。 阴天侧上方自然光穿过高窗，在梁柱与楼梯下形成深而有层次的阴影；真实建筑摄影，结构受力清楚，材料粗粝但不过度破败。",
+    "promptEn": "A monumental Brutalist civic cultural hall built from exposed cast-in-place concrete, with one cantilevered rectangular upper volume, a double-height public foyer, a broad concrete stair, and restrained blackened-steel railings. Use a slightly low street-level 24 mm architectural viewpoint, facing the entrance and offset a little to the right. The stair rises from the lower left toward the central doorway, the cantilever occupies the upper half, and two small people establish scale. Keep the horizon level and every vertical line straight. Preserve timber formwork grain, tie holes, subtle tonal variation, and precise construction joints. Concrete gray occupies about seventy percent, iron black twenty percent, with bare brick red and mortar beige limited to small secondary areas. Soft overcast side light enters through high openings and creates deep legible shadows beneath beams and stairs. Photoreal architectural photography with credible load paths, weight, and rough material presence without decay.",
+    "negativePrompt": "装饰主义线脚，光滑白墙，玻璃写字楼，彩色霓虹，金色饰面，大理石豪宅，轻薄悬浮结构，无法受力的悬挑，随机裂缝，严重破败，密集家具，拥挤人群，倾斜竖线，鱼眼，文字，标志，水印",
     "sourceType": "curated-seed-pending-license-confirmation",
     "sourceNote": "Curated seed reference retained for beta evaluation. Confirm ownership or redistribution license before production publication.",
     "reviewStatus": "human-reviewed",
     "updatedAt": "2026-07-29",
-    "promptVersion": 2,
+    "promptVersion": 3,
     "promptSchema": [
-      "subject",
-      "style_and_context",
+      "concrete_subject",
       "composition_and_camera",
-      "materials_light_color",
-      "constraints",
-      "negative_prompt"
-    ]
+      "materials_and_color_proportions",
+      "lighting_and_finish",
+      "language_specific_negative_prompt"
+    ],
+    "promptSchemaId": "aesthetic-archive.prompt-card.v3",
+    "negativePromptZh": "装饰主义线脚，光滑白墙，玻璃写字楼，彩色霓虹，金色饰面，大理石豪宅，轻薄悬浮结构，无法受力的悬挑，随机裂缝，严重破败，密集家具，拥挤人群，倾斜竖线，鱼眼，文字，标志，水印",
+    "negativePromptEn": "decorative moldings, smooth white walls, glass office tower, colorful neon, gold finishes, marble mansion, weightless floating structure, impossible cantilever, random cracks, severe ruin, dense furniture, crowds, leaning verticals, fisheye, text, logos, watermark",
+    "promptEngineering": {
+      "templateVersion": 4,
+      "directlyRunnable": true,
+      "containsPlaceholders": false,
+      "languageIsolation": "pass",
+      "providerNeutral": true,
+      "negativePromptSeparate": true,
+      "maxLength": 4000,
+      "review": {
+        "status": "static-pass-generation-pending",
+        "score": null,
+        "method": "Prompt v3 static contract review; real generation review required.",
+        "reviewedAt": null
+      }
+    }
   },
   {
     "id": "A-02",
@@ -153,22 +170,39 @@
       "G-02 学术档案风",
       "G-08 静奢·无声权贵"
     ],
-    "promptZh": "【主体】\n以用户提供的主体描述为画面主体\n【风格与语境】\n[空间描述]。极简主义建筑与静奢空间设计风格。纯净几何体量，无装饰线脚，隐藏门缝与踢脚线，大面积单一材质表面。纯白、米白、暖灰色调，近黑色作为极少量强调。自然光通过精确开口投射，形成动态光影变化，材质本身的微妙纹理是唯一装饰，呈现以减法为核心的纯粹空间与静奢美学。\n【构图与镜头】\n纯净几何体量，无装饰线脚，隐藏门缝与踢脚线，大面积单一材质，光线通过精确开口形成动态阴影。\n【材质、光线与色彩】\n自然光与阴影的动态变化，材质本身的微妙纹理，极简构图，大量留白，无人或极少人物。；纯白 #FFFFFF、米白 #F5F5F0、暖灰 #E0DDD8、近黑 #1A1A1A\n【使用约束】\n适用场景：spatial moodboard、project concept、AI image generation",
-    "promptEn": "[SUBJECT]\nUse the user-provided subject description as the visual subject\n[STYLE AND CONTEXT]\n[Space description]. Minimalist architecture and quiet luxury space design style. Clean geometric volumes, no decorative moldings, concealed door gaps and baseboards, large areas of single material surfaces. Pure white, off-white, warm grey palette with near-black as minimal accent. Natural light projected through precise openings creating dynamic shadow play, subtle material texture as the only decoration, presenting a pure spatial aesthetic of reduction and quiet luxury.\n[COMPOSITION AND CAMERA]\n纯净几何体量，无装饰线脚，隐藏门缝与踢脚线，大面积单一材质，光线通过精确开口形成动态阴影。\n[MATERIALS, LIGHT, AND COLOR]\n自然光与阴影的动态变化，材质本身的微妙纹理，极简构图，大量留白，无人或极少人物。；纯白 #FFFFFF、米白 #F5F5F0、暖灰 #E0DDD8、近黑 #1A1A1A\n[CONSTRAINTS]\nUse cases: spatial moodboard, project concept, AI image generation",
-    "negativePrompt": "generic decoration, unrelated objects, invented provenance, inconsistent materials, weak hierarchy, unreadable text, low-resolution, watermark, malformed geometry",
+    "promptZh": "一座面向安静庭院的极简住宅起居空间，由一面米白石灰墙、整块浅灰石材地面、隐藏式木门、低矮米色沙发和一张黑色细腿边几组成。 采用人眼高度的35毫米平视镜头，画面左侧保留大面积空墙，右侧落地开口框住庭院与一株小树；家具集中在下方三分之一，空间轴线清晰，只出现一名远处人物。 墙面为细腻哑光石灰抹灰，地面有克制石纹，门缝、踢脚线和收口全部隐藏；米白与暖灰约占九成，近黑只用于边几和极细窗框。 清晨漫射光从右侧进入，一条边缘清晰但不过曝的日光带落在墙面和地面；真实室内摄影，柔和动态范围，安静、克制、无装饰堆叠。",
+    "promptEn": "A quiet minimalist residential living room facing an enclosed courtyard, composed of one off-white lime-plaster wall, a continuous pale-gray stone floor, a concealed timber door, a low beige sofa, and one slender black side table. Use an eye-level 35 mm frontal camera. Preserve a large empty wall on the left while a floor-to-ceiling opening on the right frames the courtyard and one small tree. Keep furniture within the lower third, maintain a clear spatial axis, and include only one distant person. Use finely matte lime plaster, restrained natural stone grain, concealed skirting and flush junctions. Off-white and warm gray occupy about ninety percent; near-black appears only in the side table and thin window frame. Soft morning daylight enters from the right and casts one controlled band of light across wall and floor without clipping highlights. Photoreal interior photography, gentle dynamic range, precise detailing, quiet luxury achieved through proportion and material rather than decoration.",
+    "negativePrompt": "豪华装饰，金色线条，水晶吊灯，密集摆件，厚重窗帘，过多家具，高饱和色，纯黑洞口，塑料墙面，镜面大理石，过度曝光，强烈HDR，鱼眼，倾斜墙线，文字，标志，水印",
     "sourceType": "curated-seed-pending-license-confirmation",
     "sourceNote": "Curated seed reference retained for beta evaluation. Confirm ownership or redistribution license before production publication.",
     "reviewStatus": "human-reviewed",
     "updatedAt": "2026-07-29",
-    "promptVersion": 2,
+    "promptVersion": 3,
     "promptSchema": [
-      "subject",
-      "style_and_context",
+      "concrete_subject",
       "composition_and_camera",
-      "materials_light_color",
-      "constraints",
-      "negative_prompt"
-    ]
+      "materials_and_color_proportions",
+      "lighting_and_finish",
+      "language_specific_negative_prompt"
+    ],
+    "promptSchemaId": "aesthetic-archive.prompt-card.v3",
+    "negativePromptZh": "豪华装饰，金色线条，水晶吊灯，密集摆件，厚重窗帘，过多家具，高饱和色，纯黑洞口，塑料墙面，镜面大理石，过度曝光，强烈HDR，鱼眼，倾斜墙线，文字，标志，水印",
+    "negativePromptEn": "ornate luxury, gold trim, crystal chandelier, dense ornaments, heavy curtains, excessive furniture, saturated colors, black voids, plastic walls, mirrored marble, blown highlights, aggressive HDR, fisheye, leaning walls, text, logos, watermark",
+    "promptEngineering": {
+      "templateVersion": 4,
+      "directlyRunnable": true,
+      "containsPlaceholders": false,
+      "languageIsolation": "pass",
+      "providerNeutral": true,
+      "negativePromptSeparate": true,
+      "maxLength": 4000,
+      "review": {
+        "status": "static-pass-generation-pending",
+        "score": null,
+        "method": "Prompt v3 static contract review; real generation review required.",
+        "reviewedAt": null
+      }
+    }
   },
   {
     "id": "A-03",
@@ -243,22 +277,39 @@
       "G-07 侘寂·有机自然主义",
       "A-08 生物亲和"
     ],
-    "promptZh": "【主体】\n以用户提供的主体描述为画面主体\n【风格与语境】\n[空间描述]。侘寂室内与有机材料主义设计风格。非对称布局，家具摆放带有偶然性，大面积留白，天然材质的不均匀纹理为视觉主角。手工泥墙、风化木材、手作陶器、亚麻布料、苔藓。陶土色、枯木棕、宣纸白，低饱和度哑光质地。自然漫射光，刻意保留划痕与时间痕迹，呈现接受无常与不完美的东方有机材料美学。\n【构图与镜头】\n非对称布局，家具摆放带有偶然性，留白大而不规则，天然材质的不均匀纹理是视觉主角。\n【材质、光线与色彩】\n手工陶器、亚麻布料、风化木材、苔藓、宣纸等实物摄影，刻意保留划痕与折痕，自然漫射光。；陶土色 #C4956A、枯木棕 #8B7355、宣纸白 #E8E0D0、苔藓绿 #6B7C5E\n【使用约束】\n适用场景：spatial moodboard、project concept、AI image generation",
-    "promptEn": "[SUBJECT]\nUse the user-provided subject description as the visual subject\n[STYLE AND CONTEXT]\n[Space description]. Wabi-Sabi interior and organic materiality design style. Asymmetrical layout with casually placed furniture, large irregular negative space, uneven natural material textures as visual protagonist. Handmade plaster walls, weathered wood, handcrafted pottery, linen fabrics, moss. Terracotta, driftwood brown, rice paper white, low-saturation matte textures. Natural diffused light, intentionally preserved scratches and traces of time, presenting the Eastern organic material aesthetic of accepting impermanence and imperfection.\n[COMPOSITION AND CAMERA]\n非对称布局，家具摆放带有偶然性，留白大而不规则，天然材质的不均匀纹理是视觉主角。\n[MATERIALS, LIGHT, AND COLOR]\n手工陶器、亚麻布料、风化木材、苔藓、宣纸等实物摄影，刻意保留划痕与折痕，自然漫射光。；陶土色 #C4956A、枯木棕 #8B7355、宣纸白 #E8E0D0、苔藓绿 #6B7C5E\n[CONSTRAINTS]\nUse cases: spatial moodboard, project concept, AI image generation",
-    "negativePrompt": "generic decoration, unrelated objects, invented provenance, inconsistent materials, weak hierarchy, unreadable text, low-resolution, watermark, malformed geometry",
+    "promptZh": "一间安静的侘寂茶室兼起居室，包含不规则手工泥墙、风化木矮桌、两只手作陶器、亚麻坐垫和墙角一小片苔藓庭院。 采用坐姿高度的40毫米镜头，从门口斜向室内；矮桌位于右下三分点，左侧保留不规则大留白，墙面浅龛与苔藓庭院形成前后层次，不出现人物。 泥墙保留抹痕和细小裂纹，木材边缘自然磨损，陶器釉面不均，亚麻可见纤维；宣纸白约五成、枯木棕与陶土色约四成、苔藓绿不超过一成，全部低饱和哑光。 柔和阴天自然光从左侧纸门漫射进入，阴影松软，空气中只有轻微尘埃；真实室内摄影，呈现时间痕迹与手工温度，而不是脏乱或废墟。",
+    "promptEn": "A quiet wabi-sabi tea and living room with irregular hand-troweled earth plaster, a weathered low timber table, two handmade ceramic vessels, linen floor cushions, and a small moss courtyard recessed into one corner. Photograph from the doorway at seated eye level with a 40 mm lens. Place the low table near the lower-right third, preserve broad irregular negative space on the left, and use a shallow wall niche and moss court to create depth. No people. Retain trowel marks and hairline age on the plaster, naturally worn timber edges, uneven ceramic glaze, and visible linen fibers. Rice-paper white occupies about half, weathered brown and terracotta about forty percent, and moss green no more than ten percent; every surface is muted and matte. Soft overcast daylight diffuses through a paper screen from the left, producing gentle shadows and minimal suspended dust. Photoreal interior photography that expresses age and handcraft without looking dirty, abandoned, or theatrical.",
+    "negativePrompt": "奢华酒店，光滑乳胶漆，亮面大理石，塑料家具，整齐对称套装，密集装饰，鲜艳色彩，大面积绿植墙，严重破损，垃圾，废墟，强聚光灯，橙色滤镜，文字，标志，水印",
     "sourceType": "curated-seed-pending-license-confirmation",
     "sourceNote": "Curated seed reference retained for beta evaluation. Confirm ownership or redistribution license before production publication.",
     "reviewStatus": "human-reviewed",
     "updatedAt": "2026-07-29",
-    "promptVersion": 2,
+    "promptVersion": 3,
     "promptSchema": [
-      "subject",
-      "style_and_context",
+      "concrete_subject",
       "composition_and_camera",
-      "materials_light_color",
-      "constraints",
-      "negative_prompt"
-    ]
+      "materials_and_color_proportions",
+      "lighting_and_finish",
+      "language_specific_negative_prompt"
+    ],
+    "promptSchemaId": "aesthetic-archive.prompt-card.v3",
+    "negativePromptZh": "奢华酒店，光滑乳胶漆，亮面大理石，塑料家具，整齐对称套装，密集装饰，鲜艳色彩，大面积绿植墙，严重破损，垃圾，废墟，强聚光灯，橙色滤镜，文字，标志，水印",
+    "negativePromptEn": "luxury hotel, smooth latex paint, glossy marble, plastic furniture, symmetrical furniture set, dense decoration, vivid colors, large plant wall, severe damage, trash, ruins, hard spotlight, orange filter, text, logos, watermark",
+    "promptEngineering": {
+      "templateVersion": 4,
+      "directlyRunnable": true,
+      "containsPlaceholders": false,
+      "languageIsolation": "pass",
+      "providerNeutral": true,
+      "negativePromptSeparate": true,
+      "maxLength": 4000,
+      "review": {
+        "status": "static-pass-generation-pending",
+        "score": null,
+        "method": "Prompt v3 static contract review; real generation review required.",
+        "reviewedAt": null
+      }
+    }
   },
   {
     "id": "A-04",
@@ -322,22 +373,39 @@
     "crossReferences": [
       "G-10 生成艺术·数据诗学"
     ],
-    "promptZh": "【主体】\n以用户提供的主体描述为画面主体\n【风格与语境】\n[空间描述]。参数化建筑与算法生成空间设计风格。流动的非线性曲面，连续变化的结构网格，室内外空间无缝过渡。铝白、钛灰、碳黑色调，数据蓝作为强调。光线在曲面上形成动态反射与阴影，结构网格的韵律感是核心视觉语言，呈现以算法驱动形态生成的数学诗意。\n【构图与镜头】\n流动的非线性曲面，连续变化的结构网格，室内外空间无缝过渡，光线在曲面上形成动态反射。\n【材质、光线与色彩】\n复杂曲面的光影变化，结构网格的韵律感，建筑模型渲染，数字线框图与实体照片对比。；铝白 #F0F0F0、钛灰 #C8C8C8、碳黑 #1A1A1A、数据蓝 #4A90D9\n【使用约束】\n适用场景：spatial moodboard、project concept、AI image generation",
-    "promptEn": "[SUBJECT]\nUse the user-provided subject description as the visual subject\n[STYLE AND CONTEXT]\n[Space description]. Parametric architecture and algorithmic space design style. Flowing non-linear surfaces, continuously varying structural mesh, seamless transition between interior and exterior spaces. Aluminum white, titanium grey, carbon black palette with data blue as accent. Light forming dynamic reflections and shadows on curved surfaces, the rhythm of structural mesh as core visual language, presenting mathematical poetry driven by algorithmic form generation.\n[COMPOSITION AND CAMERA]\n流动的非线性曲面，连续变化的结构网格，室内外空间无缝过渡，光线在曲面上形成动态反射。\n[MATERIALS, LIGHT, AND COLOR]\n复杂曲面的光影变化，结构网格的韵律感，建筑模型渲染，数字线框图与实体照片对比。；铝白 #F0F0F0、钛灰 #C8C8C8、碳黑 #1A1A1A、数据蓝 #4A90D9\n[CONSTRAINTS]\nUse cases: spatial moodboard, project concept, AI image generation",
-    "negativePrompt": "generic decoration, unrelated objects, invented provenance, inconsistent materials, weak hierarchy, unreadable text, low-resolution, watermark, malformed geometry",
+    "promptZh": "一座安静克制的滨水市民公共文化建筑，不是购物中心、酒店、写字楼或娱乐地标；建筑由两座高度明显错落的流线型塔楼、连续上升的低层公共裙房，以及两条位于不同高度的封闭玻璃空中连桥组成，右塔比左塔高约百分之二十。 采用街道层略偏左的远距离24毫米建筑摄影机位，地平线水平、竖线垂直；弧形裙房占画面下方三分之一，双塔位于中央和右侧，两条连桥完整可见，前景为安静滨水步道与平静水面，最多三名小人物和五株纤细乔木。 密集纤细的竖向金属肋条从裙房连续上升至塔身，沿圆润曲面有秩序地渐变；表皮仅使用哑光银灰、钛灰、少量炭黑金属和退后的蓝灰玻璃，冷色约占九成，只允许玻璃后少量暖琥珀室内光。 阴天柔和漫射光，金属拉丝细腻，玻璃反射干净受控，节点和桥体承重关系真实可建造；画面庄重、流动、安静，具有清晰参数化肋骨节奏但不是幻想城市或商业效果图。",
+    "promptEn": "A quiet waterfront civic cultural institution, not a shopping mall, hotel, office complex, or entertainment landmark. It consists of two staggered fluid towers, a continuously rising low public podium, and two enclosed glass skybridges at clearly different heights; the right tower is visibly about twenty percent taller than the left. Photograph it from a distant street-level position slightly left of center with a restrained 24 mm architectural lens. Keep the horizon level and verticals straight. The curved podium fills the lower third, both towers occupy the center and right, and both complete skybridges remain visible. Use a calm waterfront promenade and still water in front, with no more than three tiny people and five slender trees. Dense slender vertical metal ribs rise continuously from the podium into both towers and vary gradually along rounded surfaces. Limit the envelope to matte silver gray, titanium gray, small amounts of charcoal metal, and recessed blue-gray glazing. Cool colors occupy about ninety percent, with only sparse warm amber interior light behind glass. Use soft overcast diffuse light, subtle brushed metal, controlled clean reflections, precise joints, and structurally credible bridge connections. The image is monumental, fluid, quiet, and photoreal, with a legible parametric rib rhythm rather than a fantasy city or commercial visualization.",
+    "negativePrompt": "购物中心，商业综合体，酒店，写字楼，广告牌，LED屏，店铺招牌，金色幕墙，黄铜，彩虹灯光，RGB灯带，霓虹，密集人群，大量车辆，公交车，等高双塔，标准圆柱办公楼，只有一条连桥，断裂或悬浮连桥，随机波浪，无法建造结构，鱼眼，倾斜竖线，文字，标志，水印",
     "sourceType": "curated-seed-pending-license-confirmation",
     "sourceNote": "Curated seed reference retained for beta evaluation. Confirm ownership or redistribution license before production publication.",
     "reviewStatus": "human-reviewed",
     "updatedAt": "2026-07-29",
-    "promptVersion": 2,
+    "promptVersion": 3,
     "promptSchema": [
-      "subject",
-      "style_and_context",
+      "concrete_subject",
       "composition_and_camera",
-      "materials_light_color",
-      "constraints",
-      "negative_prompt"
-    ]
+      "materials_and_color_proportions",
+      "lighting_and_finish",
+      "language_specific_negative_prompt"
+    ],
+    "promptSchemaId": "aesthetic-archive.prompt-card.v3",
+    "negativePromptZh": "购物中心，商业综合体，酒店，写字楼，广告牌，LED屏，店铺招牌，金色幕墙，黄铜，彩虹灯光，RGB灯带，霓虹，密集人群，大量车辆，公交车，等高双塔，标准圆柱办公楼，只有一条连桥，断裂或悬浮连桥，随机波浪，无法建造结构，鱼眼，倾斜竖线，文字，标志，水印",
+    "negativePromptEn": "shopping mall, retail complex, hotel, office complex, billboards, LED screens, shop signs, gold curtain wall, brass, rainbow lighting, RGB strips, neon, dense crowds, heavy traffic, buses, equal-height towers, generic cylindrical office towers, only one skybridge, broken or floating skybridges, arbitrary waves, unbuildable structure, fisheye, leaning verticals, text, logos, watermark",
+    "promptEngineering": {
+      "templateVersion": 4,
+      "directlyRunnable": true,
+      "containsPlaceholders": false,
+      "languageIsolation": "pass",
+      "providerNeutral": true,
+      "negativePromptSeparate": true,
+      "maxLength": 4000,
+      "review": {
+        "status": "passed",
+        "score": 82,
+        "method": "User-accepted bilingual Jimeng Agent generation review, four candidates per language.",
+        "reviewedAt": "2026-08-03"
+      }
+    }
   },
   {
     "id": "A-06",
@@ -409,22 +477,39 @@
     "crossReferences": [
       "G-09 新装饰艺术·感官极繁"
     ],
-    "promptZh": "【主体】\n以用户提供的主体描述为画面主体\n【风格与语境】\n[空间描述]。新装饰艺术室内与奢华几何设计风格。强烈中轴对称，放射状或扇形几何铺装，黄铜线条分割墙面，密集装饰性边框，天花板精雕细刻。哑金、深祖母绿、深黑、香槟色，金色为绝对主角。几何镶嵌图案，大理石纹理，天鹅绒质感，戏剧性照明，呈现以几何秩序驾驭繁复装饰的奢华仪式感。\n【构图与镜头】\n强烈中轴对称，放射状或扇形几何铺装，密集装饰性边框，黄铜线条分割墙面，天花板精雕细刻。\n【材质、光线与色彩】\n几何镶嵌图案，放射状线条，大理石纹理，镀金边框，天鹅绒质感特写，戏剧性照明。；深酒红 #480808、琥珀金 #D88818、焦糖棕 #783818、黑红釉 #180808\n【使用约束】\n适用场景：spatial moodboard、project concept、AI image generation",
-    "promptEn": "[SUBJECT]\nUse the user-provided subject description as the visual subject\n[STYLE AND CONTEXT]\n[Space description]. Neo Art Deco interior and opulent geometry design style. Strong central axis symmetry, radial or fan-shaped geometric flooring, brass lines dividing walls, dense decorative borders, elaborately detailed ceilings. Matte gold, deep emerald green, deep black, champagne as absolute protagonist. Geometric mosaic patterns, marble textures, velvet textures, dramatic lighting, presenting luxury ceremonial quality of geometric order governing ornate decoration.\n[COMPOSITION AND CAMERA]\n强烈中轴对称，放射状或扇形几何铺装，密集装饰性边框，黄铜线条分割墙面，天花板精雕细刻。\n[MATERIALS, LIGHT, AND COLOR]\n几何镶嵌图案，放射状线条，大理石纹理，镀金边框，天鹅绒质感特写，戏剧性照明。；深酒红 #480808、琥珀金 #D88818、焦糖棕 #783818、黑红釉 #180808\n[CONSTRAINTS]\nUse cases: spatial moodboard, project concept, AI image generation",
-    "negativePrompt": "generic decoration, unrelated objects, invented provenance, inconsistent materials, weak hierarchy, unreadable text, low-resolution, watermark, malformed geometry",
+    "promptZh": "一间新装饰艺术风格的精品酒店酒廊，中央是一组深酒红天鹅绒弧形沙发，后方为扇形黄铜屏风、黑红大理石壁炉和层叠几何天花。 采用人眼高度的28毫米正面镜头，严格中轴对称；沙发与圆形地毯位于中央，双侧壁灯和柱列镜像排列，前景留出完整通道，不出现人物。 深酒红天鹅绒、焦糖棕木饰面、黑红釉面石材为主体，哑光黄铜只用于细线分格和节点，金色面积不超过两成；材质接缝精确，几何图案有秩序而不过密。 暖色壁灯与隐藏顶光形成低照度层次，黄铜有柔和反射，暗部保留细节；真实室内摄影，奢华、仪式化但不俗艳。",
+    "promptEn": "A neo-Art-Deco boutique hotel lounge centered on a curved deep-burgundy velvet sofa, backed by a fan-shaped brass screen, a black-red marble fireplace, and a layered geometric ceiling. Use an eye-level 28 mm frontal camera with strict axial symmetry. Center the sofa and circular rug, mirror the wall sconces and columns on both sides, preserve a complete foreground aisle, and include no people. Deep burgundy velvet, caramel-brown timber, and black-red glazed stone dominate. Matte brass is restricted to fine divisions and junctions and covers less than twenty percent of the image. Keep seams precise and geometric ornament ordered rather than dense. Warm sconces and concealed ceiling light create a low-key layered exposure; brass reflections remain soft and shadow detail is visible. Photoreal interior photography, ceremonial and opulent without becoming gaudy.",
+    "negativePrompt": "洛可可卷草，巴洛克宫殿，满墙金箔，亮黄色金属，赌场，夜总会，霓虹灯，紫色LED，过量水晶，杂乱花纹，不对称家具，塑料天鹅绒，过曝高光，密集人群，文字，标志，水印",
     "sourceType": "curated-seed-pending-license-confirmation",
     "sourceNote": "Curated seed reference retained for beta evaluation. Confirm ownership or redistribution license before production publication.",
     "reviewStatus": "human-reviewed",
     "updatedAt": "2026-07-29",
-    "promptVersion": 2,
+    "promptVersion": 3,
     "promptSchema": [
-      "subject",
-      "style_and_context",
+      "concrete_subject",
       "composition_and_camera",
-      "materials_light_color",
-      "constraints",
-      "negative_prompt"
-    ]
+      "materials_and_color_proportions",
+      "lighting_and_finish",
+      "language_specific_negative_prompt"
+    ],
+    "promptSchemaId": "aesthetic-archive.prompt-card.v3",
+    "negativePromptZh": "洛可可卷草，巴洛克宫殿，满墙金箔，亮黄色金属，赌场，夜总会，霓虹灯，紫色LED，过量水晶，杂乱花纹，不对称家具，塑料天鹅绒，过曝高光，密集人群，文字，标志，水印",
+    "negativePromptEn": "rococo scrollwork, baroque palace, wall-to-wall gold leaf, bright yellow metal, casino, nightclub, neon, purple LEDs, excessive crystal, chaotic patterns, asymmetric furniture, plastic velvet, clipped highlights, crowds, text, logos, watermark",
+    "promptEngineering": {
+      "templateVersion": 4,
+      "directlyRunnable": true,
+      "containsPlaceholders": false,
+      "languageIsolation": "pass",
+      "providerNeutral": true,
+      "negativePromptSeparate": true,
+      "maxLength": 4000,
+      "review": {
+        "status": "static-pass-generation-pending",
+        "score": null,
+        "method": "Prompt v3 static contract review; real generation review required.",
+        "reviewedAt": null
+      }
+    }
   },
   {
     "id": "A-07",
@@ -490,22 +575,39 @@
     "crossReferences": [
       "G-06 暗黑电影·幽玄美学"
     ],
-    "promptZh": "【主体】\n以用户提供的主体描述为画面主体\n【风格与语境】\n[空间描述]。暗黑浪漫与新哥特室内设计风格。深色调墙面（墨绿、深酒红、炭黑），拱形结构，高书架直达天花，古典油画与标本陈列，天鹅绒窗帘。深墨绿、暗酒红、煤炭黑、古铜金，整体如烛光下的图书馆，低亮度高饱和宝石色点缀。烛台与烛光，古铜色金属吊灯，暖色低照度，大量阴影区域营造神秘感，呈现古典文学崇拜与腐朽之美的沉浸氛围。\n【构图与镜头】\n深色调墙面（墨绿、深酒红、炭黑），拱形结构，高书架直达天花，古典油画与标本陈列，天鹅绒窗帘。\n【材质、光线与色彩】\n烛台与烛光，古铜色金属吊灯，暖色低照度，强烈局部重点光，大量阴影区域。古典油画、标本展示柜、皮革装帧书籍。；玻璃灰 #585858、雾银灰 #989898、曜石黑 #181818、暖灯米 #C0B4A4\n【使用约束】\n适用场景：spatial moodboard、project concept、AI image generation",
-    "promptEn": "[SUBJECT]\nUse the user-provided subject description as the visual subject\n[STYLE AND CONTEXT]\n[Space description]. Dark Romantic and Neo-Gothic interior design style. Dark-toned walls (dark green, deep crimson, charcoal black), arched structures, tall bookshelves reaching the ceiling, classical oil paintings and specimen displays, velvet drapes. Deep dark green, dark crimson, charcoal black, antique bronze gold, overall resembling a candlelit library, accented with low-light high-saturation jewel tones. Candelabras and candlelight, antique bronze metal pendant lights, warm low-intensity lighting, large areas of shadow creating mystery, presenting an immersive atmosphere of classical literary worship and the beauty of decay.\n[COMPOSITION AND CAMERA]\n深色调墙面（墨绿、深酒红、炭黑），拱形结构，高书架直达天花，古典油画与标本陈列，天鹅绒窗帘。\n[MATERIALS, LIGHT, AND COLOR]\n烛台与烛光，古铜色金属吊灯，暖色低照度，强烈局部重点光，大量阴影区域。古典油画、标本展示柜、皮革装帧书籍。；玻璃灰 #585858、雾银灰 #989898、曜石黑 #181818、暖灯米 #C0B4A4\n[CONSTRAINTS]\nUse cases: spatial moodboard, project concept, AI image generation",
-    "negativePrompt": "generic decoration, unrelated objects, invented provenance, inconsistent materials, weak hierarchy, unreadable text, low-resolution, watermark, malformed geometry",
+    "promptZh": "一间挑高两层的新哥特私人图书室，深墨绿墙面上嵌入拱形胡桃木书架，中央放置一张旧皮革阅读桌，后方有古铜吊灯、深酒红天鹅绒帘和两幅无可辨识人物的古典油画。 采用站立人眼高度的32毫米镜头，从入口沿中央走道望向尽端拱窗；书架向上形成强烈竖向尺度，阅读桌处于下方中央，只出现一名背对镜头的读者。 胡桃木、旧皮革、哑光墨绿墙面、古铜金属和深酒红织物形成低亮度宝石色，黑色阴影约占四成但保留纹理，不出现鲜艳现代色。 烛台与古铜吊灯提供暖色局部光，拱窗带来微弱冷色轮廓光；真实室内摄影，神秘、文学性、沉静，不是恐怖片布景。",
+    "promptEn": "A double-height neo-Gothic private library with arched walnut bookcases set into matte dark-green walls, an aged leather reading table at the center, an antique-bronze chandelier, deep burgundy velvet drapes, and two classical paintings without identifiable figures. Use a standing eye-level 32 mm lens from the entrance, looking along a central aisle toward an arched end window. Let the bookcases create strong vertical scale, keep the reading table in the lower center, and include one reader seen from behind. Combine walnut, worn leather, matte dark-green plaster, antique bronze, and deep burgundy textile in a low-luminance jewel palette. Black shadow may occupy about forty percent but must preserve surface detail; exclude vivid contemporary color. Candles and the bronze chandelier provide localized warm practical light while the arched window adds a faint cool rim. Photoreal interior photography, mysterious, literary, and contemplative rather than horror scenery.",
+    "negativePrompt": "恐怖片，血迹，骷髅，怪物，万圣节装饰，明亮现代办公室，白色极简墙，彩色霓虹，紫色LED，过量烟雾，全黑无细节，歪斜书架，重复书本，畸形人物，文字，标志，水印",
     "sourceType": "curated-seed-pending-license-confirmation",
     "sourceNote": "Curated seed reference retained for beta evaluation. Confirm ownership or redistribution license before production publication.",
     "reviewStatus": "human-reviewed",
     "updatedAt": "2026-07-29",
-    "promptVersion": 2,
+    "promptVersion": 3,
     "promptSchema": [
-      "subject",
-      "style_and_context",
+      "concrete_subject",
       "composition_and_camera",
-      "materials_light_color",
-      "constraints",
-      "negative_prompt"
-    ]
+      "materials_and_color_proportions",
+      "lighting_and_finish",
+      "language_specific_negative_prompt"
+    ],
+    "promptSchemaId": "aesthetic-archive.prompt-card.v3",
+    "negativePromptZh": "恐怖片，血迹，骷髅，怪物，万圣节装饰，明亮现代办公室，白色极简墙，彩色霓虹，紫色LED，过量烟雾，全黑无细节，歪斜书架，重复书本，畸形人物，文字，标志，水印",
+    "negativePromptEn": "horror film, blood, skulls, monsters, Halloween props, bright modern office, white minimalist walls, colorful neon, purple LEDs, excessive fog, crushed black detail, leaning shelves, duplicated books, malformed people, text, logos, watermark",
+    "promptEngineering": {
+      "templateVersion": 4,
+      "directlyRunnable": true,
+      "containsPlaceholders": false,
+      "languageIsolation": "pass",
+      "providerNeutral": true,
+      "negativePromptSeparate": true,
+      "maxLength": 4000,
+      "review": {
+        "status": "static-pass-generation-pending",
+        "score": null,
+        "method": "Prompt v3 static contract review; real generation review required.",
+        "reviewedAt": null
+      }
+    }
   },
   {
     "id": "A-08",
@@ -580,22 +682,39 @@
       "G-07 侘寂·有机自然主义",
       "G-11 手工温情"
     ],
-    "promptZh": "【主体】\n以用户提供的主体描述为画面主体\n【风格与语境】\n[空间描述]。生物亲和设计与自然融合室内风格。活体植物墙，室内庭院，大面积玻璃引入自然光，天窗，水景装置。叶绿色、土壤棕、石灰白、流水蓝，色彩参照自然生态系统比例。天然石材、竹材、苔藓、活体植物，模糊室内外边界。动态照明系统模拟昼夜节律，呈现将自然系统引入建筑内部的健康空间美学。\n【构图与镜头】\n活体植物墙，室内庭院，自然采光系统，水景，天然石材与木材，模糊室内外边界，引入自然的不规则形态。\n【材质、光线与色彩】\n模拟自然光的动态照明系统，大面积玻璃引入自然光，天窗，光线随时间变化，模拟昼夜节律。；炭化黑 #181818、混凝土灰 #686868、鲜叶绿 #2E6F22、苔藓绿 #5A6B35\n【使用约束】\n适用场景：spatial moodboard、project concept、AI image generation",
-    "promptEn": "[SUBJECT]\nUse the user-provided subject description as the visual subject\n[STYLE AND CONTEXT]\n[Space description]. Biophilic design and Nature Integration interior style. Living plant walls, indoor courtyard, large glass areas introducing natural light, skylights, water feature installations. Leaf green, soil brown, limestone white, flowing water blue referencing natural ecosystem color proportions. Natural stone, bamboo, moss, living plants blurring interior-exterior boundary. Dynamic lighting system simulating circadian rhythms, presenting a healthy spatial aesthetic that brings natural systems into architecture.\n[COMPOSITION AND CAMERA]\n活体植物墙，室内庭院，自然采光系统，水景，天然石材与木材，模糊室内外边界，引入自然的不规则形态。\n[MATERIALS, LIGHT, AND COLOR]\n模拟自然光的动态照明系统，大面积玻璃引入自然光，天窗，光线随时间变化，模拟昼夜节律。；炭化黑 #181818、混凝土灰 #686868、鲜叶绿 #2E6F22、苔藓绿 #5A6B35\n[CONSTRAINTS]\nUse cases: spatial moodboard, project concept, AI image generation",
-    "negativePrompt": "generic decoration, unrelated objects, invented provenance, inconsistent materials, weak hierarchy, unreadable text, low-resolution, watermark, malformed geometry",
+    "promptZh": "一座三层高的生物亲和办公中庭，中央生长一株完整乔木，环形步道围绕浅水池展开，墙面分布真实植物群落，竹木格栅与灰色天然石构成主要建筑界面。 采用二层步道高度的24毫米广角，从左前方俯视中庭；乔木位于中央偏右，水池占下方三分之一，环廊形成清晰动线，玻璃天窗完整可见，人物不超过五名。 活体植物必须有不同叶形和自然密度，石材粗糙、竹木哑光、水面反射克制；炭黑与混凝土灰约五成，植物绿约四成，水与天空蓝不超过一成。 柔和日光从天窗垂直漫射，叶片投下细碎阴影，室内没有彩色装饰灯；真实建筑摄影，通风、湿度和维护逻辑可信，室内外边界自然。",
+    "promptEn": "A three-story biophilic office atrium organized around one mature indoor tree, a shallow reflecting pool, circular walkways, planted wall communities, matte bamboo screens, and rough gray natural stone. Use a 24 mm wide architectural view from the second-level walkway, looking slightly downward from the front-left. Place the tree just right of center, let water occupy the lower third, show the circulation loop clearly, retain the full glass skylight, and include no more than five people. Living plants must show varied leaf shapes and natural density. Keep stone tactile, bamboo matte, and water reflections restrained. Charcoal and concrete gray occupy about half, plant greens about forty percent, and water or sky blue no more than ten percent. Soft daylight diffuses vertically through the skylight and creates fine leaf shadows; no colored decorative lighting. Photoreal architectural photography with credible planting, drainage, humidity, maintenance, and a natural indoor-outdoor transition.",
+    "negativePrompt": "人造塑料植物，热带主题乐园，植物塞满全部空间，荧光绿，彩色灯带，瀑布奇观，悬浮花园，无排水水池，潮湿发霉，办公家具杂乱，密集人群，鱼眼，倾斜竖线，文字，标志，水印",
     "sourceType": "curated-seed-pending-license-confirmation",
     "sourceNote": "Curated seed reference retained for beta evaluation. Confirm ownership or redistribution license before production publication.",
     "reviewStatus": "human-reviewed",
     "updatedAt": "2026-07-29",
-    "promptVersion": 2,
+    "promptVersion": 3,
     "promptSchema": [
-      "subject",
-      "style_and_context",
+      "concrete_subject",
       "composition_and_camera",
-      "materials_light_color",
-      "constraints",
-      "negative_prompt"
-    ]
+      "materials_and_color_proportions",
+      "lighting_and_finish",
+      "language_specific_negative_prompt"
+    ],
+    "promptSchemaId": "aesthetic-archive.prompt-card.v3",
+    "negativePromptZh": "人造塑料植物，热带主题乐园，植物塞满全部空间，荧光绿，彩色灯带，瀑布奇观，悬浮花园，无排水水池，潮湿发霉，办公家具杂乱，密集人群，鱼眼，倾斜竖线，文字，标志，水印",
+    "negativePromptEn": "plastic plants, tropical theme park, vegetation filling every surface, fluorescent green, colored light strips, spectacle waterfall, floating garden, pool without drainage, mold, cluttered office furniture, crowds, fisheye, leaning verticals, text, logos, watermark",
+    "promptEngineering": {
+      "templateVersion": 4,
+      "directlyRunnable": true,
+      "containsPlaceholders": false,
+      "languageIsolation": "pass",
+      "providerNeutral": true,
+      "negativePromptSeparate": true,
+      "maxLength": 4000,
+      "review": {
+        "status": "static-pass-generation-pending",
+        "score": null,
+        "method": "Prompt v3 static contract review; real generation review required.",
+        "reviewedAt": null
+      }
+    }
   },
   {
     "id": "A-09",
@@ -663,22 +782,39 @@
       "G-02 学术档案风",
       "G-07 侘寂·有机自然主义"
     ],
-    "promptZh": "【主体】\n以用户提供的主体描述为画面主体\n【风格与语境】\n[空间描述]。禅意景观与枯山水庭园设计。砾石、苔藓、置石、修剪植物构成高度抽象的自然符号系统，元素种类不超过 5 种。砾石灰、苔藓绿、黑色置石、白砂，色彩不超过 3 种，材质本身即全部视觉语言。大面积砾石海（负空间）为主角，置石如岛屿点缀其中。自然光随时间变化，光影在砾石纹路上形成动态图案，呈现以最少元素传达最大精神容量的冥想空间美学。\n【构图与镜头】\n砾石、苔藓、置石、修剪植物构成高度抽象的自然符号系统，元素种类不超过 5 种，砾石海（负空间）是主角。\n【材质、光线与色彩】\n自然光随时间变化，光影在砾石纹路上形成动态图案，偶有竹制灯笼的温暖点光源，大量负空间。；竹林绿 #2F3F1D、苔影绿 #5F6F34、木平台米 #B8A98C、深水黑绿 #181808\n【使用约束】\n适用场景：spatial moodboard、project concept、AI image generation",
-    "promptEn": "[SUBJECT]\nUse the user-provided subject description as the visual subject\n[STYLE AND CONTEXT]\n[Space description]. Zen landscape and Karesansui garden design. Highly abstract natural symbol system of gravel, moss, standing stones, and pruned plants, no more than 5 element types. Gravel grey, moss green, black standing stones, white sand, no more than 3 colors, materials as complete visual language. Large gravel sea (negative space) as protagonist, standing stones dotted within like islands. Natural light changing over time, light and shadow forming dynamic patterns on gravel textures, presenting a meditative aesthetic of maximum spiritual capacity with minimum elements.\n[COMPOSITION AND CAMERA]\n砾石、苔藓、置石、修剪植物构成高度抽象的自然符号系统，元素种类不超过 5 种，砾石海（负空间）是主角。\n[MATERIALS, LIGHT, AND COLOR]\n自然光随时间变化，光影在砾石纹路上形成动态图案，偶有竹制灯笼的温暖点光源，大量负空间。；竹林绿 #2F3F1D、苔影绿 #5F6F34、木平台米 #B8A98C、深水黑绿 #181808\n[CONSTRAINTS]\nUse cases: spatial moodboard, project concept, AI image generation",
-    "negativePrompt": "generic decoration, unrelated objects, invented provenance, inconsistent materials, weak hierarchy, unreadable text, low-resolution, watermark, malformed geometry",
+    "promptZh": "一座封闭庭院中的枯山水庭园，以大面积浅灰白砾石海为主体，包含五块深灰自然置石、三片低矮苔藓岛、一株修剪松树和一段简洁木平台。 采用木平台上坐姿高度的50毫米斜俯视镜头；耙砂同心纹从左下延伸至中央置石群，右上方松树平衡画面，负空间不少于三分之二，不出现人物。 砾石颗粒均匀但不塑料，耙纹连续且绕石自然转向，置石有真实风化，苔藓低矮湿润；颜色仅限砾石灰、苔藓绿、木平台米和深石灰。 清晨侧光在耙纹上形成细微阴影，整体柔和安静，无灯光秀和戏剧雾气；高分辨率景观摄影，元素克制，维护痕迹真实。",
+    "promptEn": "An enclosed karesansui courtyard dominated by a broad sea of pale gray-white gravel, with exactly five dark natural standing stones, three low moss islands, one pruned pine, and a simple timber viewing platform. Use a seated-height 50 mm view from the platform, looking gently downward. Concentric raked lines travel from the lower left and bend naturally around the central stone group, while the pine balances the upper right. Negative space occupies at least two thirds and no people appear. Keep gravel granular rather than plastic, raking continuous, stones genuinely weathered, and moss low and damp. Restrict color to gravel gray, moss green, platform beige, and dark stone gray. Soft early side light creates fine shadows across the raking without theatrical fog or decorative illumination. High-resolution landscape photography, restrained elements, meditative rhythm, and credible garden maintenance.",
+    "negativePrompt": "繁花，彩色花坛，热带植物，瀑布，锦鲤池，佛像，神社建筑，红色灯笼，过多置石，混乱耙纹，脚印，塑料砾石，游客，强烈夕阳，浓雾，文字，标志，水印",
     "sourceType": "curated-seed-pending-license-confirmation",
     "sourceNote": "Curated seed reference retained for beta evaluation. Confirm ownership or redistribution license before production publication.",
     "reviewStatus": "human-reviewed",
     "updatedAt": "2026-07-29",
-    "promptVersion": 2,
+    "promptVersion": 3,
     "promptSchema": [
-      "subject",
-      "style_and_context",
+      "concrete_subject",
       "composition_and_camera",
-      "materials_light_color",
-      "constraints",
-      "negative_prompt"
-    ]
+      "materials_and_color_proportions",
+      "lighting_and_finish",
+      "language_specific_negative_prompt"
+    ],
+    "promptSchemaId": "aesthetic-archive.prompt-card.v3",
+    "negativePromptZh": "繁花，彩色花坛，热带植物，瀑布，锦鲤池，佛像，神社建筑，红色灯笼，过多置石，混乱耙纹，脚印，塑料砾石，游客，强烈夕阳，浓雾，文字，标志，水印",
+    "negativePromptEn": "flowers, colorful beds, tropical plants, waterfall, koi pond, Buddha statue, shrine building, red lanterns, excessive rocks, chaotic raking, footprints, plastic gravel, tourists, dramatic sunset, heavy fog, text, logos, watermark",
+    "promptEngineering": {
+      "templateVersion": 4,
+      "directlyRunnable": true,
+      "containsPlaceholders": false,
+      "languageIsolation": "pass",
+      "providerNeutral": true,
+      "negativePromptSeparate": true,
+      "maxLength": 4000,
+      "review": {
+        "status": "static-pass-generation-pending",
+        "score": null,
+        "method": "Prompt v3 static contract review; real generation review required.",
+        "reviewedAt": null
+      }
+    }
   },
   {
     "id": "A-10",
@@ -762,22 +898,39 @@
       "A-01 粗野主义建筑",
       "A-03 侘寂室内·有机材料主义"
     ],
-    "promptZh": "【主体】\n以用户提供的主体描述为画面主体\n【风格与语境】\n[空间描述]。卡洛·斯卡帕建筑风格，诗意建构美学。以细部节点为核心，混凝土、大理石、钢铁、玻璃的交接处理精密如珠宝工艺。水元素贯穿空间，形成倒影与光的诗意互动。历史层叠与当代干预并置，新旧之间以精确的缝隙区分。威尼斯砂岩色、铸铁灰、铜锈金、运河深蓝。光线穿过精确开口投射在混凝土上，材料交接处的阴影线是核心视觉语言，呈现以工匠精神为灵魂的建筑诗意。\n【构图与镜头】\n以细部节点为核心，材料之间的交接处理精密如珠宝工艺；水元素贯穿空间，形成倒影与光的诗意；历史层叠与当代干预并置，新旧之间以精确的缝隙区分。\n【材质、光线与色彩】\n水面倒影，光线穿过精确开口投射在混凝土上，材料交接处的阴影线，威尼斯的水光与石材，细部节点的特写摄影。；威尼斯砂岩 #C8B89A、铸铁灰 #4A4A4A、铜锈金 #8B6914、运河深蓝 #1A3A4A\n【使用约束】\n适用场景：spatial moodboard、project concept、AI image generation",
-    "promptEn": "[SUBJECT]\nUse the user-provided subject description as the visual subject\n[STYLE AND CONTEXT]\n[Space description]. Carlo Scarpa architectural style, poetic tectonic aesthetics. Detail joints as core, the junction treatment of concrete, marble, steel, and glass as precise as jewelry craftsmanship. Water elements threading through space, creating poetic interaction of reflections and light. Historical layering juxtaposed with contemporary intervention, old and new separated by precise gaps. Venetian sandstone, cast iron grey, bronze patina gold, canal deep blue. Light projected through precise openings onto concrete, shadow lines at material junctions as core visual language, presenting architectural poetry with craftsman spirit as its soul.\n[COMPOSITION AND CAMERA]\n以细部节点为核心，材料之间的交接处理精密如珠宝工艺；水元素贯穿空间，形成倒影与光的诗意；历史层叠与当代干预并置，新旧之间以精确的缝隙区分。\n[MATERIALS, LIGHT, AND COLOR]\n水面倒影，光线穿过精确开口投射在混凝土上，材料交接处的阴影线，威尼斯的水光与石材，细部节点的特写摄影。；威尼斯砂岩 #C8B89A、铸铁灰 #4A4A4A、铜锈金 #8B6914、运河深蓝 #1A3A4A\n[CONSTRAINTS]\nUse cases: spatial moodboard, project concept, AI image generation",
-    "negativePrompt": "generic decoration, unrelated objects, invented provenance, inconsistent materials, weak hierarchy, unreadable text, low-resolution, watermark, malformed geometry",
+    "promptZh": "一处围绕浅水庭院组织的小型纪念馆入口，清水混凝土墙与浅色石材台阶错层咬合，黑钢门框、窄黄铜收边和一块悬挑石板在水面上形成精密节点。 采用腰部高度的45毫米镜头，从入口侧面斜看水庭；近景聚焦石板、门槛和水边三种材料交接，中景为两名小人物穿过矩形洞口，远景只保留一面旧砖墙。 混凝土保留细腻模板纹，石材边缘有精确切口，钢、玻璃与石之间以细窄阴影缝分离，黄铜仅作节点；砂岩米与混凝土灰约占七成，铸铁灰两成，水面深蓝与铜色一成。 柔和侧光穿过矩形开口，在材料接缝处形成清晰阴影线，水面反射安静；真实建筑细部摄影，构造可实现，新旧材料层次分明。",
+    "promptEn": "A small memorial entrance organized around a shallow water court, where exposed concrete walls, pale stone steps, a blackened-steel doorway, narrow brass trims, and one cantilevered stone slab meet through carefully separated tectonic joints. Use a waist-height 45 mm lens from an oblique position beside the entrance. Focus the foreground on the junction of slab, threshold, and water edge; place two small people passing through a rectangular opening in the middle distance, with only one aged brick wall beyond. Retain fine concrete formwork, precisely cut stone edges, and narrow shadow gaps separating steel, glass, and masonry. Brass appears only at key junctions. Sandstone beige and concrete gray occupy about seventy percent, iron gray twenty percent, and deep water blue plus aged brass ten percent. Soft side light passes through the rectangular opening and draws legible shadow lines at each material joint; water reflections remain calm. Photoreal architectural detail photography with buildable connections and clearly layered old and new fabric.",
+    "negativePrompt": "直接复制著名建筑，雕塑式幻想节点，豪华大理石大堂，满墙黄铜，金色装饰，随机拼贴材料，接缝消失，悬浮石板，无支撑楼梯，水面脏乱，过度复古滤镜，强烈HDR，文字，标志，水印",
     "sourceType": "curated-seed-pending-license-confirmation",
     "sourceNote": "Curated seed reference retained for beta evaluation. Confirm ownership or redistribution license before production publication.",
     "reviewStatus": "human-reviewed",
     "updatedAt": "2026-07-29",
-    "promptVersion": 2,
+    "promptVersion": 3,
     "promptSchema": [
-      "subject",
-      "style_and_context",
+      "concrete_subject",
       "composition_and_camera",
-      "materials_light_color",
-      "constraints",
-      "negative_prompt"
-    ]
+      "materials_and_color_proportions",
+      "lighting_and_finish",
+      "language_specific_negative_prompt"
+    ],
+    "promptSchemaId": "aesthetic-archive.prompt-card.v3",
+    "negativePromptZh": "直接复制著名建筑，雕塑式幻想节点，豪华大理石大堂，满墙黄铜，金色装饰，随机拼贴材料，接缝消失，悬浮石板，无支撑楼梯，水面脏乱，过度复古滤镜，强烈HDR，文字，标志，水印",
+    "negativePromptEn": "direct replica of a famous building, fantasy sculptural junctions, luxury marble lobby, wall-to-wall brass, gold decoration, random material collage, missing joints, floating slab, unsupported stair, dirty water, heavy vintage filter, aggressive HDR, text, logos, watermark",
+    "promptEngineering": {
+      "templateVersion": 4,
+      "directlyRunnable": true,
+      "containsPlaceholders": false,
+      "languageIsolation": "pass",
+      "providerNeutral": true,
+      "negativePromptSeparate": true,
+      "maxLength": 4000,
+      "review": {
+        "status": "static-pass-generation-pending",
+        "score": null,
+        "method": "Prompt v3 static contract review; real generation review required.",
+        "reviewedAt": null
+      }
+    }
   },
   {
     "id": "G-01",
@@ -849,22 +1002,39 @@
     "crossReferences": [
       "A-01 粗野主义建筑"
     ],
-    "promptZh": "【主体】\n以用户提供的主体描述为画面主体\n【风格与语境】\n[主体描述]。新粗野主义平面设计风格。暴露的排版网格线，粗重黑色边框，不对称且刻意拥挤的区块，出血设计。超大号无衬线粗体（如 Helvetica），高对比度字号跳跃，文字作为图形元素。纯黑纯白背景，搭配荧光绿和亮黄色块。粗糙胶片颗粒，闪光灯摄影，边缘锯齿，Dithering 像素化处理，去除所有渐变与阴影，呈现原始骨骼感与挑衅意味。\n【构图与镜头】\n暴露的网格线，粗重黑色边框，不对称且刻意拥挤的区块，打破常规的出血设计，明显的模块化分割。\n【材质、光线与色彩】\n粗糙的胶片颗粒，刺目的闪光灯摄影，边缘锯齿，Dithering 像素化处理，半调网点（Halftone），去除所有渐变与阴影。；纯黑 #000000、纯白 #FFFFFF、荧光绿 #CCFF00、亮黄 #FFFF00\n【使用约束】\n适用场景：brand proposal、visual system、AI image generation",
-    "promptEn": "[SUBJECT]\nUse the user-provided subject description as the visual subject\n[STYLE AND CONTEXT]\n[Subject description]. Neo-Brutalism graphic design style. Exposed typography grid lines, thick black borders, asymmetrical intentionally crowded layout blocks, bleed design. Oversized bold sans-serif typography (e.g., Helvetica), high-contrast font size jumps, text as graphic element. Pure black and white background with neon green and bright yellow color blocks. Rough film grain, harsh flash photography, jagged edges, dithering pixelation, removal of all gradients and shadows, presenting raw skeletal quality and provocative tone.\n[COMPOSITION AND CAMERA]\n暴露的网格线，粗重黑色边框，不对称且刻意拥挤的区块，打破常规的出血设计，明显的模块化分割。\n[MATERIALS, LIGHT, AND COLOR]\n粗糙的胶片颗粒，刺目的闪光灯摄影，边缘锯齿，Dithering 像素化处理，半调网点（Halftone），去除所有渐变与阴影。；纯黑 #000000、纯白 #FFFFFF、荧光绿 #CCFF00、亮黄 #FFFF00\n[CONSTRAINTS]\nUse cases: brand proposal, visual system, AI image generation",
-    "negativePrompt": "generic decoration, unrelated objects, invented provenance, inconsistent materials, weak hierarchy, unreadable text, low-resolution, watermark, malformed geometry",
+    "promptZh": "一张竖版独立音乐节海报，主视觉是一张黑白闪光灯拍摄的年轻鼓手半身像，人物经过粗颗粒半调与抖动处理，不包含可识别公众人物。 画布为2比3，使用六列暴露网格；人物从右侧出血，占画面约六成，左上放一行超大黑色粗体标题“NOISE”，左下为三组短日期与场地信息块，粗黑边框和错位模块形成不对称拥挤感。 纯白约四成、纯黑约四成，荧光绿和亮黄各约一成；字体使用无品牌几何无衬线粗体与窄体等宽小字，边缘锯齿、套印偏移和胶片颗粒清晰，不使用渐变和投影。 呈现真实丝网印刷海报的油墨覆盖与粗糙纸纤维，挑衅、直接、功能骨架外露；标题之外只保留短而清楚的虚构信息。",
+    "promptEn": "A vertical poster for an independent music festival, featuring a black-and-white flash portrait of a young drummer who is not an identifiable public figure, processed with coarse halftone dots and controlled dithering. Use a 2:3 canvas and expose a six-column grid. Bleed the portrait off the right edge so it occupies about sixty percent. Place one oversized black headline, “NOISE,” at the upper left and three compact date-and-venue blocks below. Thick black rules and offset modules create an intentionally crowded asymmetry. Allocate roughly forty percent white, forty percent black, ten percent fluorescent green, and ten percent bright yellow. Use an unbranded geometric grotesk for the headline and narrow monospaced microtype. Preserve jagged edges, registration shift, film grain, and paper fiber; no gradients or drop shadows. The result should look like a real screen-printed poster with blunt ink coverage and an exposed functional skeleton. Keep all supporting copy short, fictional, and legible.",
+    "negativePrompt": "企业品牌海报，柔和渐变，圆角卡片，玻璃拟态，精致阴影，居中对称，粉彩色，大段乱码，真实品牌，公众人物，光滑数码表面，三维立体字，水印",
     "sourceType": "curated-seed-pending-license-confirmation",
     "sourceNote": "Curated seed reference retained for beta evaluation. Confirm ownership or redistribution license before production publication.",
     "reviewStatus": "human-reviewed",
     "updatedAt": "2026-07-29",
-    "promptVersion": 2,
+    "promptVersion": 3,
     "promptSchema": [
-      "subject",
-      "style_and_context",
+      "concrete_subject",
       "composition_and_camera",
-      "materials_light_color",
-      "constraints",
-      "negative_prompt"
-    ]
+      "materials_and_color_proportions",
+      "lighting_and_finish",
+      "language_specific_negative_prompt"
+    ],
+    "promptSchemaId": "aesthetic-archive.prompt-card.v3",
+    "negativePromptZh": "企业品牌海报，柔和渐变，圆角卡片，玻璃拟态，精致阴影，居中对称，粉彩色，大段乱码，真实品牌，公众人物，光滑数码表面，三维立体字，水印",
+    "negativePromptEn": "corporate branding, soft gradients, rounded cards, glassmorphism, polished shadows, centered symmetry, pastel colors, long gibberish copy, real brands, public figures, smooth digital finish, 3D lettering, watermark",
+    "promptEngineering": {
+      "templateVersion": 4,
+      "directlyRunnable": true,
+      "containsPlaceholders": false,
+      "languageIsolation": "pass",
+      "providerNeutral": true,
+      "negativePromptSeparate": true,
+      "maxLength": 4000,
+      "review": {
+        "status": "static-pass-generation-pending",
+        "score": null,
+        "method": "Prompt v3 static contract review; real generation review required.",
+        "reviewedAt": null
+      }
+    }
   },
   {
     "id": "G-02",
@@ -928,22 +1098,39 @@
       "A-02 极简主义建筑",
       "A-09 禅意景观·枯山水"
     ],
-    "promptZh": "【主体】\n以用户提供的主体描述为画面主体\n【风格与语境】\n[主体描述]。学术档案风与极简编辑平面设计。严谨的瑞士网格系统（Swiss Grid），极大留白，极细黑色分隔线，清晰层级结构，带有脚注、索引号和坐标系元素。优雅的现代衬线体与无衬线体混合排版，字号小巧克制，字距精准。大面积米白底，深灰文字，偶以单一深蓝作为强调色。高质量黑白摄影，局部特写，排版精美的图表，轻微纸张纹理质感。\n【构图与镜头】\n严谨的瑞士网格系统（Swiss Grid），极大留白，极细黑色分隔线，清晰层级结构，脚注、索引号、坐标系、档案编码等元素，双语对位排版。\n【材质、光线与色彩】\n高质量黑白摄影，建筑或静物局部特写，排版精美的图表与数据可视化，轻微的纸张纹理。；米白/纸张色 #F5F0E8、深灰文字 #222222、极细分隔线 #CCCCCC、功能性深蓝 #1A3A6B\n【使用约束】\n适用场景：brand proposal、visual system、AI image generation",
-    "promptEn": "[SUBJECT]\nUse the user-provided subject description as the visual subject\n[STYLE AND CONTEXT]\n[Subject description]. Academic Archival and Editorial Minimalism graphic design. Strict Swiss Grid system, massive white space, ultra-thin black dividing lines, clear hierarchical structure with footnotes, index numbers, and coordinate system elements. Elegant modern serif and sans-serif mixed typography, small restrained font sizes, precise letter spacing. Large areas of off-white background, dark grey text, occasionally a single deep blue as accent. High-quality black and white photography, close-up detail shots, beautifully typeset charts, subtle paper texture.\n[COMPOSITION AND CAMERA]\n严谨的瑞士网格系统（Swiss Grid），极大留白，极细黑色分隔线，清晰层级结构，脚注、索引号、坐标系、档案编码等元素，双语对位排版。\n[MATERIALS, LIGHT, AND COLOR]\n高质量黑白摄影，建筑或静物局部特写，排版精美的图表与数据可视化，轻微的纸张纹理。；米白/纸张色 #F5F0E8、深灰文字 #222222、极细分隔线 #CCCCCC、功能性深蓝 #1A3A6B\n[CONSTRAINTS]\nUse cases: brand proposal, visual system, AI image generation",
-    "negativePrompt": "generic decoration, unrelated objects, invented provenance, inconsistent materials, weak hierarchy, unreadable text, low-resolution, watermark, malformed geometry",
+    "promptZh": "一张竖版建筑研究期刊封面，主视觉为一幅匿名混凝土楼梯的黑白局部摄影，下方配一张小型结构剖面图和两列档案索引。 画布为3比4，使用八列瑞士网格；照片位于右上四列并占画面约三分之一，左侧保留大面积米白留白，标题“FORM / 01”置于左上，页码、坐标和三条脚注沿底边精确对齐。 米白纸色约七成，深灰文字与照片约两成，功能深蓝不超过一成；现代衬线标题搭配中性无衬线正文，细黑分隔线、稳定基线和克制字距，纸张只有轻微纤维。 输出为高质量未装订期刊封面平面扫描，理性、安静、信息层级清楚；所有文字保持短小，不生成虚假机构或品牌。",
+    "promptEn": "A vertical cover for an architectural research journal, using one anonymous black-and-white detail photograph of a concrete stair, one small structural section diagram, and two columns of archival indexing. Use a 3:4 canvas on a strict eight-column Swiss grid. Place the photograph across four columns in the upper right and limit it to roughly one third of the page. Preserve broad off-white space on the left, set the title “FORM / 01” at the upper left, and align page numbers, coordinates, and three footnotes precisely along the bottom. Off-white paper occupies about seventy percent, charcoal type and photography twenty percent, and functional deep blue no more than ten percent. Pair a modern serif title with neutral sans-serif text, hairline rules, a consistent baseline, and restrained tracking. Keep paper fiber subtle. Render a high-quality flat scan of an unbound journal cover: rational, quiet, and clearly hierarchical. All copy is short and fictional, with no invented institution or brand.",
+    "negativePrompt": "杂志堆叠场景，透视展示，彩色渐变，粗重装饰字体，大面积照片，无留白，杂乱网格，粗线条，复古污渍，长篇乱码，真实出版社标志，条码主导，水印",
     "sourceType": "curated-seed-pending-license-confirmation",
     "sourceNote": "Curated seed reference retained for beta evaluation. Confirm ownership or redistribution license before production publication.",
     "reviewStatus": "human-reviewed",
     "updatedAt": "2026-07-29",
-    "promptVersion": 2,
+    "promptVersion": 3,
     "promptSchema": [
-      "subject",
-      "style_and_context",
+      "concrete_subject",
       "composition_and_camera",
-      "materials_light_color",
-      "constraints",
-      "negative_prompt"
-    ]
+      "materials_and_color_proportions",
+      "lighting_and_finish",
+      "language_specific_negative_prompt"
+    ],
+    "promptSchemaId": "aesthetic-archive.prompt-card.v3",
+    "negativePromptZh": "杂志堆叠场景，透视展示，彩色渐变，粗重装饰字体，大面积照片，无留白，杂乱网格，粗线条，复古污渍，长篇乱码，真实出版社标志，条码主导，水印",
+    "negativePromptEn": "stacked magazine mockup, perspective presentation, colorful gradient, heavy decorative type, oversized photograph, no whitespace, broken grid, thick rules, vintage stains, long gibberish text, real publisher logo, dominant barcode, watermark",
+    "promptEngineering": {
+      "templateVersion": 4,
+      "directlyRunnable": true,
+      "containsPlaceholders": false,
+      "languageIsolation": "pass",
+      "providerNeutral": true,
+      "negativePromptSeparate": true,
+      "maxLength": 4000,
+      "review": {
+        "status": "static-pass-generation-pending",
+        "score": null,
+        "method": "Prompt v3 static contract review; real generation review required.",
+        "reviewedAt": null
+      }
+    }
   },
   {
     "id": "G-03",
@@ -1005,22 +1192,39 @@
     "typography": "等宽字体（Monospace：Courier、Fira Code、IBM Plex Mono），像素字体，ASCII 字符艺术，全小写或全大写。",
     "imagery": "像素艺术（Pixel Art），低分辨率图像，Bayer 矩阵抖动（Dithering），半调网点，复古软件截图，CRT 屏幕扫描线效果。",
     "crossReferences": [],
-    "promptZh": "【主体】\n以用户提供的主体描述为画面主体\n【风格与语境】\n[主体描述]。复古数字与终端机美学平面设计。模仿早期命令行界面（CLI）的窗口堆叠布局，路径导航式文字标注（如 /home/user），代码片段作为装饰元素。等宽字体（如 Courier、IBM Plex Mono），像素字体，ASCII 字符艺术。纯黑背景搭配荧光绿或琥珀色文字，极高对比度。像素艺术，Bayer 矩阵抖动（Dithering），CRT 屏幕扫描线效果，低分辨率图像质感，呈现早期数字时代的粗粝极客气质。\n【构图与镜头】\n模仿早期操作系统或命令行界面（CLI），窗口堆叠，路径导航（如 /home/user），代码片段直接作为装饰元素，模块化的卡片式信息块。\n【材质、光线与色彩】\n像素艺术（Pixel Art），低分辨率图像，Bayer 矩阵抖动（Dithering），半调网点，复古软件截图，CRT 屏幕扫描线效果。；Matrix绿 #00FF41、终端黑 #000000、琥珀色 #FFB000、青色 #00FFFF\n【使用约束】\n适用场景：brand proposal、visual system、AI image generation",
-    "promptEn": "[SUBJECT]\nUse the user-provided subject description as the visual subject\n[STYLE AND CONTEXT]\n[Subject description]. Retro-Digital and Terminal Aesthetic graphic design. Stacked window layout mimicking early command-line interfaces (CLI), path-navigation style text labels (e.g., /home/user), code snippets as decorative elements. Monospace fonts (e.g., Courier, IBM Plex Mono), pixel fonts, ASCII character art. Pure black background with neon green or amber text, extreme high contrast. Pixel art, Bayer matrix dithering, CRT screen scanline effect, low-resolution image texture, presenting the raw geek spirit of the early digital era.\n[COMPOSITION AND CAMERA]\n模仿早期操作系统或命令行界面（CLI），窗口堆叠，路径导航（如 /home/user），代码片段直接作为装饰元素，模块化的卡片式信息块。\n[MATERIALS, LIGHT, AND COLOR]\n像素艺术（Pixel Art），低分辨率图像，Bayer 矩阵抖动（Dithering），半调网点，复古软件截图，CRT 屏幕扫描线效果。；Matrix绿 #00FF41、终端黑 #000000、琥珀色 #FFB000、青色 #00FFFF\n[CONSTRAINTS]\nUse cases: brand proposal, visual system, AI image generation",
-    "negativePrompt": "generic decoration, unrelated objects, invented provenance, inconsistent materials, weak hierarchy, unreadable text, low-resolution, watermark, malformed geometry",
+    "promptZh": "一张16比9的复古终端系统启动界面，中央是一幅由ASCII字符构成的卫星天线图，周围排列三个命令行窗口、一个目录树和一条底部状态栏。 纯黑画布使用12列像素网格；最大窗口位于左中，占六列，右侧两个小窗口上下堆叠，顶部显示短路径“/SYS/ARCHIVE”，底部以分段参数条收束，窗口允许轻微重叠但不遮挡关键信息。 荧光绿文字约占八成，琥珀色用于警告行，青色仅用于光标；全部采用清晰等宽像素字，带轻微CRT扫描线、磷光拖影和Bayer抖动，边缘保持低分辨率但主体可读。 输出为正面截取的老式CRT界面，不出现真实操作系统、品牌、密码或个人数据；技术感来自布局和纹理，而不是随机代码墙。",
+    "promptEn": "A 16:9 retro terminal boot interface centered on a satellite dish drawn in ASCII characters, surrounded by three command-line windows, one directory tree, and a segmented status bar along the bottom. Build the black canvas on a twelve-column pixel grid. Put the largest six-column window at center-left, stack two smaller windows on the right, show the short path “/SYS/ARCHIVE” at the top, and close the composition with parameter blocks below. Windows may overlap slightly but never obscure key information. Use fluorescent green for about eighty percent of the type, amber for warning lines, and cyan only for the cursor. Set everything in crisp monospaced pixel lettering with restrained CRT scanlines, phosphor persistence, and Bayer dithering. Keep the low-resolution edge character while preserving legibility. Render a front-facing capture of an old CRT interface. Do not imitate a real operating system or include brands, passwords, or personal data. The technical character comes from layout and texture, not a wall of random code.",
+    "negativePrompt": "现代玻璃拟态界面，圆角SaaS卡片，蓝紫渐变，智能手机边框，真实操作系统标志，真实代码仓库，密码，个人信息，密集乱码，不可读文字，强烈故障艺术，过量扫描线，三维透视，水印",
     "sourceType": "curated-seed-pending-license-confirmation",
     "sourceNote": "Curated seed reference retained for beta evaluation. Confirm ownership or redistribution license before production publication.",
     "reviewStatus": "human-reviewed",
     "updatedAt": "2026-07-29",
-    "promptVersion": 2,
+    "promptVersion": 3,
     "promptSchema": [
-      "subject",
-      "style_and_context",
+      "concrete_subject",
       "composition_and_camera",
-      "materials_light_color",
-      "constraints",
-      "negative_prompt"
-    ]
+      "materials_and_color_proportions",
+      "lighting_and_finish",
+      "language_specific_negative_prompt"
+    ],
+    "promptSchemaId": "aesthetic-archive.prompt-card.v3",
+    "negativePromptZh": "现代玻璃拟态界面，圆角SaaS卡片，蓝紫渐变，智能手机边框，真实操作系统标志，真实代码仓库，密码，个人信息，密集乱码，不可读文字，强烈故障艺术，过量扫描线，三维透视，水印",
+    "negativePromptEn": "modern glassmorphism UI, rounded SaaS cards, blue-purple gradient, smartphone frame, real operating-system logo, real repository, passwords, personal data, dense gibberish, unreadable text, extreme glitch art, excessive scanlines, 3D perspective, watermark",
+    "promptEngineering": {
+      "templateVersion": 4,
+      "directlyRunnable": true,
+      "containsPlaceholders": false,
+      "languageIsolation": "pass",
+      "providerNeutral": true,
+      "negativePromptSeparate": true,
+      "maxLength": 4000,
+      "review": {
+        "status": "static-pass-generation-pending",
+        "score": null,
+        "method": "Prompt v3 static contract review; real generation review required.",
+        "reviewedAt": null
+      }
+    }
   },
   {
     "id": "G-04",
@@ -1089,22 +1293,39 @@
     "typography": "带有科幻感、几何感或气泡感的变体字体，倾斜体，发光字效，金属质感立体字，偶用像素字体。",
     "imagery": "早期 3D 渲染图形（低多边形 Low-poly 或光滑塑料质感），金属液滴，星形/十字星光芒，早期互联网低保真动图（GIF）风格，镭射反光材质。",
     "crossReferences": [],
-    "promptZh": "【主体】\n以用户提供的主体描述为画面主体\n【风格与语境】\n[主体描述]。千禧复古未来主义（Y2K）平面设计风格。气泡感与流动感的界面布局，不规则流线型边框，元素相互叠压的浮窗设计。带有科幻感的几何变体字体，发光字效，金属质感立体字。高明度高饱和糖果色：水蓝、亮粉、薄荷绿，搭配镭射全息渐变（Holographic）与金属银色。早期 3D 渲染的光滑塑料质感，金属液滴，十字星光芒，镭射反光材质，呈现 2000 年代初期数字乌托邦的乐观未来感。\n【构图与镜头】\n界面充满气泡感与流动感，不规则的流线型边框，浮窗设计，信息密度高且充满动感，元素相互叠压。\n【材质、光线与色彩】\n早期 3D 渲染图形（低多边形 Low-poly 或光滑塑料质感），金属液滴，星形/十字星光芒，早期互联网低保真动图（GIF）风格，镭射反光材质。；水蓝色 #00BFFF、亮粉色 #FF69B4、金属银 #C0C0C0、薄荷绿 #98FF98\n【使用约束】\n适用场景：brand proposal、visual system、AI image generation",
-    "promptEn": "[SUBJECT]\nUse the user-provided subject description as the visual subject\n[STYLE AND CONTEXT]\n[Subject description]. Y2K and Retro-Futurism graphic design style. Bubbly and fluid interface layout, irregular streamlined borders, overlapping floating window design. Geometric display fonts with sci-fi character, glowing text effects, metallic 3D letterforms. High-brightness high-saturation candy colors: aqua blue, hot pink, mint green, paired with holographic iridescent gradients and metallic silver. Early 3D rendered smooth plastic texture, metallic liquid droplets, starburst lens flares, iridescent reflective materials, presenting the optimistic futurism of early 2000s digital utopianism.\n[COMPOSITION AND CAMERA]\n界面充满气泡感与流动感，不规则的流线型边框，浮窗设计，信息密度高且充满动感，元素相互叠压。\n[MATERIALS, LIGHT, AND COLOR]\n早期 3D 渲染图形（低多边形 Low-poly 或光滑塑料质感），金属液滴，星形/十字星光芒，早期互联网低保真动图（GIF）风格，镭射反光材质。；水蓝色 #00BFFF、亮粉色 #FF69B4、金属银 #C0C0C0、薄荷绿 #98FF98\n[CONSTRAINTS]\nUse cases: brand proposal, visual system, AI image generation",
-    "negativePrompt": "generic decoration, unrelated objects, invented provenance, inconsistent materials, weak hierarchy, unreadable text, low-resolution, watermark, malformed geometry",
+    "promptZh": "一张千禧复古未来主义的方形数字音乐单曲封面，中央是一枚透明水蓝色凝胶球体，内部悬浮银色液态金属花朵，周围有四个小型半透明浮窗和星形高光。 使用1比1画布，主体球体占中央约一半，浮窗沿对角线从左下延伸至右上，顶部放短标题“SYNC 2001”，底部只保留一行窄体信息；元素叠压但轮廓清楚。 水蓝和金属银为主体，亮粉与薄荷绿只作小面积强调；球体具有透明凝胶折射，金属花朵为光滑早期三维渲染，背景使用克制全息渐变和细小像素星光，文字为几何变体无衬线体。 画面乐观、轻盈、带早期互联网乌托邦感，但保持清晰设计秩序；所有文案短小虚构，不使用品牌或真实艺人。",
+    "promptEn": "A square Y2K retro-futurist digital single cover centered on one translucent aqua gel sphere containing a floating silver liquid-metal flower, surrounded by four small translucent windows and restrained star-shaped highlights. Use a 1:1 canvas. Let the sphere occupy roughly half the center and arrange the floating windows along a lower-left to upper-right diagonal. Place the short title “SYNC 2001” at the top and one narrow information line below. Allow overlap while preserving clean silhouettes. Aqua and metallic silver dominate; hot pink and mint green appear only as small accents. Give the sphere believable gel refraction, render the metal flower with smooth early-3D surfaces, and use a controlled holographic gradient with tiny pixel stars. Typography is an unbranded geometric mutant sans serif. The image feels optimistic, light, and connected to early-internet utopian design while retaining clear order. Keep all copy short and fictional, with no brand or real artist.",
+    "negativePrompt": "赛博朋克城市，暗黑黑客界面，过量霓虹，彩虹覆盖全画面，现代扁平插画，写实人物，真实艺人，品牌标志，复杂长文，脏污胶片，粗野主义黑框，低质塑料，变形球体，水印",
     "sourceType": "curated-seed-pending-license-confirmation",
     "sourceNote": "Curated seed reference retained for beta evaluation. Confirm ownership or redistribution license before production publication.",
     "reviewStatus": "human-reviewed",
     "updatedAt": "2026-07-29",
-    "promptVersion": 2,
+    "promptVersion": 3,
     "promptSchema": [
-      "subject",
-      "style_and_context",
+      "concrete_subject",
       "composition_and_camera",
-      "materials_light_color",
-      "constraints",
-      "negative_prompt"
-    ]
+      "materials_and_color_proportions",
+      "lighting_and_finish",
+      "language_specific_negative_prompt"
+    ],
+    "promptSchemaId": "aesthetic-archive.prompt-card.v3",
+    "negativePromptZh": "赛博朋克城市，暗黑黑客界面，过量霓虹，彩虹覆盖全画面，现代扁平插画，写实人物，真实艺人，品牌标志，复杂长文，脏污胶片，粗野主义黑框，低质塑料，变形球体，水印",
+    "negativePromptEn": "cyberpunk city, dark hacker interface, excessive neon, full-frame rainbow, modern flat illustration, photoreal person, real artist, brand logo, long copy, dirty film, brutalist black borders, cheap plastic, malformed sphere, watermark",
+    "promptEngineering": {
+      "templateVersion": 4,
+      "directlyRunnable": true,
+      "containsPlaceholders": false,
+      "languageIsolation": "pass",
+      "providerNeutral": true,
+      "negativePromptSeparate": true,
+      "maxLength": 4000,
+      "review": {
+        "status": "static-pass-generation-pending",
+        "score": null,
+        "method": "Prompt v3 static contract review; real generation review required.",
+        "reviewedAt": null
+      }
+    }
   },
   {
     "id": "G-05",
@@ -1169,22 +1390,39 @@
     "typography": "工业无衬线体（DIN、Roboto、Helvetica Neue），等宽字体混排，全大写字母，强调信息的参数化与编码感。",
     "imagery": "矢量图标，工业零件图解，X 光透视图，蓝图（Blueprint），极简几何图形，摒弃一切不必要的装饰性图像。",
     "crossReferences": [],
-    "promptZh": "【主体】\n以用户提供的主体描述为画面主体\n【风格与语境】\n[主体描述]。实用工业与系统设计平面风格。标签式排版，说明书式的模块化信息区块，大量使用条形码、编号系统、警示符号与引导箭头。工业无衬线体（如 DIN），全大写字母，参数化编码感。工业灰与牛皮色底，搭配工业橙、亮黄警示色块。矢量图标，工业零件图解，X 光透视图，蓝图风格线稿，摒弃一切装饰性图像，呈现高度秩序化与标准化的功能美学。\n【构图与镜头】\n标签式排版，说明书式的模块化信息区块，大量使用条形码、二维码、编号系统、警示符号与箭头，引导线与注释框。\n【材质、光线与色彩】\n矢量图标，工业零件图解，X 光透视图，蓝图（Blueprint），极简几何图形，摒弃一切不必要的装饰性图像。；工业黄 #FFD700、警示橙红 #FF4500、纯黑 #000000、牛皮色 #C8B89A\n【使用约束】\n适用场景：brand proposal、visual system、AI image generation",
-    "promptEn": "[SUBJECT]\nUse the user-provided subject description as the visual subject\n[STYLE AND CONTEXT]\n[Subject description]. Utilitarian and System Design graphic style. Label-style typography, instruction manual-style modular information blocks, extensive use of barcodes, numbering systems, warning symbols, and directional arrows. Industrial sans-serif typeface (e.g., DIN), all-caps lettering, parametric coding aesthetic. Industrial grey and kraft paper background, paired with industrial orange and bright yellow warning color blocks. Vector icons, industrial parts diagrams, X-ray perspective views, blueprint-style line drawings, elimination of all decorative imagery, presenting a highly ordered functional aesthetic.\n[COMPOSITION AND CAMERA]\n标签式排版，说明书式的模块化信息区块，大量使用条形码、二维码、编号系统、警示符号与箭头，引导线与注释框。\n[MATERIALS, LIGHT, AND COLOR]\n矢量图标，工业零件图解，X 光透视图，蓝图（Blueprint），极简几何图形，摒弃一切不必要的装饰性图像。；工业黄 #FFD700、警示橙红 #FF4500、纯黑 #000000、牛皮色 #C8B89A\n[CONSTRAINTS]\nUse cases: brand proposal, visual system, AI image generation",
-    "negativePrompt": "generic decoration, unrelated objects, invented provenance, inconsistent materials, weak hierarchy, unreadable text, low-resolution, watermark, malformed geometry",
+    "promptZh": "一张竖版工业设备维护说明海报，中央为一只匿名机械阀门的黑色矢量分解图，周围排列八个编号部件、三条引导线、一个警示区和底部参数表。 画布为2比3，使用五列模块网格；分解图占中央三列，左侧为步骤01至04，右上为橙色警示框，底部横跨全宽的参数表与简化条形码形成稳定基座。 牛皮纸米色约五成、纯黑约三成、工业黄和警示橙红合计两成；使用中性工业无衬线全大写标题与等宽参数字，线宽统一，图标简洁，不使用装饰插图。 输出为平整印刷的技术手册海报，编号和箭头关系清楚，短标签可读；不包含真实制造商、二维码、可扫描编码或安全承诺。",
+    "promptEn": "A vertical industrial maintenance instruction poster centered on a black vector exploded view of an anonymous mechanical valve, surrounded by eight numbered parts, three leader lines, one warning panel, and a parameter table at the bottom. Use a 2:3 canvas on a five-column modular grid. The exploded diagram occupies the middle three columns, steps 01–04 run down the left, an orange warning block sits upper right, and a full-width specification table plus a simplified nonfunctional barcode forms the base. Kraft beige occupies about fifty percent, black thirty percent, and industrial yellow plus warning orange-red twenty percent. Use neutral industrial sans-serif capitals with monospaced parameters, consistent line weights, and simple icons. No decorative illustration. Render a flat printed technical-manual poster with clear numbering, arrows, and short readable labels. Include no real manufacturer, QR code, scannable identifier, or safety claim.",
+    "negativePrompt": "真实品牌说明书，可扫描二维码，真实条形码，危险操作指南，复杂工程承诺，装饰花纹，手写字体，柔和粉彩，玻璃拟态，三维产品广告，随机箭头，错误编号，长篇乱码，水印",
     "sourceType": "curated-seed-pending-license-confirmation",
     "sourceNote": "Curated seed reference retained for beta evaluation. Confirm ownership or redistribution license before production publication.",
     "reviewStatus": "human-reviewed",
     "updatedAt": "2026-07-29",
-    "promptVersion": 2,
+    "promptVersion": 3,
     "promptSchema": [
-      "subject",
-      "style_and_context",
+      "concrete_subject",
       "composition_and_camera",
-      "materials_light_color",
-      "constraints",
-      "negative_prompt"
-    ]
+      "materials_and_color_proportions",
+      "lighting_and_finish",
+      "language_specific_negative_prompt"
+    ],
+    "promptSchemaId": "aesthetic-archive.prompt-card.v3",
+    "negativePromptZh": "真实品牌说明书，可扫描二维码，真实条形码，危险操作指南，复杂工程承诺，装饰花纹，手写字体，柔和粉彩，玻璃拟态，三维产品广告，随机箭头，错误编号，长篇乱码，水印",
+    "negativePromptEn": "real branded manual, scannable QR code, real barcode, hazardous instructions, engineering claims, decorative patterns, handwriting, soft pastels, glassmorphism, 3D product advertisement, random arrows, duplicate numbering, long gibberish, watermark",
+    "promptEngineering": {
+      "templateVersion": 4,
+      "directlyRunnable": true,
+      "containsPlaceholders": false,
+      "languageIsolation": "pass",
+      "providerNeutral": true,
+      "negativePromptSeparate": true,
+      "maxLength": 4000,
+      "review": {
+        "status": "static-pass-generation-pending",
+        "score": null,
+        "method": "Prompt v3 static contract review; real generation review required.",
+        "reviewedAt": null
+      }
+    }
   },
   {
     "id": "G-06",
@@ -1257,22 +1495,39 @@
     "crossReferences": [
       "A-07 暗黑浪漫·新哥特室内"
     ],
-    "promptZh": "【主体】\n以用户提供的主体描述为画面主体\n【风格与语境】\n[主体描述]。暗黑电影与幽玄美学平面设计。沉浸式全屏布局，漂浮感极简排版，文字置于画面边缘。纤细的现代衬线体，字距拉宽，半透明发光字效。深邃暗色调：深渊黑、午夜蓝、太空灰，搭配极微弱的单色渐变发光（幽蓝、暗金、微紫），拒绝高饱和度色彩。电影级光影，发光人体轮廓或星云形态，烟雾胶片颗粒质感，失焦景深效果，流体光波生成艺术，呈现神秘精神性与史诗沉浸氛围。\n【构图与镜头】\n沉浸式全屏布局，中心对称或刻意打破重心的漂浮感排版，极少的文字干扰，大面积深色空间留白，文字常置于画面边缘。\n【材质、光线与色彩】\n电影级光影，发光体（星云、光晕、人体轮廓），烟雾/颗粒质感（Film Grain），失焦/景深效果，流体或光波生成艺术。；深渊黑 #050505、午夜蓝 #0D1B2A、太空灰蓝 #1A1A2E、暗金 #C8A84B\n【使用约束】\n适用场景：brand proposal、visual system、AI image generation",
-    "promptEn": "[SUBJECT]\nUse the user-provided subject description as the visual subject\n[STYLE AND CONTEXT]\n[Subject description]. Dark Cinematic and Ethereal aesthetic graphic design. Immersive full-screen layout, floating minimalist typography, text positioned at composition edges. Thin modern serif typeface, wide letter spacing, semi-transparent glowing text effect. Deep dark palette: abyss black, midnight blue, space grey, paired with extremely subtle monochromatic gradient luminescence (deep blue, dark gold, faint purple), rejecting high-saturation colors. Cinematic light and shadow, glowing human silhouette or nebula forms, smoky film grain texture, bokeh depth-of-field effect, fluid light wave generative art, presenting mystical spirituality and epic immersive atmosphere.\n[COMPOSITION AND CAMERA]\n沉浸式全屏布局，中心对称或刻意打破重心的漂浮感排版，极少的文字干扰，大面积深色空间留白，文字常置于画面边缘。\n[MATERIALS, LIGHT, AND COLOR]\n电影级光影，发光体（星云、光晕、人体轮廓），烟雾/颗粒质感（Film Grain），失焦/景深效果，流体或光波生成艺术。；深渊黑 #050505、午夜蓝 #0D1B2A、太空灰蓝 #1A1A2E、暗金 #C8A84B\n[CONSTRAINTS]\nUse cases: brand proposal, visual system, AI image generation",
-    "negativePrompt": "generic decoration, unrelated objects, invented provenance, inconsistent materials, weak hierarchy, unreadable text, low-resolution, watermark, malformed geometry",
+    "promptZh": "一张竖版暗黑电影艺术海报，主视觉是一名披长外套的匿名人物站在薄雾水面中央，身后只有一圈暗金色微光与远处午夜蓝山体轮廓。 画布为2比3，人物位于中央下方且只占画面高度四分之一，上方保留约一半深色负空间；标题“ECHO”以纤细衬线体置于左上边缘，底部只有两行极小信息。 深渊黑和午夜蓝约占九成，太空灰蓝构成雾层，暗金只用于人物轮廓与标题小点；使用低反差电影摄影、柔和景深、细腻胶片颗粒和轻微光晕，暗部保留层次。 画面神秘、精神性、安静而非恐怖；人物比例自然、轮廓清晰，所有文字短小虚构，不出现宗教标志或真实电影信息。",
+    "promptEn": "A vertical dark cinematic art poster showing one anonymous figure in a long coat standing in shallow mist-covered water, backed only by a restrained dark-gold halo and a distant midnight-blue mountain silhouette. Use a 2:3 canvas. Place the figure in the lower center at only one quarter of the image height and preserve roughly half the page as dark negative space above. Set the thin-serif title “ECHO” at the upper-left edge and keep only two tiny information lines at the bottom. Abyss black and midnight blue occupy about ninety percent, space blue-gray builds the mist, and dark gold appears only along the figure rim and one title mark. Use low-contrast cinematic photography, soft depth, fine film grain, subtle halation, and detailed shadows. The mood is mysterious, spiritual, and quiet rather than horrific. Keep anatomy natural and silhouette clear. All copy is short and fictional, with no religious symbol or real film information.",
+    "negativePrompt": "恐怖怪物，血腥，骷髅，宗教符号，明亮科幻城市，高饱和紫色，彩虹星云，大面积金色，完全黑死暗部，过量烟雾，人物畸形，脸部特写，长篇文字，真实电影标志，水印",
     "sourceType": "curated-seed-pending-license-confirmation",
     "sourceNote": "Curated seed reference retained for beta evaluation. Confirm ownership or redistribution license before production publication.",
     "reviewStatus": "human-reviewed",
     "updatedAt": "2026-07-29",
-    "promptVersion": 2,
+    "promptVersion": 3,
     "promptSchema": [
-      "subject",
-      "style_and_context",
+      "concrete_subject",
       "composition_and_camera",
-      "materials_light_color",
-      "constraints",
-      "negative_prompt"
-    ]
+      "materials_and_color_proportions",
+      "lighting_and_finish",
+      "language_specific_negative_prompt"
+    ],
+    "promptSchemaId": "aesthetic-archive.prompt-card.v3",
+    "negativePromptZh": "恐怖怪物，血腥，骷髅，宗教符号，明亮科幻城市，高饱和紫色，彩虹星云，大面积金色，完全黑死暗部，过量烟雾，人物畸形，脸部特写，长篇文字，真实电影标志，水印",
+    "negativePromptEn": "horror monster, gore, skulls, religious symbols, bright science-fiction city, saturated purple, rainbow nebula, extensive gold, crushed blacks, excessive smoke, malformed anatomy, face close-up, long copy, real film logo, watermark",
+    "promptEngineering": {
+      "templateVersion": 4,
+      "directlyRunnable": true,
+      "containsPlaceholders": false,
+      "languageIsolation": "pass",
+      "providerNeutral": true,
+      "negativePromptSeparate": true,
+      "maxLength": 4000,
+      "review": {
+        "status": "static-pass-generation-pending",
+        "score": null,
+        "method": "Prompt v3 static contract review; real generation review required.",
+        "reviewedAt": null
+      }
+    }
   },
   {
     "id": "G-07",
@@ -1347,22 +1602,39 @@
       "A-03 侘寂室内",
       "A-08 生物亲和"
     ],
-    "promptZh": "【主体】\n以用户提供的主体描述为画面主体\n【风格与语境】\n[主体描述]。侘寂与有机自然主义平面设计风格。非对称的自由排版，呼吸感极强的大留白，元素呈现偶然落下的自然感。手写体或带有笔触感的衬线体，字间距宽松。大地色系：陶土色、苔藓绿、砂岩米，低饱和度哑光质地。手工陶器、亚麻布料、宣纸等实物摄影，刻意保留的划痕与折痕，活版印刷压痕，拒绝数字修图的真实质感，呈现接受无常与不完美的东方审美哲学。\n【构图与镜头】\n非对称、呼吸感极强的自由排版，无严格网格约束，留白大而不规则，元素位置带有「偶然落下」的感觉。\n【材质、光线与色彩】\n手工陶器、亚麻布料、宣纸、枯枝、苔藓等实物摄影；刻意保留的划痕、折痕、水渍；活版印刷压痕；拒绝修图的真实质感。；陶土色 #C4956A、苔藓绿 #6B7C5E、砂岩米 #D4C8B0、枯叶棕 #5C4A3A\n【使用约束】\n适用场景：brand proposal、visual system、AI image generation",
-    "promptEn": "[SUBJECT]\nUse the user-provided subject description as the visual subject\n[STYLE AND CONTEXT]\n[Subject description]. Wabi-Sabi and Organic Naturalism graphic design style. Asymmetrical free layout, immensely breathable large white space, elements appearing naturally scattered. Handwritten or brush-stroke serif typeface, loose letter spacing. Earthy palette: terracotta, moss green, sandstone beige, low saturation matte texture. Still-life photography of handmade pottery, linen fabrics, rice paper, intentionally preserved scratches and creases, letterpress printing impression, refusing digital retouching, presenting the Eastern aesthetic philosophy of accepting impermanence and imperfection.\n[COMPOSITION AND CAMERA]\n非对称、呼吸感极强的自由排版，无严格网格约束，留白大而不规则，元素位置带有「偶然落下」的感觉。\n[MATERIALS, LIGHT, AND COLOR]\n手工陶器、亚麻布料、宣纸、枯枝、苔藓等实物摄影；刻意保留的划痕、折痕、水渍；活版印刷压痕；拒绝修图的真实质感。；陶土色 #C4956A、苔藓绿 #6B7C5E、砂岩米 #D4C8B0、枯叶棕 #5C4A3A\n[CONSTRAINTS]\nUse cases: brand proposal, visual system, AI image generation",
-    "negativePrompt": "generic decoration, unrelated objects, invented provenance, inconsistent materials, weak hierarchy, unreadable text, low-resolution, watermark, malformed geometry",
+    "promptZh": "一张竖版手工陶艺展览海报，主视觉是一只不规则赤陶茶碗的自然光静物照片，旁边放一小段亚麻布、一片苔藓和一张有折痕的宣纸。 画布为3比4，无严格中心网格；茶碗位于右下三分点并占约四分之一，左上保留大面积砂岩米留白，标题“EARTH / 07”像活版印刷般轻微错位，三条短信息散落在边缘。 砂岩米约六成、陶土色两成、枯叶棕和苔藓绿各一成；手工衬线字与少量手写标记结合，纸纤维、折痕、压印和水渍细微真实，所有表面低饱和哑光。 输出为平面扫描的天然纸张海报，安静、有呼吸感、保留手工误差，但不能显得污损或随意拼贴。",
+    "promptEn": "A vertical poster for a handmade ceramics exhibition, featuring a naturally lit still-life photograph of one irregular terracotta tea bowl beside a short fold of linen, a small patch of moss, and a creased sheet of handmade paper. Use a 3:4 canvas without rigid centering. Place the bowl at the lower-right third at about one quarter of the page, preserve broad sandstone-beige space at the upper left, print the title “EARTH / 07” with slight letterpress misregistration, and scatter three short information lines near the edges. Sandstone beige occupies about sixty percent, terracotta twenty percent, with dry-leaf brown and moss green at ten percent each. Combine a handcrafted serif with sparse handwritten marks. Show subtle fibers, folds, impression, and water traces; every surface is muted and matte. Render a flat scan of a natural-paper poster: quiet, breathable, and visibly handmade without looking dirty or randomly collaged.",
+    "negativePrompt": "日式品牌标志，商业包装模拟图，光滑数码渐变，鲜艳荧光色，严格对称，密集网格，塑料陶器，完美无瑕表面，严重污渍，撕烂纸张，大量手写乱码，三维透视，水印",
     "sourceType": "curated-seed-pending-license-confirmation",
     "sourceNote": "Curated seed reference retained for beta evaluation. Confirm ownership or redistribution license before production publication.",
     "reviewStatus": "human-reviewed",
     "updatedAt": "2026-07-29",
-    "promptVersion": 2,
+    "promptVersion": 3,
     "promptSchema": [
-      "subject",
-      "style_and_context",
+      "concrete_subject",
       "composition_and_camera",
-      "materials_light_color",
-      "constraints",
-      "negative_prompt"
-    ]
+      "materials_and_color_proportions",
+      "lighting_and_finish",
+      "language_specific_negative_prompt"
+    ],
+    "promptSchemaId": "aesthetic-archive.prompt-card.v3",
+    "negativePromptZh": "日式品牌标志，商业包装模拟图，光滑数码渐变，鲜艳荧光色，严格对称，密集网格，塑料陶器，完美无瑕表面，严重污渍，撕烂纸张，大量手写乱码，三维透视，水印",
+    "negativePromptEn": "Japanese brand logo, commercial packaging mockup, smooth digital gradient, fluorescent colors, strict symmetry, dense grid, plastic pottery, flawless surfaces, severe stains, torn paper, extensive illegible handwriting, 3D perspective, watermark",
+    "promptEngineering": {
+      "templateVersion": 4,
+      "directlyRunnable": true,
+      "containsPlaceholders": false,
+      "languageIsolation": "pass",
+      "providerNeutral": true,
+      "negativePromptSeparate": true,
+      "maxLength": 4000,
+      "review": {
+        "status": "static-pass-generation-pending",
+        "score": null,
+        "method": "Prompt v3 static contract review; real generation review required.",
+        "reviewedAt": null
+      }
+    }
   },
   {
     "id": "G-08",
@@ -1431,22 +1703,39 @@
     "crossReferences": [
       "A-02 极简主义建筑"
     ],
-    "promptZh": "【主体】\n以用户提供的主体描述为画面主体\n【风格与语境】\n[主体描述]。静奢与无声权贵平面设计风格。极大留白，严谨对称，极细的分隔线，信息量极少但每个元素精确到位。经典优雅的衬线体（如 Didot、Bodoni），字号小而精准，字距微微拉宽，绝不使用粗体。驼色、象牙白、燕麦色、深海军蓝，极低饱和度，拒绝任何荧光色。极简的面料特写、皮革纹理，绝无滤镜的自然光影摄影，材质本身即是视觉语言，呈现克制而昂贵的隐形财富感。\n【构图与镜头】\n极大留白，严谨对称，极细的分隔线，信息量极少但每个元素都精确到位，拒绝任何装饰性填充。\n【材质、光线与色彩】\n极简的面料特写、皮革纹理、建筑局部；高端黑白摄影；绝无滤镜的自然光影；材质本身即是视觉语言。；驼色 #C8A87A、象牙白 #F5F0E0、燕麦色 #E8E0D0、深海军蓝 #1C2B3A\n【使用约束】\n适用场景：brand proposal、visual system、AI image generation",
-    "promptEn": "[SUBJECT]\nUse the user-provided subject description as the visual subject\n[STYLE AND CONTEXT]\n[Subject description]. Quiet Luxury and Old Money aesthetic graphic design. Massive white space, strictly symmetrical, ultra-thin dividing lines, minimal information but every element precisely placed. Classic elegant serif typeface (e.g., Didot, Bodoni), small precise font size, slightly wide letter spacing, absolutely no bold or decorative fonts. Camel, ivory, oatmeal, deep navy blue, ultra-low saturation, rejecting any fluorescent colors. Minimalist fabric close-ups, leather textures, natural light photography with no filters, materials as visual language, presenting restrained and expensive stealth wealth.\n[COMPOSITION AND CAMERA]\n极大留白，严谨对称，极细的分隔线，信息量极少但每个元素都精确到位，拒绝任何装饰性填充。\n[MATERIALS, LIGHT, AND COLOR]\n极简的面料特写、皮革纹理、建筑局部；高端黑白摄影；绝无滤镜的自然光影；材质本身即是视觉语言。；驼色 #C8A87A、象牙白 #F5F0E0、燕麦色 #E8E0D0、深海军蓝 #1C2B3A\n[CONSTRAINTS]\nUse cases: brand proposal, visual system, AI image generation",
-    "negativePrompt": "generic decoration, unrelated objects, invented provenance, inconsistent materials, weak hierarchy, unreadable text, low-resolution, watermark, malformed geometry",
+    "promptZh": "一张高端羊绒面料品牌的竖版形象海报，主视觉为象牙白羊绒与驼色皮革在自然光下交叠的局部静物，不出现人物或可识别商品。 画布为3比4，严格中轴但不僵硬；静物窄幅照片横跨画面中部约三分之一，上下保留大面积留白，顶部小号标题“ATELIER”，底部只有材质编号和一条极细分隔线。 象牙白与燕麦色约七成、驼色两成、深海军蓝一成；使用高对比现代衬线标题和极小中性无衬线信息，不用粗体，纸面和织物纹理细腻，绝无金属炫光。 输出为平整的精品画册广告页，自然光、真实纤维、精确对齐与克制间距传达品质，不依赖豪车、珠宝、徽章或品牌标志。",
+    "promptEn": "A vertical image poster for an anonymous premium cashmere atelier, featuring a close still life of ivory cashmere folded against camel leather in unfiltered natural light, with no person or identifiable product. Use a 3:4 canvas with disciplined near-symmetry. Let a narrow still-life photograph span the middle third and preserve broad whitespace above and below. Set the small title “ATELIER” at the top, with only a material code and one hairline rule at the bottom. Ivory and oatmeal occupy about seventy percent, camel twenty percent, and deep navy ten percent. Pair a high-contrast modern serif title with tiny neutral sans-serif information; no bold type. Preserve fine paper and fiber texture and exclude metallic spectacle. Render a flat premium lookbook advertisement. Quality comes from natural light, real fibers, exact alignment, and restrained spacing rather than cars, jewelry, crests, or logos.",
+    "negativePrompt": "豪车，游艇，珠宝，王冠，家族徽章，马术场景，真人模特，真实奢侈品牌，金色标志，大理石宫殿，粗体大标题，密集信息，荧光色，强滤镜，塑料织物，透视样机，水印",
     "sourceType": "curated-seed-pending-license-confirmation",
     "sourceNote": "Curated seed reference retained for beta evaluation. Confirm ownership or redistribution license before production publication.",
     "reviewStatus": "human-reviewed",
     "updatedAt": "2026-07-29",
-    "promptVersion": 2,
+    "promptVersion": 3,
     "promptSchema": [
-      "subject",
-      "style_and_context",
+      "concrete_subject",
       "composition_and_camera",
-      "materials_light_color",
-      "constraints",
-      "negative_prompt"
-    ]
+      "materials_and_color_proportions",
+      "lighting_and_finish",
+      "language_specific_negative_prompt"
+    ],
+    "promptSchemaId": "aesthetic-archive.prompt-card.v3",
+    "negativePromptZh": "豪车，游艇，珠宝，王冠，家族徽章，马术场景，真人模特，真实奢侈品牌，金色标志，大理石宫殿，粗体大标题，密集信息，荧光色，强滤镜，塑料织物，透视样机，水印",
+    "negativePromptEn": "luxury car, yacht, jewelry, crown, family crest, equestrian scene, fashion model, real luxury brand, gold logo, marble palace, oversized bold headline, dense information, neon colors, heavy filter, plastic fabric, perspective mockup, watermark",
+    "promptEngineering": {
+      "templateVersion": 4,
+      "directlyRunnable": true,
+      "containsPlaceholders": false,
+      "languageIsolation": "pass",
+      "providerNeutral": true,
+      "negativePromptSeparate": true,
+      "maxLength": 4000,
+      "review": {
+        "status": "static-pass-generation-pending",
+        "score": null,
+        "method": "Prompt v3 static contract review; real generation review required.",
+        "reviewedAt": null
+      }
+    }
   },
   {
     "id": "G-09",
@@ -1514,22 +1803,39 @@
     "crossReferences": [
       "A-06 新装饰艺术室内"
     ],
-    "promptZh": "【主体】\n以用户提供的主体描述为画面主体\n【风格与语境】\n[主体描述]。新装饰艺术与感官极繁平面设计风格。强烈的中轴对称，放射状或扇形几何构图，密集的装饰性边框与分隔元素，信息层级戏剧化。带有装饰性的几何衬线体（Art Deco 字体），全大写排版，金属质感字效。哑金、香槟金、深祖母绿、宝石蓝，高对比度，金色是绝对主角。几何镶嵌图案，放射状线条，大理石纹理，镀金边框，高度风格化的人物插图，呈现仪式感与戏剧性的奢华极繁美学。\n【构图与镜头】\n强烈的中轴对称，放射状或扇形几何构图，密集的装饰性边框与分隔元素，信息层级戏剧化。\n【材质、光线与色彩】\n几何镶嵌图案、放射状线条、大理石纹理、镀金边框、羽毛/珠宝等奢华材质特写，高度风格化的人物插图。；哑金 #C5A059、香槟金 #E8D5A3、深祖母绿 #1A4A3A、深酒红 #8B1A1A\n【使用约束】\n适用场景：brand proposal、visual system、AI image generation",
-    "promptEn": "[SUBJECT]\nUse the user-provided subject description as the visual subject\n[STYLE AND CONTEXT]\n[Subject description]. Neo Art Deco and Opulent Maximalism graphic design style. Strong central axis symmetry, radial or fan-shaped geometric composition, dense decorative borders and dividing elements, dramatic information hierarchy. Decorative geometric serif typeface (Art Deco font), all-caps typography, metallic text effect. Matte gold, champagne gold, deep emerald green, jewel blue, high contrast, gold as absolute protagonist. Geometric mosaic patterns, radial lines, marble texture, gilded borders, highly stylized figurative illustrations, presenting ceremonial and dramatic luxury maximalist aesthetic.\n[COMPOSITION AND CAMERA]\n强烈的中轴对称，放射状或扇形几何构图，密集的装饰性边框与分隔元素，信息层级戏剧化。\n[MATERIALS, LIGHT, AND COLOR]\n几何镶嵌图案、放射状线条、大理石纹理、镀金边框、羽毛/珠宝等奢华材质特写，高度风格化的人物插图。；哑金 #C5A059、香槟金 #E8D5A3、深祖母绿 #1A4A3A、深酒红 #8B1A1A\n[CONSTRAINTS]\nUse cases: brand proposal, visual system, AI image generation",
-    "negativePrompt": "generic decoration, unrelated objects, invented provenance, inconsistent materials, weak hierarchy, unreadable text, low-resolution, watermark, malformed geometry",
+    "promptZh": "一张竖版新装饰艺术歌舞演出海报，中央是一名非写实匿名舞者的几何剪影，背后展开祖母绿与哑金组成的放射扇形，外圈为三层对称阶梯边框。 画布为2比3，严格中轴对称；舞者占中央约三分之一，标题“NOCTURNE”沿上方弧线排布，日期与场次集中在底部矩形铭牌，装饰密集但保留清晰层级。 深祖母绿和黑色约占六成，哑金与香槟金约三成，深酒红不超过一成；几何衬线全大写标题、金属墨线、扇形和阶梯纹样精确重复，背景带细腻大理石纹而非摄影奢侈品。 输出为精致箔压与丝网印刷结合的平面海报，仪式感强但不变成赌场广告；文字短小虚构，人物不指向真实表演者。",
+    "promptEn": "A vertical neo-Art-Deco poster for a fictional dance performance, centered on a stylized anonymous dancer silhouette against a radial fan of deep emerald and matte gold, enclosed by three symmetrical stepped borders. Use a 2:3 canvas with strict axial symmetry. The dancer occupies roughly one third of the center, the title “NOCTURNE” follows the upper arc, and date plus performance details sit within one rectangular plaque at the bottom. Ornament is dense but hierarchy remains unmistakable. Deep emerald and black occupy about sixty percent, matte and champagne gold thirty percent, and burgundy no more than ten percent. Use geometric all-cap serif lettering, metallic ink lines, precise repeated fans and steps, and subtle marble texture rather than photographs of luxury goods. Render a refined flat poster combining foil stamping and screen print. It is ceremonial without resembling a casino advertisement. Keep copy short and fictional and avoid any real performer.",
+    "negativePrompt": "赌场，拉斯维加斯，夜总会广告，真实明星，照片人像，满版亮金，廉价黄色，彩虹宝石，洛可可花纹，随机装饰，左右不对称，霓虹灯，三维金字，长篇乱码，品牌标志，水印",
     "sourceType": "curated-seed-pending-license-confirmation",
     "sourceNote": "Curated seed reference retained for beta evaluation. Confirm ownership or redistribution license before production publication.",
     "reviewStatus": "human-reviewed",
     "updatedAt": "2026-07-29",
-    "promptVersion": 2,
+    "promptVersion": 3,
     "promptSchema": [
-      "subject",
-      "style_and_context",
+      "concrete_subject",
       "composition_and_camera",
-      "materials_light_color",
-      "constraints",
-      "negative_prompt"
-    ]
+      "materials_and_color_proportions",
+      "lighting_and_finish",
+      "language_specific_negative_prompt"
+    ],
+    "promptSchemaId": "aesthetic-archive.prompt-card.v3",
+    "negativePromptZh": "赌场，拉斯维加斯，夜总会广告，真实明星，照片人像，满版亮金，廉价黄色，彩虹宝石，洛可可花纹，随机装饰，左右不对称，霓虹灯，三维金字，长篇乱码，品牌标志，水印",
+    "negativePromptEn": "casino, Las Vegas, nightclub advertisement, real celebrity, photographic portrait, full-frame bright gold, cheap yellow, rainbow gems, rococo pattern, random ornament, asymmetry, neon, 3D gold lettering, long gibberish, brand logo, watermark",
+    "promptEngineering": {
+      "templateVersion": 4,
+      "directlyRunnable": true,
+      "containsPlaceholders": false,
+      "languageIsolation": "pass",
+      "providerNeutral": true,
+      "negativePromptSeparate": true,
+      "maxLength": 4000,
+      "review": {
+        "status": "static-pass-generation-pending",
+        "score": null,
+        "method": "Prompt v3 static contract review; real generation review required.",
+        "reviewedAt": null
+      }
+    }
   },
   {
     "id": "G-10",
@@ -1600,22 +1906,39 @@
     "crossReferences": [
       "A-04 参数化建筑"
     ],
-    "promptZh": "【主体】\n以用户提供的主体描述为画面主体\n【风格与语境】\n[主体描述]。生成艺术与数据诗学平面设计风格。由算法生成的有机或几何结构，无传统网格，构图随参数变化无限衍生。极简无衬线体作为数据标注，字符本身被解构为点线面参与生成。色彩由数据驱动，或极度克制的黑白+单一强调色，或全光谱渐变。粒子系统，流场（Flow Field），Voronoi 图，声波/地理数据的视觉化，L-System 植物形态，呈现算法秩序与数学诗意的交融。\n【构图与镜头】\n无传统网格，由算法生成的有机或几何结构，构图随参数变化无限衍生，每次输出都是唯一的。\n【材质、光线与色彩】\n粒子系统、流场（Flow Field）、Voronoi 图、L-System 植物形态、声波/地理/气象数据的视觉化，代码即作品。；算法黑 #000000、数据白 #FFFFFF、数据蓝 #0066FF、强调橙 #FF6600\n【使用约束】\n适用场景：brand proposal、visual system、AI image generation",
-    "promptEn": "[SUBJECT]\nUse the user-provided subject description as the visual subject\n[STYLE AND CONTEXT]\n[Subject description]. Generative Art and Data Poetics graphic design style. Organic or geometric structures generated by algorithms, no traditional grid, composition infinitely derived as parameters change. Minimalist sans-serif typeface as data annotation, characters deconstructed into points, lines, and planes participating in generation. Colors driven by data: either extremely restrained black and white with a single accent color, or full-spectrum gradients. Particle systems, flow fields, Voronoi diagrams, visualization of sound wave/geographic data, L-System plant forms, presenting the fusion of algorithmic order and mathematical poetry.\n[COMPOSITION AND CAMERA]\n无传统网格，由算法生成的有机或几何结构，构图随参数变化无限衍生，每次输出都是唯一的。\n[MATERIALS, LIGHT, AND COLOR]\n粒子系统、流场（Flow Field）、Voronoi 图、L-System 植物形态、声波/地理/气象数据的视觉化，代码即作品。；算法黑 #000000、数据白 #FFFFFF、数据蓝 #0066FF、强调橙 #FF6600\n[CONSTRAINTS]\nUse cases: brand proposal, visual system, AI image generation",
-    "negativePrompt": "generic decoration, unrelated objects, invented provenance, inconsistent materials, weak hierarchy, unreadable text, low-resolution, watermark, malformed geometry",
+    "promptZh": "一张方形生成艺术展览海报，中央是一组由两万条细线构成的蓝色流场涡旋，线条从左下橙色种子点出发，在黑色背景上形成一个有秩序的开放环。 使用1比1画布，不设传统网格；流场占画面约七成并略偏右，左上仅放短标题“FIELD 24”，右下排列四个极小参数值，边缘留出稳定黑色负空间。 算法黑约七成，数据蓝约两成，数据白与强调橙合计一成；线条密度沿轨迹连续渐变，交叉处保持清楚，标题使用极简无衬线，参数使用等宽字，不加入全光谱彩虹。 输出为高分辨率平面数字版画，视觉复杂度来自连续规则和密度变化，而不是随机噪声；参数为虚构装饰，不声称真实数据来源。",
+    "promptEn": "A square generative-art exhibition poster centered on a blue flow-field vortex made from twenty thousand fine trajectories, emerging from one orange seed point at the lower left and forming an ordered open loop on black. Use a 1:1 canvas without a conventional layout grid. Let the field occupy about seventy percent and sit slightly right of center. Place only the short title “FIELD 24” at the upper left and four tiny parameter values at the lower right, retaining stable black negative space around the edges. Algorithmic black occupies about seventy percent, data blue twenty percent, and data white plus accent orange ten percent. Vary line density continuously along trajectories and keep crossings legible. Use minimal sans-serif titling and monospaced parameters; no full-spectrum rainbow. Render a high-resolution flat digital print whose complexity comes from coherent rules and density variation rather than random noise. Parameters are fictional graphic notation and do not claim a real dataset.",
+    "negativePrompt": "随机粒子噪声，全光谱彩虹，默认AI分形，三维发光球，太空星云，代码截图，真实数据声明，复杂仪表盘，密集长文，粗重标题，模糊线条，断裂轨迹，低分辨率，品牌标志，水印",
     "sourceType": "curated-seed-pending-license-confirmation",
     "sourceNote": "Curated seed reference retained for beta evaluation. Confirm ownership or redistribution license before production publication.",
     "reviewStatus": "human-reviewed",
     "updatedAt": "2026-07-29",
-    "promptVersion": 2,
+    "promptVersion": 3,
     "promptSchema": [
-      "subject",
-      "style_and_context",
+      "concrete_subject",
       "composition_and_camera",
-      "materials_light_color",
-      "constraints",
-      "negative_prompt"
-    ]
+      "materials_and_color_proportions",
+      "lighting_and_finish",
+      "language_specific_negative_prompt"
+    ],
+    "promptSchemaId": "aesthetic-archive.prompt-card.v3",
+    "negativePromptZh": "随机粒子噪声，全光谱彩虹，默认AI分形，三维发光球，太空星云，代码截图，真实数据声明，复杂仪表盘，密集长文，粗重标题，模糊线条，断裂轨迹，低分辨率，品牌标志，水印",
+    "negativePromptEn": "random particle noise, full-spectrum rainbow, generic AI fractal, 3D glowing sphere, space nebula, code screenshot, real-data claim, complex dashboard, dense copy, heavy headline, blurry lines, broken trajectories, low resolution, brand logo, watermark",
+    "promptEngineering": {
+      "templateVersion": 4,
+      "directlyRunnable": true,
+      "containsPlaceholders": false,
+      "languageIsolation": "pass",
+      "providerNeutral": true,
+      "negativePromptSeparate": true,
+      "maxLength": 4000,
+      "review": {
+        "status": "static-pass-generation-pending",
+        "score": null,
+        "method": "Prompt v3 static contract review; real generation review required.",
+        "reviewedAt": null
+      }
+    }
   },
   {
     "id": "G-11",
@@ -1683,22 +2006,39 @@
       "A-03 侘寂室内",
       "A-08 生物亲和"
     ],
-    "promptZh": "【主体】\n以用户提供的主体描述为画面主体\n【风格与语境】\n[主体描述]。手工温情与新工艺美术平面设计风格。自由不规则的手绘版式，邮票/印章式的拼贴构图，活版印刷（Letterpress）的压痕感。手写体与手工感衬线体，字母间距不均匀，手绘字（Lettering）。温暖的大地色系：奶油黄、赤陶橙、苔藓绿，牛皮纸温度感。活版印刷压痕，手工水彩插图，木刻版画，粗糙纸张纹理，植物图鉴式插图，强调「人手触碰过」的痕迹，呈现对抗数字冷漠的手作温度。\n【构图与镜头】\n自由不规则的手绘版式，邮票/贴纸/印章式的拼贴构图，带有手工印刷（活版印刷 Letterpress）的压痕感。\n【材质、光线与色彩】\n活版印刷压痕、手工水彩插图、木刻版画、粗糙纸张纹理、手绘地图与植物图鉴式插图，强调「人手触碰过」的痕迹。；奶油黄 #F5E6C8、赤陶橙 #C4714A、苔藓绿 #6B7C5E、亚麻白 #C8B89A\n【使用约束】\n适用场景：brand proposal、visual system、AI image generation",
-    "promptEn": "[SUBJECT]\nUse the user-provided subject description as the visual subject\n[STYLE AND CONTEXT]\n[Subject description]. Artisanal Craft and New Folk graphic design style. Free and irregular hand-drawn layout, stamp/seal-style collage composition, letterpress printing impression texture. Handwritten and hand-crafted serif typeface, uneven letter spacing, hand-lettering. Warm earthy palette: cream yellow, terracotta orange, moss green, kraft paper warmth. Letterpress printing impressions, hand-painted watercolor illustrations, woodblock prints, rough paper texture, botanical illustration style, emphasizing traces of 'human hands having touched,' presenting handmade warmth against digital coldness.\n[COMPOSITION AND CAMERA]\n自由不规则的手绘版式，邮票/贴纸/印章式的拼贴构图，带有手工印刷（活版印刷 Letterpress）的压痕感。\n[MATERIALS, LIGHT, AND COLOR]\n活版印刷压痕、手工水彩插图、木刻版画、粗糙纸张纹理、手绘地图与植物图鉴式插图，强调「人手触碰过」的痕迹。；奶油黄 #F5E6C8、赤陶橙 #C4714A、苔藓绿 #6B7C5E、亚麻白 #C8B89A\n[CONSTRAINTS]\nUse cases: brand proposal, visual system, AI image generation",
-    "negativePrompt": "generic decoration, unrelated objects, invented provenance, inconsistent materials, weak hierarchy, unreadable text, low-resolution, watermark, malformed geometry",
+    "promptZh": "一张竖版社区植物节海报，中央是手工木刻风格的三株本地野草插图，周围拼贴一枚赤陶色圆印章、两张奶油黄票券和一小块苔藓绿水彩。 画布为2比3，使用松散不规则布局；植物从底部向上生长并占画面一半，标题“GROW TOGETHER”以手绘衬线字置于左上，日期和地点分别藏在票券与印章中，边缘保留纸张呼吸空间。 奶油黄纸底约五成、赤陶橙两成、苔藓绿两成、亚麻白一成；保留木刻刀痕、水彩渗色、活版压痕、套印轻微偏差和粗纸纤维，文字短小而清楚。 输出为平面扫描的社区手印海报，温暖、真诚、有地域手作感；植物只作为一般插画，不标注无法确认的物种或文化来源。",
+    "promptEn": "A vertical poster for a community plant festival, centered on three hand-cut woodblock illustrations of generic local weeds, surrounded by one terracotta circular stamp, two cream ticket shapes, and a small moss-green watercolor patch. Use a 2:3 canvas with a loose irregular layout. Plants grow upward from the bottom and occupy half the page. Place the hand-drawn serif title “GROW TOGETHER” at the upper left, with date and venue embedded separately in the ticket and stamp. Preserve breathing room at the paper edges. Cream paper occupies about fifty percent, terracotta twenty percent, moss green twenty percent, and linen white ten percent. Preserve carved marks, watercolor bleed, letterpress impression, slight registration shift, and coarse paper fibers. Keep copy short and legible. Render a flat scan of a community hand-printed poster: warm, sincere, and materially specific. Treat the plants as general illustrations and do not invent species or cultural provenance.",
+    "negativePrompt": "精致企业品牌，现代矢量图标，照片级植物，真实物种标签，民族文化挪用，光滑铜版纸，数码渐变，完美套印，霓虹色，密集贴纸，儿童卡通，长篇乱码，透视样机，水印",
     "sourceType": "curated-seed-pending-license-confirmation",
     "sourceNote": "Curated seed reference retained for beta evaluation. Confirm ownership or redistribution license before production publication.",
     "reviewStatus": "human-reviewed",
     "updatedAt": "2026-07-29",
-    "promptVersion": 2,
+    "promptVersion": 3,
     "promptSchema": [
-      "subject",
-      "style_and_context",
+      "concrete_subject",
       "composition_and_camera",
-      "materials_light_color",
-      "constraints",
-      "negative_prompt"
-    ]
+      "materials_and_color_proportions",
+      "lighting_and_finish",
+      "language_specific_negative_prompt"
+    ],
+    "promptSchemaId": "aesthetic-archive.prompt-card.v3",
+    "negativePromptZh": "精致企业品牌，现代矢量图标，照片级植物，真实物种标签，民族文化挪用，光滑铜版纸，数码渐变，完美套印，霓虹色，密集贴纸，儿童卡通，长篇乱码，透视样机，水印",
+    "negativePromptEn": "polished corporate brand, modern vector icons, photoreal plants, specific species labels, invented folk provenance, glossy coated paper, digital gradient, perfect registration, neon colors, sticker overload, childish cartoon, long gibberish, perspective mockup, watermark",
+    "promptEngineering": {
+      "templateVersion": 4,
+      "directlyRunnable": true,
+      "containsPlaceholders": false,
+      "languageIsolation": "pass",
+      "providerNeutral": true,
+      "negativePromptSeparate": true,
+      "maxLength": 4000,
+      "review": {
+        "status": "static-pass-generation-pending",
+        "score": null,
+        "method": "Prompt v3 static contract review; real generation review required.",
+        "reviewedAt": null
+      }
+    }
   },
   {
     "id": "G-12",
@@ -1767,22 +2107,39 @@
       "A-01 粗野主义建筑",
       "A-02 极简主义建筑"
     ],
-    "promptZh": "【主体】\n以用户提供的主体描述为画面主体\n【风格与语境】\n[主体描述]。建筑艺术插画风格。等距或透视构图，剖面切割揭示内部空间，精密线条与色彩填充的层次感。纤细的钢笔线稿，水彩渲染，建筑细部放大图，人物尺度参照。纸张白、墨水蓝、赭石橙、植物绿，色调克制而诗意。精密的建筑制图语言与插画表现力融合，将技术性图纸转化为充满诗意的视觉叙事，线条即情感。\n【构图与镜头】\n等距或透视构图，剖面切割揭示内部空间，精密线条与色彩填充的层次感，建筑作为叙事容器。\n【材质、光线与色彩】\n精密钢笔线稿，水彩渲染，等距剖面图，建筑细部放大图，空间序列叙事，人物尺度参照。；纸张白 #F5F0E8、墨水蓝 #2A3A5A、赭石橙 #C4956A、植物绿 #4A7C59\n【使用约束】\n适用场景：brand proposal、visual system、AI image generation",
-    "promptEn": "[SUBJECT]\nUse the user-provided subject description as the visual subject\n[STYLE AND CONTEXT]\n[Subject description]. Architectural Illustration style. Isometric or perspective composition, cross-section cuts revealing interior spaces, layered precision line work with color fills. Fine pen line drawing, watercolor rendering, architectural detail enlargements, human scale references. Paper white, ink blue, ochre orange, plant green, restrained and poetic palette. Fusion of precise architectural drawing language with illustrative expressiveness, transforming technical drawings into poetic visual narrative where lines carry emotion.\n[COMPOSITION AND CAMERA]\n等距或透视构图，剖面切割揭示内部空间，精密线条与色彩填充的层次感，建筑作为叙事容器。\n[MATERIALS, LIGHT, AND COLOR]\n精密钢笔线稿，水彩渲染，等距剖面图，建筑细部放大图，空间序列叙事，人物尺度参照。；纸张白 #F5F0E8、墨水蓝 #2A3A5A、赭石橙 #C4956A、植物绿 #4A7C59\n[CONSTRAINTS]\nUse cases: brand proposal, visual system, AI image generation",
-    "negativePrompt": "generic decoration, unrelated objects, invented provenance, inconsistent materials, weak hierarchy, unreadable text, low-resolution, watermark, malformed geometry",
+    "promptZh": "一张横版建筑剖透视插画，描绘一座三层社区图书馆被纵向切开后的内部空间：底层阅览厅、中层连桥、顶层天窗与屋顶花园同时可见，包含十二名简化人物作为尺度。 画布为4比3，采用轻微轴测剖面；建筑主体占中央约四分之三，左侧保留入口广场，右侧展开一张楼梯节点放大图，剖切面使用深墨水蓝粗线，内部线条细而有层级。 纸张白约六成、墨水蓝两成、赭石橙与植物绿各一成；钢笔线稿保持精确，水彩只在地面、木构件和植物上形成半透明色块，人物简洁但不重复。 输出为平整扫描的手绘建筑叙事图，空间连接、楼板厚度、楼梯方向和剖切逻辑一致；不出现尺寸标注、真实项目名称或虚构建筑师。",
+    "promptEn": "A horizontal sectional-perspective illustration of a three-story community library cut longitudinally to reveal a ground-floor reading hall, a middle-level bridge, roof skylights, and a planted terrace, with twelve simplified people providing scale. Use a 4:3 canvas with a mild axonometric section. Let the building occupy roughly three quarters of the center, preserve an entrance court on the left, and place one enlarged stair-junction detail on the right. Draw the cut plane with a heavy ink-blue line and interiors with finer hierarchical lines. Paper white occupies about sixty percent, ink blue twenty percent, with ochre orange and plant green at ten percent each. Keep pen work precise and use translucent watercolor only on floors, timber elements, and planting. People are simple but not duplicated. Render a flat scan of a hand-drawn architectural narrative. Maintain coherent room connections, slab thicknesses, stair direction, and cutting logic. Include no dimensions, real project name, or invented architect.",
+    "negativePrompt": "照片级建筑渲染，三维游戏画面，不可能剖面，断裂楼板，无出口楼梯，错误透视，悬浮人物，重复人物，密集尺寸标注，乱码文字，真实项目名，著名建筑师署名，鲜艳马克笔，全黑背景，水印",
     "sourceType": "curated-seed-pending-license-confirmation",
     "sourceNote": "Curated seed reference retained for beta evaluation. Confirm ownership or redistribution license before production publication.",
     "reviewStatus": "human-reviewed",
     "updatedAt": "2026-07-29",
-    "promptVersion": 2,
+    "promptVersion": 3,
     "promptSchema": [
-      "subject",
-      "style_and_context",
+      "concrete_subject",
       "composition_and_camera",
-      "materials_light_color",
-      "constraints",
-      "negative_prompt"
-    ]
+      "materials_and_color_proportions",
+      "lighting_and_finish",
+      "language_specific_negative_prompt"
+    ],
+    "promptSchemaId": "aesthetic-archive.prompt-card.v3",
+    "negativePromptZh": "照片级建筑渲染，三维游戏画面，不可能剖面，断裂楼板，无出口楼梯，错误透视，悬浮人物，重复人物，密集尺寸标注，乱码文字，真实项目名，著名建筑师署名，鲜艳马克笔，全黑背景，水印",
+    "negativePromptEn": "photoreal rendering, video-game scene, impossible section, broken slabs, stairs without exits, inconsistent perspective, floating people, duplicated people, dense dimensions, gibberish text, real project name, famous architect attribution, vivid marker colors, black background, watermark",
+    "promptEngineering": {
+      "templateVersion": 4,
+      "directlyRunnable": true,
+      "containsPlaceholders": false,
+      "languageIsolation": "pass",
+      "providerNeutral": true,
+      "negativePromptSeparate": true,
+      "maxLength": 4000,
+      "review": {
+        "status": "static-pass-generation-pending",
+        "score": null,
+        "method": "Prompt v3 static contract review; real generation review required.",
+        "reviewedAt": null
+      }
+    }
   },
   {
     "id": "G-13",
@@ -1851,21 +2208,38 @@
       "G-06 暗黑电影·幽玄美学",
       "G-08 静奢·无声权贵"
     ],
-    "promptZh": "【主体】\n以用户提供的主体描述为画面主体\n【风格与语境】\n[主体描述]。电影感编辑排版设计风格。全出血大幅摄影，宽幅比例（16:9 或 2.39:1 电影比例），文字叠加于图像之上，排版本身具有强烈的构图感。大号衬线体标题（如 Bodoni、Didot），超细与超粗字重的极端对比，字距拉宽。电影黑、胶片白、暗金色调，高对比度黑白或低饱和度电影调色。胶片颗粒质感，宽幅黑边（Letterboxing），景深效果，呈现每一版面都是一帧电影画面的叙事张力。\n【构图与镜头】\n全出血（Full-bleed）大幅摄影，宽幅比例（16:9 或 2.39:1 电影比例），文字叠加于图像之上，排版本身具有强烈的构图感。\n【材质、光线与色彩】\n电影级摄影，胶片颗粒质感，高对比度黑白或低饱和度调色，宽幅黑边（Letterboxing），运动模糊，景深效果。；电影黑 #0A0A0A、胶片白 #F0EDE8、胶片棕 #8B7355、暗金 #C8A84B\n【使用约束】\n适用场景：brand proposal、visual system、AI image generation",
-    "promptEn": "[SUBJECT]\nUse the user-provided subject description as the visual subject\n[STYLE AND CONTEXT]\n[Subject description]. Cinematic Editorial design style. Full-bleed large-format photography, widescreen ratio (16:9 or 2.39:1 cinematic ratio), text overlaid on imagery with strong compositional sense in the typography itself. Large serif headline typeface (e.g., Bodoni, Didot), extreme contrast between ultra-thin and ultra-bold weights, wide letter spacing. Cinematic black, film white, dark gold palette, high-contrast black and white or low-saturation cinematic color grading. Film grain texture, letterboxing, depth-of-field effect, presenting narrative tension where every layout is a cinematic frame\n[COMPOSITION AND CAMERA]\n全出血（Full-bleed）大幅摄影，宽幅比例（16:9 或 2.39:1 电影比例），文字叠加于图像之上，排版本身具有强烈的构图感。\n[MATERIALS, LIGHT, AND COLOR]\n电影级摄影，胶片颗粒质感，高对比度黑白或低饱和度调色，宽幅黑边（Letterboxing），运动模糊，景深效果。；电影黑 #0A0A0A、胶片白 #F0EDE8、胶片棕 #8B7355、暗金 #C8A84B\n[CONSTRAINTS]\nUse cases: brand proposal, visual system, AI image generation",
-    "negativePrompt": "generic decoration, unrelated objects, invented provenance, inconsistent materials, weak hierarchy, unreadable text, low-resolution, watermark, malformed geometry",
+    "promptZh": "一张电影感文化杂志的横版跨页，主视觉为一名匿名女性独自走过雨夜空旷车站的全出血低饱和摄影，人物位于右侧三分点，湿地面反射一盏远处暖灯。 画布为16比9并带克制上下黑边；照片占满画面，左侧深色负空间放两行大号衬线标题“LAST PLATFORM”，右下排列三行极小信息，文字不遮挡人物和主要光源。 电影黑和午夜蓝约占七成，胶片白用于标题，胶片棕与暗金只出现在远灯和反射；使用50毫米电影镜头观感、浅景深、轻微运动模糊、细腻35毫米颗粒和受控高光。 输出为平整数字杂志跨页，叙事张力来自人物、空间和排版共同构图；人物比例自然，文案短小虚构，不包含真实电影、演员或品牌。",
+    "promptEn": "A horizontal cinematic culture-magazine spread built around a full-bleed low-saturation photograph of one anonymous woman crossing an empty railway platform at night in light rain, positioned on the right third with a distant warm lamp reflected on wet pavement. Use a 16:9 canvas with restrained black letterbox bars. The image fills the page; place the two-line large serif title “LAST PLATFORM” in dark negative space on the left and three tiny information lines at the lower right. Never cover the figure or primary light. Cinema black and midnight blue occupy about seventy percent, film white is reserved for the title, and film brown plus dark gold appear only in the lamp and reflection. Use the character of a 50 mm cinema lens, shallow depth, slight motion blur, fine 35 mm grain, and controlled highlights. Render a flat digital magazine spread whose narrative tension comes from the combined composition of person, space, and typography. Keep anatomy natural and all copy short and fictional, with no real film, actor, or brand.",
+    "negativePrompt": "电影截图水印，真实演员，真实电影标题，品牌标志，赛博朋克霓虹，彩虹灯，过量橙青调色，人物正面特写，畸形肢体，完全模糊主体，密集长文，文字遮脸，粗糙低清，透视样机，水印",
     "sourceType": "curated-seed-pending-license-confirmation",
     "sourceNote": "Curated seed reference retained for beta evaluation. Confirm ownership or redistribution license before production publication.",
     "reviewStatus": "human-reviewed",
     "updatedAt": "2026-07-29",
-    "promptVersion": 2,
+    "promptVersion": 3,
     "promptSchema": [
-      "subject",
-      "style_and_context",
+      "concrete_subject",
       "composition_and_camera",
-      "materials_light_color",
-      "constraints",
-      "negative_prompt"
-    ]
+      "materials_and_color_proportions",
+      "lighting_and_finish",
+      "language_specific_negative_prompt"
+    ],
+    "promptSchemaId": "aesthetic-archive.prompt-card.v3",
+    "negativePromptZh": "电影截图水印，真实演员，真实电影标题，品牌标志，赛博朋克霓虹，彩虹灯，过量橙青调色，人物正面特写，畸形肢体，完全模糊主体，密集长文，文字遮脸，粗糙低清，透视样机，水印",
+    "negativePromptEn": "film-still watermark, real actor, real movie title, brand logo, cyberpunk neon, rainbow lights, excessive orange-teal grade, face close-up, malformed limbs, fully blurred subject, dense long copy, type covering the face, low resolution, perspective mockup, watermark",
+    "promptEngineering": {
+      "templateVersion": 4,
+      "directlyRunnable": true,
+      "containsPlaceholders": false,
+      "languageIsolation": "pass",
+      "providerNeutral": true,
+      "negativePromptSeparate": true,
+      "maxLength": 4000,
+      "review": {
+        "status": "static-pass-generation-pending",
+        "score": null,
+        "method": "Prompt v3 static contract review; real generation review required.",
+        "reviewedAt": null
+      }
+    }
   }
 ]

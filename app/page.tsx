@@ -15,6 +15,9 @@ const images = {
   reference: '/marketing/how-reference.png',
   card: '/marketing/how-card.png',
   try: '/marketing/try-placeholder.png',
+  promptReference: '/marketing/prompt-reference-a04.webp',
+  promptResultZh: '/marketing/prompt-result-zh.webp',
+  promptResultEn: '/marketing/prompt-result-en.webp',
 };
 
 const copy = {
@@ -30,7 +33,7 @@ const copy = {
       ['04', '加入 Collage 画板', '组合多张卡片，建立材料、色彩和空间关系可以被讨论的方向。', 'Collage Board'],
       ['05', '发布到共享广场', '经过审核和版权确认后，让个人积累成为其他设计师可以使用的知识。', 'Public Plaza'],
     ],
-    tryLabel: 'TRY / START YOUR ARCHIVE', tryTitle: '从一张参考图开始，建立你的第一张审美卡片。', tryBody: '把已经保存但还没有整理的图片放进来，让它从一个文件变成可以继续使用的设计资料。', tryNote: '当前版本无需先注册，资料保存在你的本地工作区。', tryButton: '开始建立我的审美资料', storyWhisper: '一张图，不再只是被保存，而是被理解。', whyWhisper: '你不是没有想法，只是在一次次重新找回它。', imageCaption: '反复搜索、解释、重做，最后又回到空白。', tryWhisper: '不用整理完所有资料，先从一张开始。', sharedOrigin: '来自每个设计师的审美判断', miniPrompt: '文化背景 · 色卡 · Prompt', miniBoard: '+ 3 张卡片 / Collage 画板',
+    tryLabel: 'TRY / START YOUR ARCHIVE', tryTitle: '从一张参考图开始，建立你的第一张审美卡片。', tryBody: '把已经保存但还没有整理的图片放进来，让它从一个文件变成可以继续使用的设计资料。', tryNote: '当前版本无需先注册，资料保存在你的本地工作区。', tryButton: '开始建立我的审美资料', storyWhisper: '一张图，不再只是被保存，而是被理解。', whyWhisper: '你不是没有想法，只是在一次次重新找回它。', imageCaption: '反复搜索、解释、重做，最后又回到空白。', tryWhisper: '不用整理完所有资料，先从一张开始。', sharedOrigin: '来自每个设计师的审美判断', miniPrompt: '文化背景 · 色卡 · Prompt', miniBoard: '+ 3 张卡片 / Collage 画板', validationTitle: 'Prompt 不是写完就结束，而是回到图像里验证。', validationBody: '同一张参考图分别生成中英文候选，按风格、构图、色彩和材质光感复评；A-04 双语卡片已通过用户验收。', validationLabels: ['REFERENCE / 参考图', '中文 PROMPT / 通过', 'EN PROMPT / PASSED'], validationMeta: '双语独立 Prompt · 每种语言 4 张候选 · 人工复评',
   },
   en: {
     lang: 'EN', other: '中文', what: 'What', who: 'Who', why: 'Why', how: 'How', try: 'Try', login: 'Log in', open: 'Start my archive',
@@ -44,7 +47,7 @@ const copy = {
       ['04', 'Compose a Collage Board', 'Combine cards to build a direction where material, colour and spatial relations can be discussed.', 'Collage Board'],
       ['05', 'Publish to Plaza', 'After review and rights confirmation, let personal accumulation become shared knowledge.', 'Public Plaza'],
     ],
-    tryLabel: 'TRY / START YOUR ARCHIVE', tryTitle: 'Start with one reference and build your first aesthetic card.', tryBody: 'Bring in an image you have saved but never organised. Turn it from a file into design material you can use again.', tryNote: 'No account required in the current version. Your archive stays in this local workspace.', tryButton: 'Start my aesthetic archive', storyWhisper: 'One image is no longer just saved. It is understood.', whyWhisper: 'You do have ideas. You are just repeatedly trying to find them again.', imageCaption: 'Search, explain, rebuild, and return to a blank page.', tryWhisper: 'You do not need to organise everything. Start with one.', sharedOrigin: 'Built from every designer’s judgement', miniPrompt: 'cultural context · palette · prompt', miniBoard: '+ 3 cards / Collage Board',
+    tryLabel: 'TRY / START YOUR ARCHIVE', tryTitle: 'Start with one reference and build your first aesthetic card.', tryBody: 'Bring in an image you have saved but never organised. Turn it from a file into design material you can use again.', tryNote: 'No account required in the current version. Your archive stays in this local workspace.', tryButton: 'Start my aesthetic archive', storyWhisper: 'One image is no longer just saved. It is understood.', whyWhisper: 'You do have ideas. You are just repeatedly trying to find them again.', imageCaption: 'Search, explain, rebuild, and return to a blank page.', tryWhisper: 'You do not need to organise everything. Start with one.', sharedOrigin: 'Built from every designer’s judgement', miniPrompt: 'cultural context · palette · prompt', miniBoard: '+ 3 cards / Collage Board', validationTitle: 'A Prompt is not finished until it returns to the image.', validationBody: 'Chinese and English candidates are generated from the same reference, then reviewed for style, composition, colour, material and light. The bilingual A-04 card passed user acceptance.', validationLabels: ['REFERENCE', '中文 PROMPT / PASSED', 'EN PROMPT / PASSED'], validationMeta: 'Bilingual isolated Prompts · 4 candidates per language · human review',
   },
 };
 
@@ -71,7 +74,7 @@ export default function HomePage() {
       if (!entry.isIntersecting) return;
       entry.target.classList.add('is-visible');
       setActiveScene(Number((entry.target as HTMLElement).dataset.storyScene || 0));
-    }), { threshold: 0.38 });
+    }), { threshold: 0.16 });
     scenes.forEach((scene) => observer.observe(scene));
     return () => observer.disconnect();
   }, []);
@@ -98,7 +101,7 @@ export default function HomePage() {
 
       <section id="why" className="archive-scene scene-page why-section" data-story-scene="2"><div className="section-copy"><p className="scene-label">{t.whyLabel}</p><p className="story-whisper">{t.whyWhisper}</p><h2>{t.whyTitle}</h2><p>{t.whyBody}</p><strong className="why-end">{t.whyEnd}</strong></div><div className="why-visual"><Image src={images.why} alt="" width={1183} height={887} /><p className="image-story-caption">{t.imageCaption}</p><div className="why-compare"><div className="compare-column compare-old"><span>01 / {t.repeated}</span>{t.repeatedItems.map((item) => <div key={item}><b>×</b>{item}</div>)}</div><div className="compare-arrow">→</div><div className="compare-column compare-new"><span>02 / {t.accumulated}</span>{t.accumulatedItems.map((item) => <div key={item}><b>+</b>{item}</div>)}</div></div></div></section>
 
-      <section id="how" className="archive-scene scene-page how-section" data-story-scene="3"><div className="section-copy"><p className="scene-label">{t.howLabel}</p><p className="story-whisper">{t.storyWhisper}</p><h2>{t.howTitle}</h2><p>{t.howBody}</p><div className="how-preview"><Image src={images.how} alt="" width={2304} height={1728} /></div></div><div className="how-flow">{t.steps.map(([number, title, body, label], index) => <div className="flow-step" key={number}><div className="flow-marker"><span>{number}</span>{index < t.steps.length - 1 && <i />}</div><div className="flow-content"><small>{label}</small><h3>{title}</h3><p>{body}</p>{index === 1 && <div className="mini-card"><Image src={images.card} alt="" width={160} height={100} /><div><strong>{language === 'zh' ? '安静的材料性' : 'Quiet materiality'}</strong><span>{t.miniPrompt}</span></div></div>}{index === 3 && <div className="mini-board"><Image src={images.reference} alt="" width={80} height={60} /><Image src={images.card} alt="" width={80} height={60} /><span>{t.miniBoard}</span></div>}</div></div>)}</div></section>
+      <section id="how" className="archive-scene scene-page how-section" data-story-scene="3"><div className="section-copy"><p className="scene-label">{t.howLabel}</p><p className="story-whisper">{t.storyWhisper}</p><h2>{t.howTitle}</h2><p>{t.howBody}</p><div className="how-preview"><Image src={images.how} alt="" width={2304} height={1728} /></div></div><div className="how-flow">{t.steps.map(([number, title, body, label], index) => <div className="flow-step" key={number}><div className="flow-marker"><span>{number}</span>{index < t.steps.length - 1 && <i />}</div><div className="flow-content"><small>{label}</small><h3>{title}</h3><p>{body}</p>{index === 1 && <div className="mini-card"><Image src={images.card} alt="" width={160} height={100} /><div><strong>{language === 'zh' ? '安静的材料性' : 'Quiet materiality'}</strong><span>{t.miniPrompt}</span></div></div>}{index === 3 && <div className="mini-board"><Image src={images.reference} alt="" width={80} height={60} /><Image src={images.card} alt="" width={80} height={60} /><span>{t.miniBoard}</span></div>}</div></div>)}</div><div className="prompt-validation"><div className="validation-copy"><span>06 / GENERATION REVIEW</span><h3>{t.validationTitle}</h3><p>{t.validationBody}</p><small>{t.validationMeta}</small></div><div className="validation-strip">{[[images.promptReference, t.validationLabels[0], 1199, 1566], [images.promptResultZh, t.validationLabels[1], 1440, 810], [images.promptResultEn, t.validationLabels[2], 1440, 810]].map(([src, label, width, height], index) => <figure className={`validation-frame frame-${index + 1}`} key={String(src)}><Image src={String(src)} alt={`${label} · A-04`} width={Number(width)} height={Number(height)} sizes="(max-width: 760px) 82vw, 30vw" /><figcaption><b>0{index + 1}</b><span>{label}</span></figcaption></figure>)}</div></div></section>
 
       <section id="try" className="archive-final scene-page try-section" data-story-scene="4"><div><p className="archive-kicker">{t.tryLabel}</p><p className="story-whisper">{t.tryWhisper}</p><h2>{t.tryTitle}</h2><p>{t.tryBody}</p><Link className="solid-button" href="/app?tab=plaza">{t.tryButton} <span>↗</span></Link><small className="try-note">{t.tryNote}</small></div><div className="try-visual"><Image src={images.try} alt="" width={1200} height={896} /><div><span>{t.personal}</span><b>→</b><span>{t.shared}</span></div></div></section>
     </main>

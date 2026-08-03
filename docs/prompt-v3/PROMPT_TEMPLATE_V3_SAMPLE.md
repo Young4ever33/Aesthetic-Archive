@@ -1,6 +1,6 @@
 # Prompt Template v3
 
-Status: candidate contract. Production seed cards are not migrated until real generation validation passes.
+Status: active production contract. A-04 passed the user-accepted bilingual generation review; all 22 seed cards have been migrated to the same directly runnable Prompt v3 structure. Cards other than A-04 remain explicitly marked as static-pass / generation-pending until their own real-image review is completed.
 
 ## Required Outcome
 
@@ -153,6 +153,9 @@ Pass conditions:
 
 A static evidence score is only a preflight check. It must never be reported as a generation-match score.
 
-## Current A-04 Status
+## Current Migration Status
 
-`A-04-parametric-architecture.sample.json` is directly runnable and contains no placeholders. Its static evidence coverage passes. Real generation validation is currently blocked because no image-generation Provider is configured in the current environment. It is not yet approved for batch migration.
+- `A-04-parametric-architecture.sample.json` is directly runnable, contains no placeholders, and records the user-accepted bilingual Jimeng Agent generation review.
+- All 22 seed cards in `public/local-mvp/src/data/cases.json` and `cases.js` now use Prompt v3 with a concrete subject, controlled composition/camera, material and color proportions, lighting/finish, and language-specific Negative Prompts.
+- A-04 is marked `passed` based on the completed review. The other 21 cards are marked `static-pass-generation-pending`; migration does not falsely claim that their real generation gate has already run.
+- Run `node scripts/validate-seed-prompts.mjs` after any seed Prompt update.

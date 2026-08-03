@@ -609,15 +609,15 @@ function defaultProfile() {
 }
 
 function defaultCardTemplate() {
-  return { id: 'system-default', name: '空间与建筑复现', scope: '建筑 / 室内 / 景观 / 展陈', focus: '空间主体、体量拓扑、结构节奏、镜头位置、透视、尺度参照、表面材料、反射粗糙度、光向、色温、主辅色比例', instructions: '只依据参考图可见证据，先锁定最能代表整组图册的一个具体生成场景。中英文 Prompt 都必须可直接复制生成：写明真实具体的主体、数量、位置关系、前中后景、镜头高度与方向、焦段感、透视、材料表面状态、主辅色比例、光线方向和强弱、空气与渲染质感。不得使用占位符、括号待填项、“用户提供的主体”、使用场景说明或模型参数。主体必须具体但可被用户直接改写；风格骨架、构图、色系和质感必须保持稳定。Negative Prompt 独立输出，排除破坏结构与材质一致性的错误。', system: true, isDefault: true, version: 3, updatedAt: new Date().toISOString() };
+  return { id: 'system-default', name: '空间与建筑复现', scope: '建筑 / 室内 / 景观 / 展陈', focus: '具体空间功能、主体数量与拓扑、前中后景、镜头高度和焦段感、透视与尺度参照、构造节点、材料粗糙度与反射、主辅色比例、光向与色温、可建造性', instructions: '只依据参考图可见证据，先锁定最能代表图册的一个具体场景，不把建筑师、地点、年代、软件或材料推断写成事实。中文 Prompt 与 English Prompt 必须语义对齐、语言隔离并可直接复制生成：明确空间功能、体量数量、位置关系、前中后景、镜头高度和方向、单一焦段感、透视、尺度参照、材料表面与接缝、主辅色面积比例、光线方向与强弱、空气和成像质感。正向 Prompt 同时明确容易被模型误解的边界，例如非商业、非幻想或非废墟；不得使用占位符、括号待填项、“用户提供的主体”、选项列表、使用场景说明、质量口号或模型参数。分别输出中文与英文 Negative Prompt，排除结构断裂、材质漂移、商业化装饰、镜头畸变、文字、标志与水印。', system: true, isDefault: true, version: 4, updatedAt: '2026-08-03T00:00:00.000Z' };
 }
 
 function builtInTemplates() {
   const base = defaultCardTemplate();
   return [base,
-    { id: 'template-editorial-brand', name: '品牌、平面与 UI 复现', scope: '品牌 / 海报 / 编辑 / 包装 / Web UI', focus: '画布比例、网格列数、信息密度、视觉锚点、文字块形态、字体分类与字重、对齐、留白、图文占比、色块比例、印刷或屏幕质感', instructions: '选择一个具体可生成的海报、封面、包装正面或界面作为主体。中英文 Prompt 必须直接写明画布结构、网格、主视觉位置、文字块数量与形态、字体类别、层级、对齐、留白、色彩面积比例、图像处理和介质质感。不可读文字只规定为简短清晰的无品牌标题，不臆造来源；不得使用占位符或“替换文案”等元文字。避免只写风格名，必须把风格拆成可见版式规则。', system: true, version: 3 },
-    { id: 'template-cinematic-photo', name: '摄影与影像复现', scope: '摄影 / 人像 / 静物 / 电影感场景', focus: '具体主体与动作、环境叙事、景别、机位、焦段感、景深、焦点、快门观感、主辅光、色温、动态范围、胶片或数字质感', instructions: '选择参考图中最具代表性的一个具体瞬间，生成 Prompt 时锁定主体外观与动作、空间关系、景别、机位、镜头方向、焦段感、景深、焦点、主辅光、时间、色温、色彩分级、颗粒和动态范围。中英文均为可直接执行的完整摄影指令，不含占位符、选项列表或互相冲突的镜头要求。负面约束重点排除错误肢体、焦点漂移、过度 HDR、塑料皮肤、杂乱背景和文字水印。', system: true, version: 3 },
-    { id: 'template-product-object', name: '产品、家具与装置复现', scope: '产品 / 家具 / 装置 / 时尚配饰', focus: '对象类别、轮廓比例、部件关系、结构节点、材料厚度、表面工艺、接缝、色彩分区、承托场景、镜头和商业光线', instructions: '选择一个具体产品或装置作为直接生成主体。Prompt 必须锁定整体轮廓、长宽高观感、关键部件数量与连接关系、边角、接缝、厚度、材料与表面工艺、颜色分区、摆放方式、背景、机位、镜头和光线。中英文均不得出现占位符、待填写变量或泛泛的“高级产品设计”；用户可直接改产品类别，但其余造型语法、材质、色系和质感应可复用。负面约束排除结构断裂、漂浮部件、错误接缝、廉价塑料感、品牌标志和水印。', system: true, version: 3 }
+    { id: 'template-editorial-brand', name: '品牌、平面与 UI 复现', scope: '品牌 / 海报 / 编辑 / 包装 / Web UI', focus: '具体输出物、画布比例、网格列数、视觉锚点、图文面积比、文字块数量与可读长度、字体分类和字重、对齐、留白、色块比例、印刷或屏幕介质', instructions: '只依据可见证据，选择一个具体可生成的海报、封面、包装正面或界面，不臆造品牌、机构、设计师或来源。中文 Prompt 与 English Prompt 必须语义对齐、语言隔离且直接可运行：写明画布比例、网格列数、主视觉主体和位置、图文面积比、文字块数量、每块文字的短标题形态、字体分类、字重层级、对齐、留白、色彩面积比例、图像处理和纸张或屏幕质感。使用短小虚构且无品牌的可读标题，禁止长篇乱码、“替换文案”、占位符、选项列表、模型参数和空泛风格名。分别输出中文与英文 Negative Prompt，重点排除真实品牌、公众人物、乱码、网格失控、透视样机、介质错误和水印。', system: true, version: 4 },
+    { id: 'template-cinematic-photo', name: '摄影与影像复现', scope: '摄影 / 人像 / 静物 / 电影感场景', focus: '具体主体外观与动作、环境叙事、景别、机位、单一焦段感、焦点和景深、运动状态、主辅光、时间与色温、动态范围、颗粒与色彩分级', instructions: '只依据参考图可见证据，选择最具代表性的一个具体瞬间，不推断真实人物、演员、电影、地点或年代。中文 Prompt 与 English Prompt 必须语义对齐、语言隔离并直接执行：锁定主体数量、外观、姿态和动作，环境关系、景别、机位、镜头方向、单一焦段感、焦平面、景深、运动观感、主辅光、实景光源、时间、色温、色彩分级、颗粒和动态范围。正向说明是纪实、编辑或叙事影像，避免模型自动转向广告或赛博朋克；不得出现占位符、冲突镜头、质量口号或模型参数。分别输出中英文 Negative Prompt，排除错误肢体、身份仿冒、焦点漂移、过度 HDR、塑料皮肤、杂乱背景、文字、标志和水印。', system: true, version: 4 },
+    { id: 'template-product-object', name: '产品、家具与装置复现', scope: '产品 / 家具 / 装置 / 时尚配饰', focus: '具体对象与使用状态、轮廓比例、部件数量与连接、结构节点、材料厚度、表面工艺、接缝、色彩分区、承托环境、机位和商业光线', instructions: '只依据参考图可见证据，选择一个具体产品、家具或装置作为直接生成主体，不推断品牌、设计师、型号、年代或制造工艺。中文 Prompt 与 English Prompt 必须语义对齐、语言隔离并可直接运行：锁定对象类别、使用状态、整体轮廓、长宽高观感、关键部件数量与连接关系、边角、接缝、厚度、材料和表面工艺、颜色分区、支撑方式、背景、机位、单一焦段感和主辅光。正向说明结构完整和材料边界，避免模型自动添加奢侈品牌或装饰；不得使用占位符、待填变量、空泛“高级设计”、质量口号或模型参数。分别输出中英文 Negative Prompt，排除断裂或漂浮部件、错误接缝、廉价塑料感、伪造品牌、文字和水印。', system: true, version: 4 }
   ];
 }
 
@@ -1178,7 +1178,7 @@ function openDetail(item) {
   els.detailPromptZh.textContent = item.promptZh || ui('promptPending');
   els.detailPromptEn.textContent = item.promptEn || ui('englishPromptPending');
   reorderDetailPrompts();
-  els.detailNegative.textContent = item.negativePrompt || ui('negativePending');
+  els.detailNegative.textContent = (isEnglish() ? item.negativePromptEn : item.negativePromptZh) || item.negativePrompt || ui('negativePending');
   if (els.detailCopyEdit) {
     const isPrivate = item.source === 'private';
     els.detailCopyEdit.textContent = isPrivate
@@ -1919,7 +1919,7 @@ function providerReady() {
 
 function providerSystemPrompt() {
   const template = getTemplates().find(item => item.id === els.archiveTemplateSelect?.value) || getDefaultTemplate();
-  return `${template.instructions}\n\nYou are an expert design researcher and prompt engineer for an aesthetic knowledge base. Analyze only visible evidence in the reference image. Return ONLY valid JSON with this exact schema: {"category":"Architecture|Interior|Graphic Design|Brand Identity|Product Design|Fashion|Photography|Art Direction|Typography|Web / UI|Landscape|Furniture|Packaging|Other","customCategory":"only when category is Other","title":"specific concise English title naming the visible subject and visual language, never a generic placeholder","titleZh":"准确的中文标题","summary":"specific one-sentence summary","cultural":"中文文化 context; distinguish documented origin from visual inference","elements":"中文可见设计要素，material, light, geometry, typography or imagery","palette":["#hex","#hex","#hex","#hex"],"tags":["5-8 concise English style or material tags"],"composition":"specific composition","useCases":["3-5 concrete use cases"],"promptZh":"中文 AI 图像生成提示词","promptEn":"English AI image generation prompt","negative":"specific negative prompt","reviewNotes":"uncertainties or fields requiring human review"}. Title must describe the actual image, not the filename. Tags must be short searchable nouns or noun phrases, not a sentence. Template focus: ${template.focus}. Never invent provenance. Do not wrap JSON in markdown.`;
+  return `${template.instructions}\n\nYou are an expert design researcher and prompt engineer for an aesthetic knowledge base. Analyze only visible evidence in the reference image. Return ONLY valid JSON with this exact schema: {"category":"Architecture|Interior|Graphic Design|Brand Identity|Product Design|Fashion|Photography|Art Direction|Typography|Web / UI|Landscape|Furniture|Packaging|Other","customCategory":"only when category is Other","title":"specific concise English title naming the visible subject and visual language, never a generic placeholder","titleZh":"准确的中文标题","summary":"specific one-sentence summary","cultural":"中文文化语境；明确区分可见事实与推断","elements":"中文可见设计要素，包括材料、光线、几何、字体或图像","palette":["#hex","#hex","#hex","#hex"],"tags":["5-8 concise English style or material tags"],"composition":"specific composition","useCases":["3-5 concrete use cases"],"promptZh":"可直接运行、无占位符且只含中文的完整图像生成提示词","promptEn":"a complete directly runnable English-only image generation prompt without placeholders","negativeZh":"与中文提示词对应的具体中文负面提示词","negativeEn":"a specific English negative prompt corresponding to promptEn","reviewNotes":"uncertainties or fields requiring human review"}. The two generation prompts must describe the same concrete scene and separately lock subject, composition and camera, material and color proportions, lighting and finish. Put likely model drift boundaries in the positive prompt as well as the negative prompt. Never include model parameters, quality slogans, unsupported provenance, brands, public figures, architects, software, locations, or dates. Title must describe the actual image, not the filename. Tags must be short searchable nouns or noun phrases. Template focus: ${template.focus}. Do not wrap JSON in markdown.`;
 }
 
 function extractJSONFromText(text) {
@@ -1960,7 +1960,9 @@ function normalizeProviderDraft(data) {
     useCases: Array.isArray(data.useCases) ? data.useCases.slice(0, 5).join(', ') : (data.use_cases || data.useCases || ''),
     promptZh: data.promptZh || data.prompt_zh || '',
     promptEn: data.promptEn || data.prompt_en || '',
-    negative: data.negative || data.negativePrompt || data.negative_prompt || '',
+    negativeZh: data.negativeZh || data.negative_zh || data.negative || data.negativePrompt || data.negative_prompt || '',
+    negativeEn: data.negativeEn || data.negative_en || data.negative || data.negativePrompt || data.negative_prompt || '',
+    negative: data.negativeZh || data.negative_zh || data.negative || data.negativePrompt || data.negative_prompt || data.negativeEn || data.negative_en || '',
     reviewNotes: Array.isArray(data.reviewNotes) ? data.reviewNotes.join(' / ') : (data.review_notes || data.reviewNotes || '')
   };
 }
@@ -2168,7 +2170,7 @@ async function analyzeArchiveImage() {
   setFieldValue('archive-use-cases', draft.useCases);
   setFieldValue('archive-prompt-zh', limitPrompt(draft.promptZh));
   setFieldValue('archive-prompt-en', limitPrompt(draft.promptEn));
-  setFieldValue('archive-negative', limitPrompt(draft.negative));
+  setFieldValue('archive-negative', limitPrompt(isEnglish() ? (draft.negativeEn || draft.negative) : (draft.negativeZh || draft.negative)));
   updatePromptLengthStatus();
   setArchiveStatus(providerDraft ? 'Ready · Provider 已生成草稿，检查后可保存审美卡片。' : 'Ready · 本地草稿已生成，检查后可保存审美卡片。', 'success');
   toast(document.documentElement.lang === 'en' ? 'AI draft generated' : 'AI 草稿已生成');
@@ -2197,7 +2199,7 @@ function fillArchiveForm(item) {
   document.getElementById('archive-use-cases').value = item?.useCases || (item?.scenarioTags || []).join(', ');
   document.getElementById('archive-prompt-zh').value = item?.promptZh || '';
   document.getElementById('archive-prompt-en').value = item?.promptEn || '';
-  document.getElementById('archive-negative').value = item?.negativePrompt || '';
+  document.getElementById('archive-negative').value = (isEnglish() ? item?.negativePromptEn : item?.negativePromptZh) || item?.negativePrompt || '';
   updatePromptLengthStatus();
   if (els.archiveSubmit) els.archiveSubmit.textContent = item?.id ? '更新审美卡片' : '保存审美卡片';
   if (els.archiveReset) els.archiveReset.textContent = item?.id ? 'Cancel edit' : 'Reset';
@@ -3098,7 +3100,8 @@ async function generateDetailCandidate() {
   const button = document.getElementById('detail-generate-image');
   button.disabled = true; status.textContent = `正在使用 ${provider.name} / ${provider.defaultGenerationModel || provider.generationModels[0]} 生成候选图…`; results.innerHTML = '';
   try {
-    const response = await fetch('/api/ai/generate-image', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ providerId: provider.id, model: provider.defaultGenerationModel || provider.generationModels[0], prompt, negativePrompt: item.negativePrompt || '', count: 1, size: '1536x1024' }) });
+    const negativePrompt = (language === 'en' ? item.negativePromptEn : item.negativePromptZh) || item.negativePrompt || '';
+    const response = await fetch('/api/ai/generate-image', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ providerId: provider.id, model: provider.defaultGenerationModel || provider.generationModels[0], prompt, negativePrompt, count: 1, size: '1536x1024' }) });
     const payload = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(`${payload.error?.message || '生图失败'}${payload.requestId ? `（请求 ID：${payload.requestId}）` : ''}`);
     results.innerHTML = (payload.data?.images || []).map((src, index) => `<figure><img src="${escapeHTML(src)}" alt="Generated candidate ${index + 1}"><figcaption>${escapeHTML(language === 'en' ? 'English Prompt' : '中文 Prompt')} · ${escapeHTML(payload.meta?.model || '')}</figcaption></figure>`).join('');

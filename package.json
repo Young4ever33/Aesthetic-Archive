@@ -9,6 +9,7 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "seed:prompts": "node scripts/update-seed-prompts.mjs",
+    "seed:prompts:validate": "node scripts/validate-seed-prompts.mjs",
     "github:check": "node scripts/github-check.mjs",
     "smoke:production": "node scripts/smoke-production.mjs",
     "cloudflare:build": "opennextjs-cloudflare build",
@@ -18,7 +19,7 @@
     "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
     "supabase:status": "supabase migration list --linked",
     "supabase:push": "supabase db push --linked",
-    "check": "pnpm lint && pnpm typecheck && pnpm github:check && pnpm build"
+    "check": "pnpm seed:prompts:validate && pnpm lint && pnpm typecheck && pnpm github:check && pnpm build"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.4",

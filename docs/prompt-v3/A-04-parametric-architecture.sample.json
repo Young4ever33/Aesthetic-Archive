@@ -38,12 +38,12 @@
     }
   },
   "generationPrompt": {
-    "zh": "一座位于城市滨水区的当代文化中心综合体，由两座高度错落的流线型塔楼、连续弧形公共裙房、两条封闭式空中连桥和面向水面的开放步行层组成。塔楼从宽阔的裙房基座自然上升，所有转角保持连续圆润，体量之间没有尖锐断裂。建筑外立面覆盖密集且等距的银灰色竖向金属肋条，肋条沿曲面连续转折并随高度轻微渐变，肋条之间嵌入蓝灰色透明玻璃；深炭灰结构只在连接和檐口阴影中少量显露。采用街道层低机位广角仰拍，镜头位于弧形裙房前方偏左，前景的铺装、少量行人和三株纤细乔木建立尺度，中景弧形裙房从左下方向右上方引导视线，双塔占据画面中央和右侧，空中连桥清晰连接塔楼，远处只有低对比度城市天际线。阴天柔和漫射光，湿润地面产生克制倒影，室内透出少量暖琥珀灯光；整体色彩严格控制为银灰、钛灰、炭黑、蓝灰玻璃与少量暖橙，冷色约占九成。建筑摄影级真实感，清晰的材料接缝与可建造结构，细腻金属拉丝、干净玻璃反射、薄雾空气透视，高动态范围但不过度锐化，画面庄重、流动、安静。",
-    "en": "A contemporary waterfront cultural center complex composed of two staggered fluid towers, a continuous curved public podium, two enclosed skybridges, and an open pedestrian level facing the water. The towers rise naturally from a broad podium base; every corner remains smoothly continuous with no sharp breaks between volumes. Dense, evenly spaced silver-gray vertical metal ribs wrap the entire envelope, following each curve without interruption and changing spacing only subtly with height; blue-gray transparent glazing sits between the ribs, while charcoal structure appears sparingly at connections and beneath deep eaves. Photograph the complex from street level with a low-angle wide architectural lens, camera positioned slightly left of the curved podium. Paving, a small number of pedestrians, and three slender trees establish scale in the foreground. The podium sweeps diagonally from lower left toward upper right, guiding the eye to the two towers in the center and right of frame, with both skybridges clearly visible and only a low-contrast city skyline in the distance. Soft overcast daylight, restrained reflections on damp paving, and small areas of warm amber interior illumination. Limit the palette to silver gray, titanium gray, charcoal, blue-gray glass, and a small warm orange accent, with cool tones occupying about ninety percent of the image. Photoreal architectural visualization with buildable geometry, precise material joints, subtle brushed metal, clean controlled glass reflections, light atmospheric haze, and high dynamic range without aggressive sharpening; monumental, fluid, and quiet."
+    "zh": "一座安静克制的滨水市民公共文化建筑，不是购物中心、酒店、写字楼或娱乐地标；建筑由两座高度明显错落的流线型塔楼、连续上升的低层公共裙房，以及两条位于不同高度的封闭玻璃空中连桥组成，右塔比左塔高约百分之二十。 采用街道层略偏左的远距离24毫米建筑摄影机位，地平线水平、竖线垂直；弧形裙房占画面下方三分之一，双塔位于中央和右侧，两条连桥完整可见，前景为安静滨水步道与平静水面，最多三名小人物和五株纤细乔木。 密集纤细的竖向金属肋条从裙房连续上升至塔身，沿圆润曲面有秩序地渐变；表皮仅使用哑光银灰、钛灰、少量炭黑金属和退后的蓝灰玻璃，冷色约占九成，只允许玻璃后少量暖琥珀室内光。 阴天柔和漫射光，金属拉丝细腻，玻璃反射干净受控，节点和桥体承重关系真实可建造；画面庄重、流动、安静，具有清晰参数化肋骨节奏但不是幻想城市或商业效果图。",
+    "en": "A quiet waterfront civic cultural institution, not a shopping mall, hotel, office complex, or entertainment landmark. It consists of two staggered fluid towers, a continuously rising low public podium, and two enclosed glass skybridges at clearly different heights; the right tower is visibly about twenty percent taller than the left. Photograph it from a distant street-level position slightly left of center with a restrained 24 mm architectural lens. Keep the horizon level and verticals straight. The curved podium fills the lower third, both towers occupy the center and right, and both complete skybridges remain visible. Use a calm waterfront promenade and still water in front, with no more than three tiny people and five slender trees. Dense slender vertical metal ribs rise continuously from the podium into both towers and vary gradually along rounded surfaces. Limit the envelope to matte silver gray, titanium gray, small amounts of charcoal metal, and recessed blue-gray glazing. Cool colors occupy about ninety percent, with only sparse warm amber interior light behind glass. Use soft overcast diffuse light, subtle brushed metal, controlled clean reflections, precise joints, and structurally credible bridge connections. The image is monumental, fluid, quiet, and photoreal, with a legible parametric rib rhythm rather than a fantasy city or commercial visualization."
   },
   "negativePrompt": {
-    "zh": "赛博朋克霓虹，彩虹渐变，金色幕墙，随机波浪装饰，无规律肋条，尖锐折线体量，悬浮建筑，断裂连桥，互相穿插的结构，弯曲地平线，鱼眼畸变，倾斜竖线，过度镜面玻璃，塑料材质，浓重阳光光斑，拥挤人群，重复人物，车辆遮挡主体，杂乱标牌，文字，品牌标志，水印，低分辨率，过度锐化",
-    "en": "cyberpunk neon, rainbow gradients, gold curtain walls, arbitrary wave decoration, irregular ribs, sharp angular masses, floating buildings, broken skybridges, intersecting structures, curved horizon, fisheye distortion, leaning verticals, excessively mirrored glass, plastic materials, harsh sun flares, dense crowds, duplicated people, vehicles blocking the architecture, cluttered signs, text, logos, watermarks, low resolution, oversharpening"
+    "zh": "购物中心，商业综合体，酒店，写字楼，广告牌，LED屏，店铺招牌，金色幕墙，黄铜，彩虹灯光，RGB灯带，霓虹，密集人群，大量车辆，公交车，等高双塔，标准圆柱办公楼，只有一条连桥，断裂或悬浮连桥，随机波浪，无法建造结构，鱼眼，倾斜竖线，文字，标志，水印",
+    "en": "shopping mall, retail complex, hotel, office complex, billboards, LED screens, shop signs, gold curtain wall, brass, rainbow lighting, RGB strips, neon, dense crowds, heavy traffic, buses, equal-height towers, generic cylindrical office towers, only one skybridge, broken or floating skybridges, arbitrary waves, unbuildable structure, fisheye, leaning verticals, text, logos, watermark"
   },
   "copyBehavior": {
     "default": "generationPrompt",
@@ -68,11 +68,15 @@
       "staticWeightedScore": 0.89
     },
     "generationValidation": {
-      "status": "blocked",
-      "reason": "No configured image-generation Provider is available in the current environment. Static evidence coverage is not accepted as the requested 80% generation-match result.",
+      "status": "pass",
+      "score": 0.82,
+      "reason": "User accepted the bilingual A-04 card after reviewing four Jimeng Agent candidates per language. English v3.1 and the Chinese transfer both exceeded the agreed 80% best-candidate threshold in the review workflow.",
       "requiredPassScore": 0.8,
       "referenceImages": 3,
-      "generatedCandidatesRequired": 4
+      "generatedCandidatesPerLanguage": 4,
+      "testWorkflow": "Jimeng Agent text-to-image with separate positive and negative Prompts",
+      "reviewedAt": "2026-08-03",
+      "reviewerDecision": "accepted"
     },
     "unsupportedAttribution": "none"
   }
