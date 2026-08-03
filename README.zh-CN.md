@@ -4,9 +4,9 @@
 
 **产品网址：** [https://your-domain.com](https://your-domain.com) *（部署网址占位）*
 
-> **Aesthetic Archive 是一个面向所有审美者/设计师的 AI 审美知识库：把分散的视觉参考转化为可搜索、可溯源、可拆分、可复用的设计审美智能系统。**
+![Aesthetic Archive 宣传页首屏](./docs/screenshots/marketing-what.png)
 
-![Aesthetic Archive 视觉参考墙](./public/marketing/hero-editorial.png)
+> **Aesthetic Archive 是一个面向所有审美者/设计师的 AI 审美知识库：把分散的视觉参考转化为可搜索、可溯源、可拆分、可复用的设计审美智能系统。**
 
 ## 产品介绍
 
@@ -22,6 +22,8 @@ Aesthetic Archive 不把参考图当作单纯的图片，而是把它转化为�
 
 它不是另一个图片文件夹，也不是泛化的 AI 生图工具，而是连接灵感与设计生产之间的一层可工作的知识系统。
 
+![从参考图到可复用审美知识](./docs/screenshots/marketing-how.png)
+
 ## 针对用户
 
 Aesthetic Archive 面向所有希望建立、理解和复用审美知识的人：
@@ -33,7 +35,7 @@ Aesthetic Archive 面向所有希望建立、理解和复用审美知识的人�
 - **个人审美收藏者、设计学生与新晋创作者：** 整理日常灵感，拆解风格，进行视觉研究，并长期建立自己的审美体系。
 - **小型工作室与创意团队：** 建立共享视觉语言，同时将项目研究与公开灵感分开管理。
 
-![Aesthetic Archive 面向设计研究](./public/marketing/who.png)
+![Aesthetic Archive 目标用户与视觉研究痛点](./docs/screenshots/marketing-who.png)
 
 ## 使用场景
 
@@ -74,6 +76,8 @@ Aesthetic Archive 面向所有希望建立、理解和复用审美知识的人�
 ### 提示词复用 / Prompt Reuse
 
 每张分析卡片都可以生成中文 Prompt、英文 Prompt、Negative Prompt 和可复用的风格变量。目标是从“每次重新写一遍 Prompt”转向可以跨项目、跨工具调整的 Prompt Pack。生成表单和可编辑审美卡片将分析、双语 Prompt 与审美库保存整合在同一条工作流中。
+
+![个人设置中的卡片生成模板](./docs/screenshots/prompt-templates.png)
 
 ### 画板 / Collage Board
 

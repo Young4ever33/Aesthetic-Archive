@@ -4,9 +4,9 @@
 
 **Product Website:** [https://your-domain.com](https://your-domain.com) *(deployment URL placeholder)*
 
-> **Aesthetic Archive is an AI-powered aesthetic knowledge base for everyone who cares about aesthetics and design. It turns scattered visual references into a searchable, traceable, decomposable, and reusable system of design and aesthetic intelligence.**
+![Aesthetic Archive marketing homepage](./docs/screenshots/marketing-what.png)
 
-![Aesthetic Archive visual reference wall](./public/marketing/hero-editorial.png)
+> **Aesthetic Archive is an AI-powered aesthetic knowledge base for everyone who cares about aesthetics and design. It turns scattered visual references into a searchable, traceable, decomposable, and reusable system of design and aesthetic intelligence.**
 
 ## Product Introduction
 
@@ -22,6 +22,8 @@ Reference → Understanding → Aesthetic System → Production Direction
 
 The result is not another image folder or a generic AI image generator. It is a working knowledge layer between inspiration and design production.
 
+![From a reference image to reusable aesthetic knowledge](./docs/screenshots/marketing-how.png)
+
 ## For Whom
 
 Aesthetic Archive is for anyone who wants to build, understand, and reuse aesthetic knowledge:
@@ -33,7 +35,7 @@ Aesthetic Archive is for anyone who wants to build, understand, and reuse aesthe
 - **Personal aesthetic collectors, design students, and emerging creators:** everyday inspiration, style breakdown, visual research, and long-term development of a personal aesthetic system.
 - **Small studios and creative teams:** a shared visual language with private project research kept separate from public inspiration.
 
-![Aesthetic Archive for design research](./public/marketing/who.png)
+![Aesthetic Archive audience and research pain points](./docs/screenshots/marketing-who.png)
 
 ## Use Cases
 
@@ -74,6 +76,8 @@ Upload a reference or create a card manually in a private archive. Connect an AI
 ### Prompt Reuse
 
 Each analyzed card can produce Chinese and English prompts, negative prompts, and reusable style variables. The goal is to move from “write a new prompt every time” to a Prompt Pack that can be adapted across projects and tools. The generation form and editable aesthetic card keep analysis, bilingual prompts, and archive storage in one workflow.
+
+![Card generation templates in personal settings](./docs/screenshots/prompt-templates.png)
 
 ### Collage Board
 
