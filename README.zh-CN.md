@@ -2,13 +2,140 @@
 
 [English README](./README.md)
 
-Aesthetic Archive 是面向设计师的视觉知识工作区：把参考图整理为可搜索卡片、可复用 Prompt、个人审美库、Collage 画板和经过审核的公开广场。
+> **Aesthetic Archive 是一个面向设计师的 AI 审美知识库：把分散的视觉参考转化为可搜索、可解释、可复用的设计智能。**
 
-## 当前状态
+设计师从来不缺图片，真正缺少的是一种可靠的方法：记住一张参考图为什么重要，解释它为什么有效，并把其中的知识带入下一个项目。
 
-项目当前采用 Next.js + Supabase Auth/Postgres/Storage，并通过服务端 AI Gateway 调用视觉模型。未配置 Supabase 时仍保留本地浏览器草稿能力。
+Aesthetic Archive 正是从这个断点出发。它帮助设计师从**收藏参考图**走向**建立审美体系**：让视觉经验可以被搜索、讨论、转化为 Prompt、整理进项目画板，并在更大的设计社区中交流。
 
-上线前请完整执行 `docs/RELEASE_CHECKLIST.md`，尤其确认图片授权、生产域名、SMTP、管理员账号和 AI Provider 网络连通性。
+## 我们解决什么问题
+
+参考资料库通常比设计师真正理解它的速度增长得更快。
+
+- 图片分散在 Pinterest、文件夹、截图、聊天记录和项目工具中。
+- 设计师可能知道一张图“感觉很好”，却难以说清它的结构、文化语境、材料语言或构图方式。
+- Moodboard 能传达氛围，但背后的判断过程很容易丢失。
+- 每次从头开始写 Prompt，AI 生图的风格很难稳定复用。
+- 团队在不同项目中反复重建相同的视觉词汇。
+
+结果是一个熟悉的循环：收藏越来越多，搜索越来越久，解释越来越少，同样的设计判断只能凭记忆重新完成。
+
+## 产品构想
+
+Aesthetic Archive 不把参考图当作单纯的图片，而是把它视为一个设计知识单元。
+
+每张参考图都可以转化为结构化审美卡片，包含：
+
+- 可从图像中观察到的视觉事实与设计要素；
+- 文化背景，以及明确标注的判断和推测；
+- 材料、光线、几何、字体、色彩、构图等信息；
+- 适用于未来项目的使用场景；
+- 中文和英文图像生成 Prompt；
+- Negative Prompt、置信度、来源和版权信息。
+
+产品将个人审美库、公开审美广场、AI 辅助分析、可复用 Prompt Pack 和 Collage 画板组合成一条完整工作流：把视觉品味转化为可以工作的设计资料。
+
+## 面向哪些人
+
+### 空间与景观设计师
+
+用于前期研究、材料分析、空间参考、客户汇报和视觉方向。Aesthetic Archive 帮助把氛围转化为可以讨论、复用的设计语言。
+
+### 平面与品牌设计师
+
+用于收集视觉系统、编辑参考、字体、构图、色彩关系和品牌 Moodboard，同时保留这些判断背后的逻辑。
+
+### AI 视觉创作者
+
+用于建立可重复的风格变量、双语 Prompt、负向约束和参考集合，而不是每次临时试写 Prompt。
+
+### 设计学生与新晋设计师
+
+用于学习如何拆解风格、追溯视觉逻辑，并逐步建立自己的参考体系。
+
+### 小型工作室与创意团队
+
+用于沉淀团队共享的视觉语言，同时把项目研究与公开灵感分开管理。
+
+## 市场切入与机会
+
+Aesthetic Archive 的第一步不是成为另一个图片库，也不是成为另一个泛化的 AI 生图工具，而是解决两者之间的工作流断点。
+
+设计师已经在收藏参考，也越来越多地使用 AI 工具，但**参考图**、**审美解释**和**设计生产**之间的知识仍然是分散的。Aesthetic Archive 选择一个清晰的切入路径：
+
+1. 先帮助单个设计师整理自己的审美知识；
+2. 通过卡片、Prompt 和画板，让这些知识真正服务于下一个项目；
+3. 让团队和更广泛的设计社区交换经过整理和审核的审美体系；
+4. 为未来的协作、设计教育和设计智能服务建立基础。
+
+产品坚持设计师优先：视觉化、理解中英文语境、尊重来源，并且在成为大型社交网络或企业平台之前，先对个人设计工作产生实际价值。
+
+## 核心工作流
+
+```text
+收集一张参考图
+        ↓
+解释图中看见了什么、为什么重要
+        ↓
+把审美结构化为可复用卡片
+        ↓
+生成双语 Prompt 与设计方向
+        ↓
+在 Collage 画板中组织参考
+        ↓
+复用、导出、审核或分享结果
+```
+
+产品的核心循环是：
+
+**参考图 → 理解 → 审美体系 → Prompt / 设计方向 → 复用**
+
+## 产品模块
+
+### 视觉库广场 / Public Plaza
+
+经过审核的公开审美案例库。可以按风格、色彩、构图、场景、使用场景和 Prompt 浏览与搜索，查看图册与结构化知识，复制 Prompt、收藏案例或加入 Collage 画板。
+
+### 个人审美库 / My Archive
+
+用于上传参考图、创建审美卡片、编辑结构化分析、接入 AI Provider 和导出可复用资料的私人工作区。卡片可以保持私有，也可以进入公开审核流程。
+
+### 个人收藏 / Saved
+
+保存来自公开广场或其他位置的有用案例，添加项目语境，并为之后的工作收集参考。
+
+### Collage 画板 / Collage Board
+
+用于排列参考图、添加标注、整理视觉方向、总结画板内容，并准备更加清晰的项目设计 Brief。
+
+### Prompt Pack 与模板
+
+可复用的分析模板和双语 Prompt Pack，让不同项目中的输出更加稳定。设计师可以根据自己的专业、工作室方法或个人习惯调整规则。
+
+### 审核队列 / Review Queue
+
+AI 生成并不等于可以自动公开。Admin 和 Reviewer 可以查看提交内容、通过或驳回案例，并保留审核记录，之后卡片才会进入视觉库广场。
+
+## 产品原则
+
+- **参考图是证据，不是装饰。** 将可观察事实与判断、推测和不确定性分开。
+- **AI 辅助判断，不替代作者。** 设计师控制模板、编辑卡片，并决定什么值得复用。
+- **默认保护隐私。** 项目研究和 Provider 配置受到保护，只有明确分享后才会公开。
+- **解释优先于炫技。** 一张有用的卡片应该告诉设计师该观察什么，以及下一步如何行动。
+- **来源和版权同样重要。** 公开案例需要来源和版权信息，不确定的判断必须保持不确定标记。
+- **审美知识应该持续复利。** 每一张结构化参考图，都应该让下一个项目更快、更有依据。
+
+## 当前阶段
+
+Aesthetic Archive 当前处于 Open Beta / MVP 基础阶段，已经包含：
+
+- 讲述产品构想与使用场景的宣传页；
+- 包含视觉库广场、个人审美库、个人收藏、Collage、Provider、设置和审核队列的浏览器工作区；
+- 未配置 Supabase 时仍可使用的本地浏览器草稿能力；
+- Supabase Auth、Postgres、Storage、RLS、服务端 API、Provider 加密、AI Gateway 路由和审核基础设施；
+- 中文与英文双语界面。
+
+正式上线前仍需配置真实 Supabase、执行数据库迁移、完成认证 Smoke Test、验证 Provider、确认图片授权并完成部署配置。不要把当前代码直接视为生产就绪版本，请先阅读 `docs/RELEASE_CHECKLIST.md`。
 
 ## 本地运行
 
@@ -19,37 +146,35 @@ pnpm install --frozen-lockfile
 pnpm dev
 ```
 
-入口：
+访问：
 
 - 宣传页：`http://localhost:5174/`
 - 工作台：`http://localhost:5174/app`
 - 个人审美库：`http://localhost:5174/app?tab=archive`
 - 视觉库广场：`http://localhost:5174/app?tab=plaza`
 
-验证命令：
+提交 Pull Request 前执行：
 
 ```bash
-pnpm lint
-pnpm typecheck
-pnpm build
-pnpm start
+pnpm check
 ```
 
-## 目录结构
+该命令会执行 lint、类型检查、仓库安全检查和生产构建。
 
-- `app/`：Next.js 页面、API、认证回调和样式。
+## 技术基础
+
+- `app/`：Next.js 页面、服务端 API、认证回调和宣传页样式。
 - `lib/`：Supabase 客户端、校验、Provider 加密存储、AI Gateway 和使用记录。
-- `public/local-mvp/`：工作区界面和公开案例数据。
-- `public/local-mvp/legacy/updated/selected_pic/`：当前案例数据引用的图片素材，迁移数据路径前不要删除。
-- `public/marketing/`、`public/brand/`：产品公开资源。
+- `public/local-mvp/`：浏览器工作区界面和公开案例数据。
+- `public/marketing/`、`public/brand/`：产品使用的公开资源。
 - `supabase/migrations/`：数据库、RLS、Storage、安全、可观测性和反馈迁移。
-- `docs/`：部署、Supabase 设置、产品契约和发布清单。
+- `docs/`：产品契约、设置、部署、QA 和发布文档。
 
-根目录是唯一应用目录，不再使用 `apps/web`。
+根目录是唯一的应用目录，不再使用 `apps/web` 路径。
 
-## 环境变量与密钥
+## 配置与安全
 
-根据 `.env.example` 创建本地 `.env.local`。`.env.local` 不能上传 GitHub。
+根据 `.env.example` 创建本地 `.env.local`。不要提交 `.env.local` 或任何密钥文件。
 
 必须配置：
 
@@ -58,35 +183,37 @@ pnpm start
 - `SUPABASE_SERVICE_ROLE_KEY`
 - `PROVIDER_ENCRYPTION_KEY`：Base64 编码的 32 字节密钥
 
-可选配置：
+可选网络配置：
 
 - `AI_HTTP_PROXY`
 - `HTTP_PROXY`
 - `HTTPS_PROXY`
 - `AI_REQUEST_TIMEOUT_MS`
 
-Provider API Key 只在服务端加密保存。浏览器只能获得 `hasSecret` 等元数据；密钥不得进入 localStorage、请求、响应、日志、备份或 Git 历史。
+Provider API Key 只在服务端加密保存，绝不能出现在 localStorage、浏览器备份、API 响应、日志或 Git 历史中。浏览器只能获得 `hasSecret` 等非敏感元数据。
 
-## Supabase 设置
+## Supabase 与发布设置
 
 1. 创建 Supabase 项目。
 2. 按文件名顺序执行 `supabase/migrations/`，或执行 `supabase/generated/apply_all_migrations.sql`。
-3. 将生产 HTTPS 域名配置到 Auth Site URL 和 Redirect URL。
-4. 配置邮件确认、密码找回和生产 SMTP。
-5. 创建并验证 reviewer/admin 账号。
-6. 确认部署服务器可以访问 AI Provider。生产环境不能依赖开发电脑上的 `127.0.0.1` 代理。
+3. 配置生产 Site URL、Redirect URL、邮件服务和 SMTP。
+4. 创建并验证 admin、reviewer 账号。
+5. 配置部署服务器，使其能够访问指定的 AI Provider。
+6. 对登录、卡片、AI 路由、收藏、审核和反馈执行真实生产环境 Smoke Test。
 
 详见 `docs/SUPABASE_SETUP.md`、`docs/DEPLOYMENT.md` 和 `docs/RELEASE_CHECKLIST.md`。
 
-## GitHub 上传规则
+## 图片资源与许可证
 
-可以上传源代码、迁移文件、已确认有权重新分发的公开资源、`package.json`、`pnpm-lock.yaml` 和文档。不要上传：
+请阅读 `LICENSE`。商业上线前，确认所有公开案例图片都属于自有、已授权或公共领域资源；不要发布未经确认授权的参考图、私人浏览器导出、截图或临时 QA 素材。
 
-- `.env`、`.env.local` 或任何密钥文件
-- `.next/`、`node_modules/`、日志、覆盖率文件和本地导出
-- 含私人卡片或 Provider 配置的浏览器备份
-- 未确认授权的图片、截图和临时 QA 文件
+## 路线方向
 
-## 许可证与图片
+下一阶段关注的是产品深度，而不是盲目扩张功能：
 
-请阅读 `LICENSE`。商业上线前，确认 `public/` 下每张公开图片都属于自有、已授权或公共领域资源；否则应替换。
+- 设计师是否足够信任分析结果，并愿意将其用于真实项目？
+- 个人审美库是否会随着每一张新参考图变得更有价值？
+- 经过审核的公开案例能否形成高信噪比的设计知识层？
+- 画板、Prompt 和模板能否缩短从灵感到有依据的设计方向之间的距离？
+
+这些问题将指导 Beta 阶段：先建立稳定、可复用的审美工作流，再考虑不必要的社交和自动化复杂度。
