@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { requireUser } from '@/lib/supabase/server';
-import { callTextProvider, getOwnedProvider, providerMeta, resolveModel } from '@/lib/ai-gateway';
+import { callTextProvider, getOwnedProvider, probeProvider, providerMeta, resolveModel } from '@/lib/ai-gateway';
 import { logAiUsage } from '@/lib/ai-usage';
 
 export const runtime = 'nodejs';
@@ -17,12 +17,17 @@ export async function POST(request: Request) {
     if (typeof body.providerId !== 'string') return NextResponse.json({ requestId, error: { code: 'INVALID_REQUEST', message: 'providerId is required' } }, { status: 400 });
     const provider = await getOwnedProvider(body.providerId, user.id);
     providerId = provider.id;
-    model = resolveModel(provider, body.model, 'text');
-    const text = await callTextProvider(provider, model, 'Reply with one short sentence confirming that this Provider connection is reachable.');
-    const ok = typeof text === 'string' && text.trim().length > 0;
-    await logAiUsage(supabase, { ownerId: userId, providerId, route: '/api/providers/test', model, status: ok ? 'success' : 'error', requestId, durationMs: Date.now() - startedAt });
-    if (!ok) return NextResponse.json({ requestId, error: { code: 'PROVIDER_INVALID_RESPONSE', message: 'Provider responded but did not complete the connection test' } }, { status: 502 });
-    return NextResponse.json({ requestId, data: { connected: true, preview: text.trim().slice(0, 160) }, meta: providerMeta(provider, model) });
+    const hasTextModel = Array.isArray(provider.text_models) && provider.text_models.some((item) => typeof item === 'string' && item.trim());
+    if (hasTextModel || typeof body.model === 'string' && body.model.trim()) {
+      model = resolveModel(provider, body.model, 'text');
+      const text = await callTextProvider(provider, model, 'Reply with one short sentence confirming that this Provider connection is reachable.');
+      if (!text.trim()) throw new Error('Provider responded without text');
+      await logAiUsage(supabase, { ownerId: userId, providerId, route: '/api/providers/test', model, status: 'success', requestId, durationMs: Date.now() - startedAt });
+      return NextResponse.json({ requestId, data: { connected: true, capability: 'text', preview: text.trim().slice(0, 160) }, meta: providerMeta(provider, model) });
+    }
+    const modelCount = await probeProvider(provider);
+    await logAiUsage(supabase, { ownerId: userId, providerId, route: '/api/providers/test', model: null, status: 'success', requestId, durationMs: Date.now() - startedAt });
+    return NextResponse.json({ requestId, data: { connected: true, capability: 'authentication', modelCount, preview: 'Provider credentials and API endpoint are reachable.' }, meta: providerMeta(provider, 'authentication-probe') });
   } catch (error) {
     if (userId) {
       const { supabase } = await requireUser().catch(() => ({ supabase: null as never }));

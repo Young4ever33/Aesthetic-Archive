@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { encryptProviderSecret } from '@/lib/provider-vault';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 import { requireUser } from '@/lib/supabase/server';
+import { normalizeProviderType } from '@/lib/ai-gateway';
 
 export const runtime = 'nodejs';
 
@@ -29,7 +30,15 @@ function errorResponse(id: string, status: number, code: string, message: string
 const publicColumns = 'id, name, type, base_url, image_capable, image_models, generation_models, text_models, default_image_model, default_generation_model, default_text_model, image_api, image_api_url, is_default, created_at, updated_at';
 
 function messageFor(error: unknown, fallback: string) {
-  if (error instanceof Error && /PROVIDER_ENCRYPTION_KEY/.test(error.message)) return 'Provider encryption is not configured correctly';
+  if (error instanceof Error && /PROVIDER_ENCRYPTION_KEY/.test(error.message)) return 'Provider encryption is not configured correctly in the Worker';
+  if (error instanceof Error && /Supabase admin environment/.test(error.message)) return 'Supabase service configuration is missing from the Worker';
+  return fallback;
+}
+
+function databaseMessage(error: { code?: string; message?: string } | null, fallback: string) {
+  if (!error) return fallback;
+  if (error.code === '42703' || /column .* does not exist/i.test(error.message || '')) return 'Provider database migration is incomplete. Apply migrations through 202608030010';
+  if (error.code === '42501') return 'Provider database permissions are not configured correctly';
   return fallback;
 }
 
@@ -56,7 +65,7 @@ function providerFields(body: ProviderPatch) {
   const textModels = cleanModels(body.textModels);
   return {
     ...(typeof body.name === 'string' ? { name: body.name.trim().slice(0, 120) } : {}),
-    ...(typeof body.type === 'string' ? { type: body.type.trim().slice(0, 80) } : {}),
+    ...(typeof body.type === 'string' ? { type: canonicalProviderType(body.type) } : {}),
     ...(typeof body.baseUrl === 'string' || body.baseUrl === null ? { base_url: body.baseUrl ? safeBaseUrl(body.baseUrl) : null } : {}),
     ...(typeof body.imageCapable === 'boolean' ? { image_capable: body.imageCapable } : {}),
     ...(imageModels ? { image_models: imageModels } : {}),
@@ -69,6 +78,27 @@ function providerFields(body: ProviderPatch) {
     ...(typeof body.imageApiUrl === 'string' || body.imageApiUrl === null ? { image_api_url: body.imageApiUrl?.trim().slice(0, 2000) || null } : {}),
     ...(typeof body.isDefault === 'boolean' ? { is_default: body.isDefault } : {}),
   };
+}
+
+function canonicalProviderType(value: string) {
+  const normalized = normalizeProviderType(value);
+  if (normalized === 'openai') return 'OpenAI';
+  if (normalized === 'gemini') return 'Gemini';
+  if (normalized === 'openrouter') return 'OpenRouter';
+  if (normalized === 'custom endpoint') return 'Custom Endpoint';
+  return value.trim().slice(0, 80);
+}
+
+function validateDefaults(body: ProviderPatch, imageModels: string[], generationModels: string[], textModels: string[]) {
+  const defaults: Array<[unknown, string[], string]> = [
+    [body.defaultImageModel, imageModels, 'vision'],
+    [body.defaultGenerationModel, generationModels, 'generation'],
+    [body.defaultTextModel, textModels, 'text'],
+  ];
+  for (const [value, allowed, label] of defaults) {
+    if (typeof value === 'string' && value.trim() && !allowed.includes(value.trim())) return `Default ${label} model must appear in its model list`;
+  }
+  return '';
 }
 
 async function clearOtherDefaults(ownerId: string, providerId?: string) {
@@ -101,7 +131,7 @@ export async function POST(request: Request) {
     const body = await request.json() as ProviderPatch;
     const secret = typeof body.secret === 'string' ? body.secret.trim() : '';
     const name = typeof body.name === 'string' ? body.name.trim() : '';
-    const type = typeof body.type === 'string' ? body.type.trim() : '';
+    const type = typeof body.type === 'string' ? canonicalProviderType(body.type) : '';
     const imageModels = cleanModels(body.imageModels) || [];
     const generationModels = cleanModels(body.generationModels) || [];
     const textModels = cleanModels(body.textModels) || [];
@@ -110,7 +140,9 @@ export async function POST(request: Request) {
     if (body.imageCapable !== false && imageModels.length === 0) return errorResponse(id, 400, 'INVALID_REQUEST', 'Add at least one vision model');
     if (imageModels.length === 0 && generationModels.length === 0 && textModels.length === 0) return errorResponse(id, 400, 'INVALID_REQUEST', 'Add at least one model');
     if (body.baseUrl && !safeBaseUrl(body.baseUrl)) return errorResponse(id, 400, 'INVALID_REQUEST', 'Base URL must be a public HTTPS endpoint');
-    if (type.toLowerCase() === 'custom endpoint' && !safeBaseUrl(body.baseUrl)) return errorResponse(id, 400, 'INVALID_REQUEST', 'Custom Endpoint requires a public HTTPS Base URL');
+    if (normalizeProviderType(type) === 'custom endpoint' && !safeBaseUrl(body.baseUrl)) return errorResponse(id, 400, 'INVALID_REQUEST', 'Custom Endpoint requires a public HTTPS Base URL');
+    const defaultError = validateDefaults(body, imageModels, generationModels, textModels);
+    if (defaultError) return errorResponse(id, 400, 'INVALID_REQUEST', defaultError);
     if (body.isDefault) await clearOtherDefaults(user.id);
     const { data, error } = await admin.from('ai_providers').insert({
       owner_id: user.id,
@@ -119,7 +151,7 @@ export async function POST(request: Request) {
       type,
       encrypted_api_key: encryptProviderSecret(secret),
     }).select(publicColumns).single();
-    if (error) return errorResponse(id, 500, 'PROVIDER_SAVE_FAILED', 'Unable to save Provider settings');
+    if (error) return errorResponse(id, 500, 'PROVIDER_SAVE_FAILED', databaseMessage(error, 'Unable to save Provider settings'));
     return NextResponse.json({ requestId: id, data: { ...data, hasSecret: true } }, { status: 201 });
   } catch (error) {
     if (error instanceof SyntaxError) return errorResponse(id, 400, 'INVALID_REQUEST', 'Invalid JSON body');
@@ -137,6 +169,14 @@ export async function PATCH(request: Request) {
     if (!providerId) return errorResponse(id, 400, 'INVALID_REQUEST', 'Provider id is required');
     const body = await request.json() as ProviderPatch;
     if (body.baseUrl && !safeBaseUrl(body.baseUrl)) return errorResponse(id, 400, 'INVALID_REQUEST', 'Base URL must be a public HTTPS endpoint');
+    if (typeof body.type === 'string' && normalizeProviderType(body.type) === 'custom endpoint' && !safeBaseUrl(body.baseUrl)) return errorResponse(id, 400, 'INVALID_REQUEST', 'Custom Endpoint requires a public HTTPS Base URL');
+    const imageModels = cleanModels(body.imageModels);
+    const generationModels = cleanModels(body.generationModels);
+    const textModels = cleanModels(body.textModels);
+    if (imageModels && generationModels && textModels) {
+      const defaultError = validateDefaults(body, imageModels, generationModels, textModels);
+      if (defaultError) return errorResponse(id, 400, 'INVALID_REQUEST', defaultError);
+    }
     const updates: Record<string, unknown> = providerFields(body);
     if (typeof body.secret === 'string' && body.secret.trim()) {
       if (body.secret.length > 4096) return errorResponse(id, 413, 'INVALID_REQUEST', 'Provider API key is too long');
@@ -145,7 +185,7 @@ export async function PATCH(request: Request) {
     if (!Object.keys(updates).length) return errorResponse(id, 400, 'INVALID_REQUEST', 'No Provider changes supplied');
     if (body.isDefault) await clearOtherDefaults(user.id, providerId);
     const { data, error } = await admin.from('ai_providers').update(updates).eq('id', providerId).eq('owner_id', user.id).select(publicColumns).maybeSingle();
-    if (error) return errorResponse(id, 500, 'PROVIDER_UPDATE_FAILED', 'Unable to update Provider settings');
+    if (error) return errorResponse(id, 500, 'PROVIDER_UPDATE_FAILED', databaseMessage(error, 'Unable to update Provider settings'));
     if (!data) return errorResponse(id, 404, 'PROVIDER_NOT_FOUND', 'Provider was not found');
     return NextResponse.json({ requestId: id, data: { ...data, hasSecret: true } });
   } catch (error) {

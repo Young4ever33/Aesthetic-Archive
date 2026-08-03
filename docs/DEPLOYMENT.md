@@ -2,15 +2,20 @@
 
 Aesthetic Archive is a full-stack Next.js application. Deploy it to **Cloudflare Workers** through the OpenNext adapter. Do not use a static Cloudflare Pages deployment: authentication callbacks, server APIs, the Provider vault, AI Gateway, moderation, and feedback require a server runtime.
 
-## GitHub Connection
+## GitHub Actions Deployment
 
-1. In Cloudflare Dashboard, open **Workers & Pages** and create a Worker by connecting the GitHub repository `Young4ever33/Aesthetic-Archive`.
-2. Select the repository root as the application root.
-3. Use `main` as the production branch.
-4. Use the package manager detected from `pnpm-lock.yaml`.
-5. Configure the production build/deploy command as `pnpm cloudflare:deploy`.
-6. Configure non-production branch uploads as `pnpm cloudflare:upload` when preview versions are enabled.
-7. Keep the Worker name aligned with `wrangler.jsonc`: `aesthetic-archive`.
+Production deploys run from `.github/workflows/check.yml`. A push to `main` must pass `pnpm check` and `pnpm cloudflare:build`; only then does the `deploy-production` job publish the Worker and run production smoke checks.
+
+Configure these repository or `production` environment secrets in GitHub:
+
+```text
+CLOUDFLARE_API_TOKEN
+CLOUDFLARE_ACCOUNT_ID
+```
+
+The API token should be scoped to the target account with Workers Scripts edit access and the minimum read permissions Wrangler requires. It is a deployment credential only. Do not copy Supabase keys, `PROVIDER_ENCRYPTION_KEY`, or user Provider keys into GitHub.
+
+Keep the Worker name aligned with `wrangler.jsonc`: `aesthetic-archive`. The config uses `keep_vars: true`, so Wrangler deployments preserve the runtime variables and secrets already managed in the Cloudflare Dashboard. Avoid enabling a second Cloudflare Git-integration deployment for the same branch, because two independent deployment systems create ambiguous production versions.
 
 The repository contains:
 
@@ -23,7 +28,7 @@ The repository contains:
 
 ## Cloudflare Variables and Secrets
 
-Configure these only in **Cloudflare Dashboard → Worker → Settings → Variables and Secrets**. Do not create or commit local environment files.
+Configure these only in **Cloudflare Dashboard → Worker → Settings → Variables and Secrets**. Do not create or commit local environment files. GitHub Actions preserves these values during deployment and does not receive them.
 
 Public application variables:
 

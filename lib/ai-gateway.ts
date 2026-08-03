@@ -72,11 +72,12 @@ export function resolveModel(provider: ProviderRecord, requested: unknown, kind:
 
 function upstreamError(status: number, detail = ''): GatewayError {
   const suffix = detail ? `: ${detail.slice(0, 240)}` : '';
-  if (status === 401 || status === 403) return gatewayError('FORBIDDEN', `The AI service rejected the credentials or model${suffix}`, 502);
-  if (status === 404) return gatewayError('PROVIDER_INVALID_RESPONSE', `The AI service endpoint or model was not found${suffix}`, 502);
-  if (status === 429) return gatewayError('PROVIDER_RATE_LIMITED', `The AI service rate limit was reached${suffix}`, 429, true);
+  if (status === 401 || status === 403) return gatewayError('FORBIDDEN', `The AI service rejected the API key, account, or model access${suffix}`, 502);
+  if (status === 404) return gatewayError('PROVIDER_INVALID_RESPONSE', `The AI service endpoint or model was not found. Verify that Base URL ends at the API version, for example /v1${suffix}`, 502);
+  if (status === 408) return gatewayError('PROVIDER_TIMEOUT', `The AI service timed out${suffix}`, 504, true);
+  if (status === 429) return gatewayError('PROVIDER_RATE_LIMITED', `The AI service rate limit or account quota was reached${suffix}`, 429, true);
   if (status >= 500) return gatewayError('PROVIDER_UNAVAILABLE', `The AI service is temporarily unavailable${suffix}`, 502, true);
-  return gatewayError('PROVIDER_INVALID_RESPONSE', `The AI service rejected the request${suffix}`, 502);
+  return gatewayError('PROVIDER_INVALID_RESPONSE', `The AI service rejected the request (HTTP ${status})${suffix}`, 502);
 }
 
 function upstreamDetail(value: unknown): string {
@@ -103,9 +104,13 @@ async function requestJson(url: string, init: RequestInit): Promise<Record<strin
   const timeout = setTimeout(() => controller.abort(), requestTimeoutMs());
   try {
     const response = await fetch(url, { ...init, signal: controller.signal });
-    const data: unknown = await response.json().catch(() => null);
-    if (!response.ok) throw upstreamError(response.status, upstreamDetail(data));
-    if (!data || typeof data !== 'object' || Array.isArray(data)) throw gatewayError('PROVIDER_INVALID_RESPONSE', 'The AI service returned an invalid response', 502);
+    const raw = await response.text();
+    let data: unknown = null;
+    try { data = raw ? JSON.parse(raw) : null; } catch { data = null; }
+    if (!response.ok) throw upstreamError(response.status, upstreamDetail(data) || raw);
+    if (!data || typeof data !== 'object' || Array.isArray(data)) {
+      throw gatewayError('PROVIDER_INVALID_RESPONSE', `The AI service returned a non-JSON response${raw ? `: ${raw.slice(0, 160)}` : ''}`, 502);
+    }
     return data as Record<string, unknown>;
   } catch (error) {
     if (error instanceof Error && error.name === 'AbortError') throw gatewayError('PROVIDER_TIMEOUT', 'The AI service timed out', 504, true);
@@ -118,28 +123,67 @@ async function requestJson(url: string, init: RequestInit): Promise<Record<strin
   }
 }
 
+export function normalizeProviderType(value: string) {
+  const type = value.trim().toLowerCase().replace(/[_-]+/g, ' ');
+  if (type === 'google' || type === 'google gemini') return 'gemini';
+  if (type === 'open router') return 'openrouter';
+  if (type === 'custom' || type === 'openai compatible' || type === 'openai compatible endpoint') return 'custom endpoint';
+  return type;
+}
+
 function baseUrl(provider: ProviderRecord) {
-  const type = provider.type.trim().toLowerCase();
+  const type = normalizeProviderType(provider.type);
   const defaultUrl = type === 'openrouter'
     ? 'https://openrouter.ai/api/v1'
     : 'https://api.openai.com/v1';
-  return (provider.base_url || defaultUrl).replace(/\/$/, '');
+  const configured = (provider.base_url || defaultUrl).replace(/\/+$/, '');
+  return configured.replace(/\/(?:chat\/completions|responses|images\/generations|models)$/i, '');
+}
+
+function providerHeaders(provider: ProviderRecord, secret: string) {
+  const headers: Record<string, string> = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${secret}`,
+    'User-Agent': 'Aesthetic-Archive/0.1',
+  };
+  if (normalizeProviderType(provider.type) === 'openrouter') {
+    headers['HTTP-Referer'] = 'https://aesthetic-archive.laverneyue33.workers.dev';
+    headers['X-Title'] = 'Aesthetic Archive';
+  }
+  return headers;
+}
+
+function textFromContent(content: unknown): string {
+  if (typeof content === 'string') return content.trim();
+  if (!Array.isArray(content)) return '';
+  return content
+    .filter((part): part is Record<string, unknown> => Boolean(part && typeof part === 'object'))
+    .map((part) => {
+      if (typeof part.text === 'string') return part.text;
+      if (part.text && typeof part.text === 'object' && typeof (part.text as Record<string, unknown>).value === 'string') return (part.text as Record<string, unknown>).value as string;
+      if (typeof part.content === 'string') return part.content;
+      return '';
+    })
+    .join('')
+    .trim();
 }
 
 function extractOpenAiText(data: Record<string, unknown>): string {
+  if (typeof data.output_text === 'string' && data.output_text.trim()) return data.output_text.trim();
   const choices = Array.isArray(data.choices) ? data.choices : [];
-  const message = choices[0] && typeof choices[0] === 'object' ? (choices[0] as Record<string, unknown>).message : null;
-  const content = message && typeof message === 'object' ? (message as Record<string, unknown>).content : null;
-  if (typeof content === 'string' && content.trim()) return content;
-  if (Array.isArray(content)) {
-    const text = content
-      .filter((part): part is Record<string, unknown> => Boolean(part && typeof part === 'object'))
-      .map(part => typeof part.text === 'string' ? part.text : '')
-      .join('')
-      .trim();
-    if (text) return text;
-  }
-  throw gatewayError('PROVIDER_INVALID_RESPONSE', 'The AI response did not contain text', 502);
+  const choice = choices[0] && typeof choices[0] === 'object' ? choices[0] as Record<string, unknown> : null;
+  const message = choice?.message && typeof choice.message === 'object' ? choice.message as Record<string, unknown> : null;
+  const choiceText = textFromContent(message?.content) || (typeof choice?.text === 'string' ? choice.text.trim() : '');
+  if (choiceText) return choiceText;
+  const output = Array.isArray(data.output) ? data.output : [];
+  const outputText = output
+    .filter((item): item is Record<string, unknown> => Boolean(item && typeof item === 'object'))
+    .map((item) => textFromContent(item.content))
+    .join('')
+    .trim();
+  if (outputText) return outputText;
+  throw gatewayError('PROVIDER_INVALID_RESPONSE', 'The AI response succeeded but did not contain readable text', 502);
 }
 
 function extractGeminiText(data: Record<string, unknown>): string {
@@ -153,7 +197,7 @@ function extractGeminiText(data: Record<string, unknown>): string {
 
 export async function callVisionProvider(provider: ProviderRecord, model: string, image: { mimeType: string; data: string }, prompt: string) {
   const secret = decryptProviderSecret(provider.encrypted_api_key);
-  if (provider.type.toLowerCase() === 'gemini') {
+  if (normalizeProviderType(provider.type) === 'gemini') {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(secret)}`;
     const data = await requestJson(url, {
       method: 'POST',
@@ -165,21 +209,21 @@ export async function callVisionProvider(provider: ProviderRecord, model: string
 
   const data = await requestJson(`${baseUrl(provider)}/chat/completions`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${secret}` },
-    body: JSON.stringify({ model, temperature: 0.2, messages: [{ role: 'user', content: [{ type: 'text', text: prompt }, { type: 'image_url', image_url: { url: `data:${image.mimeType};base64,${image.data}` } }] }] }),
+    headers: providerHeaders(provider, secret),
+    body: JSON.stringify({ model, messages: [{ role: 'user', content: [{ type: 'text', text: prompt }, { type: 'image_url', image_url: { url: `data:${image.mimeType};base64,${image.data}` } }] }] }),
   });
   return extractOpenAiText(data);
 }
 
 export async function callImageGenerationProvider(provider: ProviderRecord, model: string, prompt: string, options: { count: number; size: '1024x1024' | '1536x1024' | '1024x1536' }) {
-  const type = provider.type.trim().toLowerCase();
+  const type = normalizeProviderType(provider.type);
   if (type !== 'openai' && type !== 'custom endpoint') {
     throw gatewayError('INVALID_REQUEST', 'Image generation currently supports OpenAI and explicit OpenAI-compatible Custom Endpoints only', 400);
   }
   const secret = decryptProviderSecret(provider.encrypted_api_key);
   const data = await requestJson(`${baseUrl(provider)}/images/generations`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${secret}` },
+    headers: providerHeaders(provider, secret),
     body: JSON.stringify({ model, prompt, n: options.count, size: options.size }),
   });
   const rows = Array.isArray(data.data) ? data.data : [];
@@ -194,9 +238,25 @@ export async function callImageGenerationProvider(provider: ProviderRecord, mode
   return images;
 }
 
+export async function probeProvider(provider: ProviderRecord) {
+  const secret = decryptProviderSecret(provider.encrypted_api_key);
+  if (normalizeProviderType(provider.type) === 'gemini') {
+    const data = await requestJson(`https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(secret)}`, {
+      method: 'GET',
+      headers: { Accept: 'application/json', 'User-Agent': 'Aesthetic-Archive/0.1' },
+    });
+    return Array.isArray(data.models) ? data.models.length : 0;
+  }
+  const data = await requestJson(`${baseUrl(provider)}/models`, {
+    method: 'GET',
+    headers: providerHeaders(provider, secret),
+  });
+  return Array.isArray(data.data) ? data.data.length : 0;
+}
+
 export async function callTextProvider(provider: ProviderRecord, model: string, prompt: string) {
   const secret = decryptProviderSecret(provider.encrypted_api_key);
-  if (provider.type.toLowerCase() === 'gemini') {
+  if (normalizeProviderType(provider.type) === 'gemini') {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(secret)}`;
     const data = await requestJson(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }) });
     return extractGeminiText(data);
@@ -204,8 +264,8 @@ export async function callTextProvider(provider: ProviderRecord, model: string, 
 
   const data = await requestJson(`${baseUrl(provider)}/chat/completions`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${secret}` },
-    body: JSON.stringify({ model, temperature: 0.2, messages: [{ role: 'user', content: prompt }] }),
+    headers: providerHeaders(provider, secret),
+    body: JSON.stringify({ model, messages: [{ role: 'user', content: prompt }] }),
   });
   return extractOpenAiText(data);
 }

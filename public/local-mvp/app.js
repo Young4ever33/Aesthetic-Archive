@@ -3076,13 +3076,13 @@ async function testProviderConnection(id) {
   const provider = getProviders().find(item => item.id === id);
   if (!provider) return setProviderStatus('请先保存 Provider，再测试连接。', 'warning');
   const model = provider.defaultTextModel || provider.textModels?.[0] || '';
-  if (!model) return setProviderStatus('连接测试需要至少一个文本模型。', 'warning');
   try {
-    setProviderStatus('正在调用 Provider 测试连接…');
-    const response = await fetch('/api/providers/test', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ providerId: id, model }) });
+    setProviderStatus(model ? '正在调用文本模型测试 Provider…' : '正在验证 Provider 地址和 API Key…');
+    const response = await fetch('/api/providers/test', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ providerId: id, ...(model ? { model } : {}) }) });
     const result = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(`${result.error?.message || '连接测试失败'}${result.requestId ? `（请求 ID：${result.requestId}）` : ''}`);
-    setProviderStatus(`连接成功 · ${result.meta?.model || model}`, 'success');
+    const capability = result.data?.capability === 'text' ? `文本模型 ${result.meta?.model || model}` : `API 认证${Number.isFinite(result.data?.modelCount) ? ` · 可见 ${result.data.modelCount} 个模型` : ''}`;
+    setProviderStatus(`连接成功 · ${capability}`, 'success');
     toast('Provider 连接测试成功');
   } catch (error) { setProviderStatus(`连接测试失败：${error.message}`, 'warning'); }
 }
