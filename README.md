@@ -2,7 +2,7 @@
 
 [中文 README](./README.zh-CN.md)
 
-> **Aesthetic Archive is an AI-powered aesthetic knowledge workspace for designers. It turns scattered visual references into searchable, explainable, and reusable design intelligence.**
+> **Aesthetic Archive is an AI-powered aesthetic knowledge base for everyone who cares about aesthetics and design. It turns scattered visual references into a searchable, traceable, decomposable, and reusable system of design and aesthetic intelligence.**
 
 ![Aesthetic Archive visual reference wall](./public/marketing/hero-editorial.png)
 
@@ -19,9 +19,9 @@ Aesthetic Archive is currently an Open Beta / MVP foundation. The local product 
 
 ## Product Introduction
 
-Designers do not lack images. They lack a reliable way to remember why a reference matters, explain what makes it work, and reuse that knowledge in the next project.
+Anyone who cares about aesthetics can accumulate more images than they can meaningfully understand. What is missing is a reliable way to remember why a reference matters, trace where it came from, break down what makes it work, and reuse that knowledge in the next creation, choice, or design project.
 
-Aesthetic Archive treats a reference as more than an image. It turns a visual reference into a structured aesthetic card with design elements, cultural context, materials, lighting, geometry, typography, palette, composition, use cases, bilingual prompts, negative prompts, source, and rights information.
+Aesthetic Archive treats a reference as more than an image. It turns a visual reference into a structured aesthetic card with design elements, cultural context, materials, lighting, geometry, typography, palette, composition, use cases, bilingual prompts, negative prompts, source, and rights information. Whether the context is professional work or personal taste, a one-off save can become knowledge that remains useful over time.
 
 The product connects four stages that are usually separated:
 
@@ -33,12 +33,13 @@ The result is not another image folder or a generic AI image generator. It is a 
 
 ## For Whom
 
-Aesthetic Archive is designed for people who need to build, explain, and reuse visual direction:
+Aesthetic Archive is for anyone who wants to build, understand, and reuse aesthetic knowledge:
 
-- **Spatial and landscape designers:** early research, material studies, spatial references, client presentations, and visual direction.
-- **Graphic and brand designers:** visual systems, editorial references, typography, composition, color relationships, and brand moodboards.
+- **Spatial designers across planning, architecture, landscape, and interiors:** early research, material studies, spatial references, client presentations, and visual direction.
+- **Graphic, brand, and UI designers:** visual systems, editorial references, typography, interfaces, composition, color relationships, and brand moodboards.
+- **Photographers and image-makers:** references for lighting, color grading, visual narrative, lens language, atmosphere, and composition.
 - **AI visual creators:** repeatable style variables, bilingual prompts, negative constraints, and reference sets.
-- **Design students and emerging designers:** style breakdown, visual research, and long-term personal taste development.
+- **Personal aesthetic collectors, design students, and emerging creators:** everyday inspiration, style breakdown, visual research, and long-term development of a personal aesthetic system.
 - **Small studios and creative teams:** a shared visual language with private project research kept separate from public inspiration.
 
 ![Aesthetic Archive for design research](./public/marketing/who.png)
