@@ -1,0 +1,32 @@
+{
+  "name": "aesthetic-archive-web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 5174",
+    "build": "next build",
+    "start": "next start -p 5174",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "seed:prompts": "node scripts/update-seed-prompts.mjs",
+    "github:check": "node scripts/github-check.mjs",
+    "smoke:production": "node scripts/smoke-production.mjs",
+    "check": "pnpm lint && pnpm typecheck && pnpm github:check && pnpm build"
+  },
+  "dependencies": {
+    "@supabase/ssr": "^0.12.4",
+    "@supabase/supabase-js": "^2.111.0",
+    "next": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "undici": "^8.9.0"
+  },
+  "devDependencies": {
+    "@types/node": "latest",
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "eslint": "^9.39.1",
+    "eslint-config-next": "latest",
+    "typescript": "^5.9.3"
+  }
+}

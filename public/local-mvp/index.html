@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Aesthetic Archive｜AI Aesthetic Knowledge Base</title>
+  <meta name="description" content="Aesthetic Archive helps designers turn visual references into reusable aesthetic systems: cultural context, design elements, palettes, composition types, and bilingual prompts.">
+  <link rel="stylesheet" href="/local-mvp/styles.css">
+  <link rel="icon" type="image/svg+xml" href="/brand/archive-mark.svg">
+</head>
+<body data-view="app">
+  <main id="app-view" aria-label="Aesthetic Archive app">
+    <header class="app-navbar">
+      <a class="brand" href="/" aria-label="Back to marketing page">
+        <img class="aa-plus-logo" src="/brand/archive-mark.svg" alt="">
+        <span class="brand-wordmark">Aesthetic Archive</span>
+      </a>
+      <div class="app-account-actions">
+        <div class="language-menu" data-language-menu>
+          <button class="language-toggle" type="button" data-language-toggle aria-label="Switch language" aria-expanded="false">中文</button>
+          <div class="language-options" role="menu">
+            <button type="button" data-language-option="zh-CN">中文</button>
+            <button type="button" data-language-option="en">EN</button>
+          </div>
+        </div>
+        <button class="login-lite" type="button" data-login-open>登录</button>
+      </div>
+    </header>
+
+    <section class="app-page">
+      <div class="app-shell">
+        <aside class="app-sidebar" aria-label="Workspace sidebar">
+          <button class="side-item is-active" type="button" data-tab="plaza"><img class="side-icon" src="/local-mvp/icons/Plaza.svg" alt=""><span>视觉库广场</span><small>Public Plaza</small></button>
+          <button class="side-item" type="button" data-tab="archive"><img class="side-icon" src="/local-mvp/icons/个人审美库.svg" alt=""><span>微微 Highlight</span><small>My Archive</small></button>
+          <button class="side-item" type="button" data-tab="saved"><img class="side-icon" src="/local-mvp/icons/个人收藏.svg" alt=""><span>个人收藏</span><small>Saved</small></button>
+          <button class="side-item" type="button" data-tab="collage"><img class="side-icon" src="/local-mvp/icons/Collage.svg" alt=""><span>Collage 画板</span><small>Board</small></button>
+          <button class="side-item" type="button" data-tab="provider"><img class="side-icon" src="/local-mvp/icons/API.svg" alt=""><span>模型</span><small>API Provider</small></button>
+          <button class="side-item reviewer-only" type="button" data-tab="reviews"><img class="side-icon" src="/local-mvp/icons/review.svg" alt=""><span>审核队列</span><small>Review Queue</small></button>
+          <button class="side-item" type="button" data-tab="settings"><img class="side-icon" src="/local-mvp/icons/setting.svg" alt=""><span>设置</span><small>Settings</small></button>
+          <button class="side-item feedback-link" type="button" data-feedback-open aria-label="意见箱"><img class="side-icon" src="/local-mvp/icons/feedback.svg" alt=""><span class="feedback-title"><b>意见箱</b></span><small>Feedback</small></button>
+        </aside>
+
+        <section class="app-main">
+          <div class="tab-panel is-active" data-panel="plaza">
+            <section class="plaza-hero">
+              <div>
+                <p class="eyebrow">Public Plaza</p>
+                <h1>Search reusable aesthetic systems.</h1>
+                <p>浏览公开审美案例，按风格、色彩、构图、场景和 Prompt 筛选。点击卡片查看左侧图册与右侧风格知识。</p>
+              </div>
+              <div class="plaza-meta">
+                <span id="result-count">0 styles</span>
+                <span id="saved-count">0 saved</span>
+              </div>
+            </section>
+
+            <div class="plaza-search-card">
+              <div class="plaza-search-head">
+                <div class="search-line">
+                  <label for="style-search">Search</label>
+                  <input id="style-search" type="search" placeholder="东方克制住宅入口 / Swiss editorial grid / 低饱和石材庭院 / dark cinematic brand visual">
+                </div>
+                <div class="plaza-actions">
+                  <button class="button ghost" type="button" id="plaza-clear-btn">Clear</button>
+                </div>
+              </div>
+              <div class="filter-bar" aria-label="Category filters">
+                <span>Category</span>
+                <button class="filter-chip is-active" type="button" data-filter-group="category" data-filter="All">All</button>
+                <button class="filter-chip" type="button" data-filter-group="category" data-filter="Architecture">Architecture</button>
+                <button class="filter-chip" type="button" data-filter-group="category" data-filter="Graphic">Graphic</button>
+              </div>
+              <div class="filter-bar" aria-label="Quick filters">
+                <span>Style</span>
+                <button class="filter-chip" type="button" data-query="Minimal">Minimal</button>
+                <button class="filter-chip" type="button" data-query="Brutalism">Brutalist</button>
+                <button class="filter-chip" type="button" data-query="Wabi-Sabi">Wabi-sabi</button>
+                <button class="filter-chip" type="button" data-query="Swiss grid">Swiss grid</button>
+                <button class="filter-chip" type="button" data-query="Cinematic">Cinematic</button>
+                <button class="filter-chip" type="button" data-query="Art Deco">Art Deco</button>
+              </div>
+            </div>
+            <div class="card-grid" id="case-grid"></div>
+          </div>
+
+          <div class="tab-panel" data-panel="archive">
+            <section class="archive-layout">
+              <form class="archive-form" id="archive-form" novalidate>
+                <div class="form-head">
+                  <p class="eyebrow">个人审美库 / My Archive</p>
+                  <h3>创建私人审美卡片</h3>
+                  <p>手动沉淀个人审美资料。数据暂存在本地浏览器，不上传服务器。</p>
+                </div>
+                <section class="archive-auto-section" aria-labelledby="archive-auto-title">
+                  <div class="archive-section-heading"><span class="eyebrow">01 / 上传与生成</span><h4 id="archive-auto-title">先上传参考图，让 AI 生成审美卡片</h4><p>上传图片并点击 AI 分析，系统会先生成标题、分类、描述、色卡和 Prompt。</p></div>
+                  <section class="upload-panel" aria-label="Reference image upload">
+                    <div class="upload-preview" id="archive-image-preview"><span>No Image</span></div>
+                    <div class="upload-controls">
+                      <label class="file-picker-field"><span class="file-field-label">上传参考图片</span> <small>支持多张</small><span class="file-picker-button"><span class="file-picker-label" id="archive-file-label">选择文件</span><input id="archive-file" type="file" accept="image/*" multiple></span></label>
+                      <label>封面与图册地址 <small>每行一张</small><textarea id="archive-image" rows="3" placeholder="每行输入一个图片地址，也可以直接上传本地图片"></textarea></label>
+                      <div class="ai-model-row">
+                        <label>AI 服务商 <small>Provider</small><select id="archive-provider-select"><option value="">本地备用分析</option></select></label>
+                        <label>图片模型 <small>Image model</small><select id="archive-model-select"><option value="">自动选择可识图模型</option></select></label>
+                      </div>
+                      <div class="ai-generation-options">
+                        <label>分析模板 <small>Prompt template</small><select id="archive-template-select"></select></label>
+                        <div class="prompt-length-row"><label id="prompt-max-length-label">提示词字数上限 <small>AI 生成前的长度限制</small><input id="prompt-max-length" type="number" min="80" max="4000" step="10" value="1000" inputmode="numeric"></label><span id="prompt-length-status" class="helper-text">中文和英文提示词会按此上限自动截短。</span></div>
+                      </div>
+                      <div class="upload-actions">
+                        <button class="button ghost" type="button" id="archive-ai-btn">AI 分析图片</button>
+                        <button class="button ghost" type="button" id="archive-clear-image-btn">清除图片</button>
+                      </div>
+                      <p class="helper-text" id="archive-ai-status">本地 MVP：图片保存在浏览器本地。AI 分析先用模拟生成，真实 Provider 调用已预留。</p>
+                    </div>
+                  </section>
+                </section>
+                <section class="archive-manual-section" aria-labelledby="archive-manual-title">
+                  <div class="archive-section-heading"><span class="eyebrow">02 / 检查与调整</span><h4 id="archive-manual-title">检查 AI 结果，再手动修改和保存</h4><p>下面的字段会回填 AI 生成结果，也可以全部手动填写或继续调整。</p></div>
+                  <div class="form-grid two">
+                    <label>英文标题 <small>English title</small><input id="archive-title" required placeholder="Quiet limestone courtyard"></label>
+                    <label>中文标题 <small>主要显示</small><input id="archive-title-zh" placeholder="安静石灰岩庭院"></label>
+                  </div>
+                  <div class="form-grid two">
+                    <label>分类 <small>Category</small><select id="archive-category"><option>Architecture</option><option>Interior</option><option>Graphic Design</option><option>Brand Identity</option><option>Product Design</option><option>Fashion</option><option>Photography</option><option>Art Direction</option><option>Typography</option><option>Web / UI</option><option>Landscape</option><option>Furniture</option><option>Packaging</option><option>Other</option></select><input id="archive-category-other" class="category-other-input" type="text" placeholder="输入自定义分类" hidden></label>
+                    <label>可见范围 <small>Visibility</small><select id="archive-visibility"><option value="private">仅自己可见 · Private</option><option value="public">申请公开审核</option></select></label>
+                  </div>
+                  <label>风格概述 <small>Summary</small><textarea id="archive-summary" rows="3" placeholder="一句话说明这个风格适合什么场景。"></textarea></label>
+                  <label>文化背景 <small>Cultural background</small><textarea id="archive-cultural" rows="4" placeholder="文化来源、时代语境、审美关键词。"></textarea></label>
+                  <label>设计要素 <small>Design elements</small><textarea id="archive-elements" rows="4" placeholder="材质、形态、字体、影像、空间语言。"></textarea></label>
+                  <div class="form-grid two">
+                    <label>色卡 <small>Palette</small><input id="archive-palette" placeholder="#d8d1c4, #8a8378, #3e403a"></label>
+                    <label>标签 <small>Tags</small><input id="archive-tags" placeholder="侘寂、石材、克制"></label>
+                  </div>
+                  <label>构图方式 <small>Composition</small><input id="archive-composition" placeholder="轴线留白 / 模块化编辑网格"></label>
+                  <label>使用场景 <small>Use cases</small><input id="archive-use-cases" placeholder="住宅入口、品牌情绪板、AI 图片生成"></label>
+                  <label>中文提示词 <small>Prompt ZH</small><textarea id="archive-prompt-zh" rows="4" placeholder="中文生成提示词"></textarea></label>
+                  <label>英文提示词 <small>Prompt EN</small><textarea id="archive-prompt-en" rows="4" placeholder="English prompt"></textarea></label>
+                  <label>负面提示词 <small>Negative prompt</small><textarea id="archive-negative" rows="3" placeholder="避免泛化装饰、低质量渲染、材料逻辑不一致……"></textarea></label>
+                </section>
+                <div class="save-status" id="archive-save-status" role="status">Ready · 上传图片并生成后，可以检查和调整审美卡片。</div>
+                <div class="form-actions">
+                  <button class="button primary" type="submit">保存审美卡片</button>
+                  <button class="button ghost" type="button" id="archive-new-card-btn">新建卡片</button>
+                  <button class="button ghost" type="reset">重置</button>
+                </div>
+              </form>
+              <section class="archive-list-panel">
+                <div class="saved-toolbar">
+                  <h3>私人审美库</h3>
+                  <div class="archive-toolbar-actions">
+                    <details class="export-menu" id="archive-export-menu">
+                      <summary class="button ghost">Export</summary>
+                      <div class="export-options" role="menu" aria-label="Archive export formats">
+                        <button type="button" data-archive-export="png">PNG 图片</button>
+                        <button type="button" data-archive-export="jpg">JPG 图片</button>
+                        <button type="button" data-archive-export="pdf">PDF 文档</button>
+                        <button type="button" data-archive-export="html">HTML 图文档案</button>
+                        <button type="button" data-archive-export="md">Markdown 文本档案</button>
+                      </div>
+                    </details>
+                    <button class="button danger" type="button" id="clear-archive-btn">Clear</button>
+                  </div>
+                </div>
+                <div class="storage-health" id="archive-storage-health">Local storage health loading...</div>
+                <div class="saved-grid archive-grid" id="archive-grid"></div>
+              </section>
+            </section>
+          </div>
+
+          <div class="tab-panel" data-panel="saved">
+            <div class="saved-toolbar">
+              <h3>个人收藏</h3>
+              <div>
+                <button class="button ghost" type="button" id="export-md-btn">Export Markdown</button>
+                <button class="button ghost" type="button" id="export-json-btn">Export JSON</button>
+                <button class="button danger" type="button" id="clear-saved-btn">Clear</button>
+              </div>
+            </div>
+            <div class="saved-grid" id="saved-grid"></div>
+          </div>
+
+          <div class="tab-panel" data-panel="collage">
+            <section class="collage-panel">
+              <div class="saved-toolbar">
+                <div><h3>Collage Board</h3><span class="feature-status">测试中 · 未来待开放</span></div>
+                <div class="collage-toolbar-actions">
+                  <button class="button ghost" type="button" id="collage-summary-btn">生成画板总结</button>
+                  <details class="export-menu" id="collage-export-menu">
+                    <summary class="button ghost">导出</summary>
+                    <div class="export-options" role="menu" aria-label="Collage export formats">
+                      <button type="button" data-collage-export="png">PNG 图片</button>
+                      <button type="button" data-collage-export="jpg">JPG 图片</button>
+                      <button type="button" data-collage-export="pdf">PDF 文档</button>
+                      <button type="button" data-collage-export="html">HTML 图文档案</button>
+                      <button type="button" data-collage-export="md">Markdown 文本档案</button>
+                    </div>
+                  </details>
+                  <button class="button danger" type="button" id="clear-collage-btn">清空画板</button>
+                </div>
+              </div>
+              <div class="collage-workspace">
+                <div>
+                  <div class="collage-summary" id="collage-summary">
+                    <span>画板总结 / Board Summary</span>
+                    <p>从广场、私人审美库或详情页点击 + Collage，把参考图加入项目风格板。</p>
+                  </div>
+                  <div class="collage-canvas-wrap">
+                    <div class="collage-canvas" id="collage-canvas"></div>
+                    <div class="collage-toolrail" aria-label="Collage tools">
+                      <button type="button" data-collage-tool="select" title="Select" aria-label="Select">↖</button>
+                      <button type="button" data-collage-tool="text" title="Text" aria-label="Text">T</button>
+                      <button type="button" data-collage-tool="sticky" title="Sticky note" aria-label="Sticky note">▣</button>
+                      <button type="button" data-collage-tool="pen" title="Pen" aria-label="Pen">✎</button>
+                      <button type="button" id="collage-undo-btn" title="Undo" aria-label="Undo">↶</button>
+                      <button type="button" id="collage-redo-btn" title="Redo" aria-label="Redo">↷</button>
+                      <button type="button" id="collage-clear-stroke-btn" title="Clear last stroke" aria-label="Clear last stroke">⌫</button>
+                    </div>
+                  </div>
+                </div>
+                <aside class="collage-side">
+                  <div class="collage-inspector" id="collage-inspector">选择一个元素后，可以编辑、复制、调整层级或移除。</div>
+                  <div class="collage-list" id="collage-list"></div>
+                </aside>
+              </div>
+            </section>
+          </div>
+
+          <div class="tab-panel" data-panel="provider" id="ai-provider">
+            <section class="provider-page">
+              <div class="provider-intro"><div><p class="eyebrow">自带 AI 服务 / Bring Your Own Provider</p><h2>连接模型，保留你的分析方法。</h2><p>Provider 决定使用哪个模型；卡片生成模板决定模型如何提取文化背景、设计元素和可复用 Prompt。所有配置只保存在当前浏览器。</p></div><span class="local-badge">API Key 仅本地保存</span></div>
+              <div class="provider-layout">
+                <section class="provider-panel-card provider-accounts"><div class="provider-section-head"><div><h3>已配置服务</h3><p>选择一个服务用于图片分析和 Prompt 生成。</p></div><span class="provider-section-index">01</span></div><div class="provider-count-row"><span>当前服务</span><strong id="provider-count">0 个</strong></div><div class="provider-list" id="provider-list"></div></section>
+                <form class="provider-panel-card provider-form" id="provider-form">
+                  <div class="provider-section-head"><div><h3>服务配置</h3><p>保存后可在个人审美库中选择对应模型。</p></div><span class="provider-section-index">02</span></div>
+                  <fieldset class="provider-fieldset"><legend>基础连接</legend><div class="provider-fields-two"><label>服务名称 <small>Provider name</small><input id="provider-name" type="text" placeholder="例如：工作用 OpenAI / 个人 Gemini"></label><label>服务类型 <small>Provider type</small><select id="provider-type"><option>OpenAI</option><option>Gemini</option><option>OpenRouter</option><option>Custom Endpoint</option></select></label><label class="provider-wide">API 密钥 <small>仅保存在本地，备份时会脱敏</small><input id="provider-key" type="password" placeholder="密钥只保存在当前浏览器"></label><label class="provider-wide">接口地址 <small>Base URL</small><input id="provider-base-url" type="url" placeholder="只有自定义接口需要填写"></label></div></fieldset>
+                  <fieldset class="provider-fieldset"><legend>模型能力</legend><div class="provider-fields-two"><label>可识图模型 <small>每行一个</small><textarea id="provider-image-models" rows="4" placeholder="例如：gpt-4o\ngemini-1.5-pro"></textarea></label><label>文本模型 <small>每行一个</small><textarea id="provider-text-models" rows="4" placeholder="例如：gpt-4o-mini\nclaude-3.5-sonnet"></textarea></label></div><label class="checkbox-row"><input id="provider-image-capable" type="checkbox" checked> 此服务支持图片分析</label></fieldset>
+                  <fieldset class="provider-fieldset"><legend>图片处理</legend><div class="provider-fields-two"><label>图片处理服务 <small>Image API</small><select id="provider-image-api"><option value="none">不使用</option><option value="removebg">remove.bg</option><option value="clipdrop">Clipdrop</option><option value="custom-remove-bg">自定义去背景接口</option></select></label><label>接口地址 <small>可选</small><input id="provider-image-api-url" type="url" placeholder="自定义去背景接口或代理地址"></label></div></fieldset>
+                  <div class="form-actions"><button class="button primary" type="submit">保存 AI 服务</button><button class="button ghost" type="button" id="provider-new-btn">新建服务</button></div>
+                </form>
+              </div>
+            </section>
+          </div>
+
+          <div class="tab-panel reviewer-only" data-panel="reviews">
+            <section class="review-page">
+              <div class="review-intro"><div><p class="eyebrow" id="review-eyebrow">Review Queue / 内容审核</p><h2 id="review-title">审核公开视觉卡片。</h2><p id="review-copy">检查提交到 Public Plaza 的图片、描述、文化背景和版权提示。通过后仍需显式发布，审核中的内容不会出现在公开广场。</p></div><button class="button ghost" type="button" id="review-refresh-btn">刷新队列</button></div>
+              <div class="review-status" id="review-status" role="status">正在读取审核队列…</div>
+              <div class="review-grid" id="review-grid"></div>
+            </section>
+          </div>
+
+          <div class="tab-panel" data-panel="settings">
+            <section class="settings-page">
+              <div class="settings-intro"><div><p class="eyebrow">个人设置 / Workspace Settings</p><h2>管理你的资料与工作区方法。</h2><p>个人资料、卡片生成规则和本地数据都保存在当前浏览器。Provider 只负责调用模型，卡片模板决定模型如何理解你的审美。</p></div><span class="local-badge">本地工作区 · Local only</span></div>
+              <form class="settings-section settings-profile" id="settings-profile-form">
+                <div class="settings-section-head"><div><h3>个人资料</h3><p>为未来的账号、同步和服务扩展保留基础信息。</p></div><span class="settings-section-index">01</span></div>
+                <div class="profile-grid"><label class="avatar-field">头像 / Avatar<div class="avatar-picker"><div class="avatar-preview" id="setting-avatar-preview" aria-label="头像预览"></div><div class="avatar-picker-controls"><div class="avatar-choice-group"><span class="avatar-option-label">默认头像</span><div class="avatar-presets" id="setting-avatar-presets" aria-label="默认头像"></div></div><div class="avatar-upload-group"><span class="avatar-option-label">本地图片</span><label class="file-picker-button"><span class="file-picker-label" id="setting-avatar-file-label">选择图片</span><input id="setting-avatar-file" type="file" accept="image/jpeg,image/png,image/webp"></label></div><input id="setting-avatar" type="hidden"></div></div></label><label class="profile-name-field">名称 / Name<input id="setting-name" type="text" autocomplete="name" placeholder="你的名称"></label><label class="profile-email-field">邮箱 / Email<input id="setting-email" type="email" autocomplete="email" placeholder="name@example.com" readonly></label><label class="profile-contact-field">联系方式 / Contact<input id="setting-contact" type="text" placeholder="可选"></label><label class="profile-wide">设计方向 / Design focus<input id="setting-specialty" type="text" placeholder="例如：空间设计、品牌视觉、AI 生成"></label></div>
+                <div class="settings-actions"><button class="button primary" type="submit">保存个人资料</button><span class="save-status" id="profile-status">资料保存在当前浏览器。</span></div>
+              </form>
+              <form class="settings-section" id="settings-form">
+                <div class="settings-section-head"><div><h3>本地工作区</h3><p>只影响之后的新操作，不会改变已经保存的卡片。</p></div><span class="settings-section-index">02</span></div>
+                <div class="settings-fields-grid"><label>界面语言 / Language<select id="setting-language"><option value="zh-CN">中文</option><option value="en">English</option></select></label><label>默认内容导出格式<select id="setting-export-format"><option value="png">PNG 图片</option><option value="jpg">JPG 图片</option><option value="pdf">PDF 文档</option><option value="html">HTML 图文档案</option><option value="md">Markdown 文本档案</option></select></label><label>默认打开页面<select id="setting-default-tab"><option value="plaza">视觉库广场</option><option value="archive">个人审美库</option><option value="saved">个人收藏</option><option value="collage">Collage 画板</option></select></label><label>显示密度<select id="setting-density"><option value="compact">紧凑</option><option value="standard">标准</option><option value="spacious">宽松</option></select></label></div>
+                <div class="settings-actions"><button class="button primary" type="submit">保存工作区设置</button><span class="save-status" id="settings-status">设置已准备就绪。</span></div>
+              </form>
+              <section class="settings-section settings-template-section">
+                <div class="settings-section-head"><div><h3>卡片生成模板</h3><p>决定 AI 如何从图片、主题和文化语境中提取信息，并生成可复用的结构化卡片与 Prompt。</p></div><span class="settings-section-index">03</span></div>
+                <div class="template-folders" id="setting-template-folders" aria-label="卡片生成模板列表"></div><div class="template-toolbar"><label>当前模板<select id="setting-template-select"></select></label><button class="button ghost" type="button" id="setting-template-copy">复制并编辑</button><button class="button ghost" type="button" id="setting-template-reset">恢复系统默认</button></div>
+                <div class="template-editor-grid"><div class="template-options"><label>模板名称<input id="setting-template-name" type="text" placeholder="例如：住宅空间审美分析"></label><label>适用场景<input id="setting-template-scope" type="text" placeholder="空间设计 / 品牌视觉 / AI 生图"></label><label>分析重点<textarea id="setting-template-focus" rows="3" placeholder="文化背景、材料与工艺、空间关系、光线、构图、色彩"></textarea></label><label>生成规则<textarea id="setting-template-instructions" rows="8" placeholder="写下你希望 AI 遵守的分析和 Prompt 规则"></textarea></label></div><div class="template-preview"><div class="template-preview-head"><span>模板预览 / Template preview</span><span id="setting-template-state">系统默认</span></div><pre id="setting-template-preview"></pre><div class="template-test"><label>测试主题<input id="setting-template-test-topic" type="text" placeholder="例如：安静的住宅入口，天然石材与柔和自然光"></label><button class="button ghost" type="button" id="setting-template-test">生成测试 Prompt</button><pre id="setting-template-test-result">保存模板后，可以在这里检查 Prompt 是否具体、可复用。</pre></div></div></div>
+                <div class="settings-actions"><button class="button primary" type="button" id="setting-template-save">保存模板</button><span class="save-status" id="template-status">未修改系统默认模板。</span></div>
+              </section>
+              <section class="settings-section">
+                <div class="settings-section-head"><div><h3>使用数据</h3><p>记录当前浏览器内的个人操作；公共广场数据在接入账号和服务端前不会伪造。</p></div><span class="settings-section-index">04</span></div>
+                <div class="settings-stat-grid" id="settings-stats"></div><div class="stats-note">个人统计：当前浏览器内的生成、打开、编辑、Prompt、画板和导出行为。广场他人查看、收藏和加入画板：当前版本暂未启用。</div>
+              </section>
+              <section class="settings-section settings-privacy-section">
+                <div class="settings-section-head"><div><h3>隐私与版权</h3><p>提醒你确认来源和使用权限，但不会替你判断图片是否拥有授权。</p></div><span class="settings-section-index">05</span></div>
+                <div class="privacy-grid"><label class="privacy-option"><span class="privacy-option-control"><input id="setting-publish-confirm" type="checkbox"><i></i></span><span><strong>公开前再次确认</strong><small>将私人卡片提交到共享广场前，先确认内容和可见范围。</small></span></label><label class="privacy-option"><span class="privacy-option-control"><input id="setting-copyright-reminder" type="checkbox"><i></i></span><span><strong>提醒确认图片授权</strong><small>公开卡片前提醒你确认图片来源和使用权。</small></span></label><label class="privacy-option"><span class="privacy-option-control"><input id="setting-source-reminder" type="checkbox"><i></i></span><span><strong>导出时提醒来源</strong><small>导出包含外部图片的资料时，提醒保留来源信息。</small></span></label></div><div class="local-info"><div class="local-info-heading"><span class="local-info-mark">LOCAL</span><strong>本地工作区</strong></div><p>私人卡片、收藏、画板和设置保存在当前浏览器。Provider API Key 不会以明文进入备份，导入后需要重新填写。</p><div class="local-info-points"><span>不自动上传私人资料</span><span>API Key 备份时脱敏</span><span>版权判断由你负责</span></div></div>
+                <div class="settings-actions privacy-actions"><button class="button primary" type="button" id="settings-privacy-save">保存隐私与版权设置</button><span class="save-status" id="privacy-status">设置已准备就绪。</span></div>
+              </section>
+              <section class="settings-section settings-data-section">
+                <div class="settings-section-head"><div><h3>数据与备份</h3><p>JSON 只用于机器可读的完整工作区备份，不是普通内容导出格式。</p></div><span class="settings-section-index">06</span></div>
+                <div class="data-grid"><div><strong>本地文件库</strong><p>私人卡片、收藏、Prompt 模板、画板、Provider 配置和工作区偏好。</p><span id="settings-storage-summary">正在读取本地数据…</span><button class="button ghost" type="button" id="settings-folder-btn">选择本地导出文件夹</button><small id="settings-folder-status">未选择文件夹，导出将下载到浏览器默认目录。</small></div><div><strong>备份规则</strong><p>Provider API Key 导出为 <code>[redacted]</code>；Markdown 只引用图片 URL，不嵌入本地 Base64。</p><div class="settings-actions"><button class="button ghost" type="button" id="settings-export-btn">导出工作区备份</button><label class="button ghost settings-file-button file-picker-button"><span class="file-picker-label" id="settings-import-file-label">导入工作区备份</span><input id="settings-import-file" type="file" accept="application/json"></label></div></div></div>
+              </section>
+              <section class="settings-section settings-danger-section">
+                <div class="settings-section-head"><div><h3>危险操作</h3><p>分开清理，避免为了删除一类资料而清空整个工作区。</p></div><span class="settings-section-index">07</span></div>
+                <div class="danger-actions"><button class="button danger" type="button" id="settings-clear-private-btn">清空私人审美库</button><button class="button danger" type="button" id="settings-clear-saved-btn">清空个人收藏</button><button class="button danger" type="button" id="settings-clear-board-btn">清空 Collage 画板</button><button class="button danger" type="button" id="settings-clear-btn">清空整个本地工作区</button></div><p class="danger-note">清空整个工作区会删除私人卡片、收藏、画板、Provider 配置、个人资料、模板和偏好；不会删除公开视觉库或项目文件。</p>
+              </section>
+            </section>
+          </div>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <div class="aa-modal" id="aa-modal" hidden role="dialog" aria-modal="true" aria-labelledby="aa-modal-title"><div class="aa-modal-backdrop" data-modal-close></div><section class="aa-modal-panel"><h2 id="aa-modal-title">确认操作</h2><p id="aa-modal-message"></p><div class="aa-modal-actions"><button class="button ghost" type="button" data-modal-cancel>取消</button><button class="button danger" type="button" data-modal-confirm>确认</button></div></section></div>
+
+  <div class="aa-modal" id="collage-picker-modal" hidden role="dialog" aria-modal="true" aria-labelledby="collage-picker-title"><div class="aa-modal-backdrop" data-collage-picker-close></div><section class="aa-modal-panel collage-picker-panel"><h2 id="collage-picker-title">选择加入画板的图片</h2><p>可以选择一张图片，也可以将这张卡片的全部图片加入画板。</p><div id="collage-picker-options" class="collage-picker-options"></div><div class="aa-modal-actions"><button class="button ghost" type="button" data-collage-picker-close>取消</button></div></section></div>
+  <div class="aa-modal" id="feedback-modal" hidden role="dialog" aria-modal="true" aria-labelledby="feedback-title"><div class="aa-modal-backdrop" data-feedback-close></div><section class="aa-modal-panel feedback-panel"><h2 id="feedback-title">意见箱</h2><p id="feedback-copy">告诉我们哪里需要改进，或提交你希望加入的功能。</p><form id="feedback-form"><label id="feedback-message-label">反馈内容<textarea id="feedback-message" rows="6" required maxlength="4000" placeholder="请输入你的意见或遇到的问题"></textarea></label><div class="aa-modal-actions"><button class="button ghost" type="button" data-feedback-close>取消</button><button class="button primary" type="submit" id="feedback-submit">提交反馈</button></div></form></section></div>
+
+  <div class="detail-overlay" id="detail-overlay">
+    <div class="detail-panel" role="dialog" aria-modal="true" aria-labelledby="detail-title">
+      <button class="detail-close" type="button" id="detail-close" aria-label="Close detail panel">×</button>
+      <div class="detail-gallery">
+        <div class="gallery-main" id="detail-main-image"></div>
+        <div class="gallery-thumbs" id="detail-thumbs"></div>
+        <div class="gallery-note"><span>图册备注 / Gallery Notes</span><p id="detail-gallery-note">低饱和、结构清晰、适合沉淀为项目风格参考。</p></div>
+        <button class="button ghost" type="button" id="detail-add-gallery">选择图片加入画板</button>
+      </div>
+      <div class="detail-content" id="detail-content">
+        <p class="eyebrow" id="detail-category">Style Case</p>
+        <h2 id="detail-title">Style title</h2>
+        <p class="detail-subtitle" id="detail-subtitle">中文标题</p>
+        <section class="prompt-block is-primary"><div class="prompt-head"><h3>中文提示词</h3><button type="button" class="copy-link" data-copy="zh">复制中文</button></div><pre id="detail-prompt-zh"></pre></section>
+        <section class="prompt-block is-secondary"><div class="prompt-head"><h3>英文提示词</h3><button type="button" class="copy-link" data-copy="en">复制英文</button></div><pre id="detail-prompt-en"></pre></section>
+        <section class="detail-block"><h3>负面提示词</h3><p id="detail-negative"></p></section>
+        <section class="detail-block"><h3>文化背景</h3><p id="detail-cultural"></p></section>
+        <section class="detail-block"><h3>设计要素</h3><p id="detail-elements"></p></section>
+        <section class="detail-block"><h3>色卡</h3><div class="detail-palette" id="detail-palette"></div></section>
+        <section class="detail-block"><h3>构图方式</h3><p id="detail-composition"></p></section>
+        <section class="detail-block"><h3>使用场景</h3><p id="detail-use-cases"></p></section>
+        <div class="detail-actions">
+          <button class="button primary" type="button" id="detail-save">Save</button>
+          <button class="button ghost" type="button" id="detail-copy-edit">Copy to My Archive</button>
+          <button class="button ghost" type="button" id="detail-add-collage">Add to Collage</button>
+          <button class="button ghost" type="button" id="detail-export">Export</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="login-popover" id="login-popover" aria-hidden="true">
+    <div class="login-card" role="dialog" aria-modal="true" aria-label="Login options">
+      <button class="login-close" type="button" id="login-close" aria-label="Close login">×</button>
+      <h3 id="login-title">Login</h3>
+      <p id="login-copy">Use a local Open Beta profile to keep your archive state on this browser.</p>
+      <form class="login-form" id="login-form">
+        <label id="login-identity-label">Email or phone
+          <input id="login-identity" type="text" autocomplete="email" placeholder="name@example.com / +86 138...">
+        </label>
+        <button class="button primary" type="submit" id="login-email-btn">Continue with Email / Phone</button>
+      </form>
+      <button class="login-provider" type="button" id="login-google-btn">Continue with Google</button>
+      <button class="login-provider danger-text" type="button" id="logout-btn">Logout</button>
+      <p class="login-note" id="login-note">No real authentication yet. This stores only a local demo profile.</p>
+    </div>
+  </div>
+
+  <script src="/local-mvp/src/data/cases.js"></script>
+  <script src="/local-mvp/app.js"></script>
+</body>
+</html>
