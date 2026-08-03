@@ -2,7 +2,7 @@
 
 [中文 README](./README.zh-CN.md)
 
-**Product Website:** [https://your-domain.com](https://your-domain.com) *(deployment URL placeholder)*
+**Product Website:** [https://aesthetic-archive.laverneyue33.workers.dev](https://aesthetic-archive.laverneyue33.workers.dev)
 
 ![Aesthetic Archive marketing homepage](./docs/screenshots/marketing-what.png)
 
@@ -75,9 +75,9 @@ Upload a reference or create a card manually in a private archive. Connect an AI
 
 ### Prompt Reuse
 
-Each analyzed card can produce Chinese and English prompts, negative prompts, and reusable style variables. The goal is to move from “write a new prompt every time” to a Prompt Pack that can be adapted across projects and tools. The generation form and editable aesthetic card keep analysis, bilingual prompts, and archive storage in one workflow.
+Each analyzed card can produce Chinese and English prompts, negative prompts, and reusable style variables. The goal is to move from “write a new prompt every time” to a Prompt Pack that can be adapted across projects and tools. In Personal Settings, users can select an existing Prompt generation template or write and maintain their own template. The generation form and editable aesthetic card keep analysis, bilingual prompts, template reuse, and archive storage in one workflow.
 
-![Card generation templates in personal settings](./docs/screenshots/prompt-templates.png)
+![Bilingual reusable prompts generated for an aesthetic card](./docs/screenshots/prompt-templates.png)
 
 ### Collage Board
 

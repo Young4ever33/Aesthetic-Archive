@@ -2,7 +2,7 @@
 
 [English README](./README.md)
 
-**产品网址：** [https://your-domain.com](https://your-domain.com) *（部署网址占位）*
+**产品网址：** [https://aesthetic-archive.laverneyue33.workers.dev](https://aesthetic-archive.laverneyue33.workers.dev)
 
 ![Aesthetic Archive 宣传页首屏](./docs/screenshots/marketing-what.png)
 
@@ -75,9 +75,9 @@ Aesthetic Archive 面向所有希望建立、理解和复用审美知识的人�
 
 ### 提示词复用 / Prompt Reuse
 
-每张分析卡片都可以生成中文 Prompt、英文 Prompt、Negative Prompt 和可复用的风格变量。目标是从“每次重新写一遍 Prompt”转向可以跨项目、跨工具调整的 Prompt Pack。生成表单和可编辑审美卡片将分析、双语 Prompt 与审美库保存整合在同一条工作流中。
+每张分析卡片都可以生成中文 Prompt、英文 Prompt、Negative Prompt 和可复用的风格变量。目标是从“每次重新写一遍 Prompt”转向可以跨项目、跨工具调整的 Prompt Pack。用户可以在个人设置中选择已有的 Prompt 生成模板，也可以自行填写和维护模板。生成表单和可编辑审美卡片将分析、双语 Prompt、模板复用与审美库保存整合在同一条工作流中。
 
-![个人设置中的卡片生成模板](./docs/screenshots/prompt-templates.png)
+![审美卡片生成的中英文可复用 Prompt](./docs/screenshots/prompt-templates.png)
 
 ### 画板 / Collage Board
 
