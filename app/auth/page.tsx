@@ -3,6 +3,11 @@
 import { FormEvent, useState } from 'react';
 import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
 
+function safeNextPath() {
+  const value = new URLSearchParams(window.location.search).get('next') || '/app';
+  return value === '/app' || value.startsWith('/app?') || value.startsWith('/authors/') || value === '/notifications' || value.startsWith('/notifications?') ? value : '/app';
+}
+
 export default function AuthPage() {
   const [mode, setMode] = useState<'sign-in' | 'sign-up'>('sign-in');
   const [email, setEmail] = useState('');
@@ -23,7 +28,7 @@ export default function AuthPage() {
 
       if (result.error) throw result.error;
       setMessage(mode === 'sign-in' ? '登录成功，正在进入工作区。' : '注册成功，请先检查邮箱完成验证。');
-      if (mode === 'sign-in') window.location.assign('/app');
+      if (mode === 'sign-in') window.location.assign(safeNextPath());
     } catch (error) {
       setMessage(error instanceof Error ? error.message : '认证失败，请稍后重试。');
     } finally {
