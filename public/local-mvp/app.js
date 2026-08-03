@@ -722,14 +722,44 @@ function renderAvatarPicker(value = '') {
   if (els.avatarPresets) els.avatarPresets.innerHTML = AVATAR_PRESETS.map(item => `<button type="button" class="avatar-preset" data-avatar-preset="${escapeHTML(item.value)}" title="${escapeHTML(item.label)}" aria-label="${escapeHTML(item.label)}" style="background-image:url('${escapeHTML(item.value)}')"></button>`).join('');
 }
 
+async function avatarDataUrlToFile(dataUrl) {
+  const source = await new Promise((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = reject;
+    image.src = dataUrl;
+  });
+  const canvas = document.createElement('canvas');
+  const size = 512;
+  canvas.width = size; canvas.height = size;
+  const context = canvas.getContext('2d');
+  context.fillStyle = '#f1f1f1'; context.fillRect(0, 0, size, size);
+  context.drawImage(source, 0, 0, size, size);
+  const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png', .9));
+  if (!blob) throw new Error('头像转换失败');
+  return new File([blob], 'avatar.png', { type: 'image/png' });
+}
+
+async function uploadProfileAvatar(dataUrl) {
+  const file = await avatarDataUrlToFile(dataUrl);
+  const form = new FormData(); form.append('file', file);
+  const response = await fetch('/api/profile/avatar', { method: 'POST', credentials: 'same-origin', body: form });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(payload.error?.message || '头像上传失败');
+  return payload.data?.avatar || '';
+}
+
 async function saveProfile(event) {
   event.preventDefault();
   const current = getProfile();
   const profile = { avatar: formValue('setting-avatar'), name: formValue('setting-name'), email: formValue('setting-email') || current.email, contact: formValue('setting-contact'), bio: formValue('setting-bio').slice(0, 500), specialty: formValue('setting-specialty').slice(0, 300) };
-  if (!saveJSON(STORAGE.profile, profile)) return;
   if (cloudState === 'online') {
-    try { await cloudRequest('/api/profile', { method: 'PATCH', body: JSON.stringify({ ...profile, avatar: /^data:image\//i.test(profile.avatar) ? '' : profile.avatar }) }); } catch (error) { toast(`云端资料保存失败：${error.message}`); return; }
+    try {
+      if (/^data:image\//i.test(profile.avatar)) profile.avatar = await uploadProfileAvatar(profile.avatar);
+      await cloudRequest('/api/profile', { method: 'PATCH', body: JSON.stringify(profile) });
+    } catch (error) { toast(`云端资料保存失败：${error.message}`); return; }
   }
+  if (!saveJSON(STORAGE.profile, profile)) return;
   const currentUser = getUser();
   if (currentUser) setUser({ ...currentUser, name: profile.name || currentUser.name, avatar: profile.avatar || '' });
   renderAvatarPicker(profile.avatar);
