@@ -33,6 +33,17 @@ function messageFor(error: unknown, fallback: string) {
   return fallback;
 }
 
+function safeBaseUrl(value: unknown) {
+  if (typeof value !== 'string' || !value.trim()) return null;
+  try {
+    const url = new URL(value.trim());
+    const host = url.hostname.toLowerCase();
+    const privateHost = host === 'localhost' || host === '0.0.0.0' || host === '::1' || host.endsWith('.local') || /^127\./.test(host) || /^10\./.test(host) || /^192\.168\./.test(host) || /^169\.254\./.test(host) || /^172\.(1[6-9]|2\d|3[01])\./.test(host) || !host.includes('.');
+    if (url.protocol !== 'https:' || privateHost || url.username || url.password) return null;
+    return url.toString().replace(/\/$/, '').slice(0, 2000);
+  } catch { return null; }
+}
+
 function cleanModels(value: unknown[] | undefined) {
   return Array.isArray(value)
     ? [...new Set(value.filter((item): item is string => typeof item === 'string').map((item) => item.trim()).filter(Boolean))].slice(0, 50)
@@ -46,7 +57,7 @@ function providerFields(body: ProviderPatch) {
   return {
     ...(typeof body.name === 'string' ? { name: body.name.trim().slice(0, 120) } : {}),
     ...(typeof body.type === 'string' ? { type: body.type.trim().slice(0, 80) } : {}),
-    ...(typeof body.baseUrl === 'string' || body.baseUrl === null ? { base_url: body.baseUrl?.trim().slice(0, 2000) || null } : {}),
+    ...(typeof body.baseUrl === 'string' || body.baseUrl === null ? { base_url: body.baseUrl ? safeBaseUrl(body.baseUrl) : null } : {}),
     ...(typeof body.imageCapable === 'boolean' ? { image_capable: body.imageCapable } : {}),
     ...(imageModels ? { image_models: imageModels } : {}),
     ...(generationModels ? { generation_models: generationModels } : {}),
@@ -98,7 +109,8 @@ export async function POST(request: Request) {
     if (secret.length > 4096) return errorResponse(id, 413, 'INVALID_REQUEST', 'Provider API key is too long');
     if (body.imageCapable !== false && imageModels.length === 0) return errorResponse(id, 400, 'INVALID_REQUEST', 'Add at least one vision model');
     if (imageModels.length === 0 && generationModels.length === 0 && textModels.length === 0) return errorResponse(id, 400, 'INVALID_REQUEST', 'Add at least one model');
-    if (type.toLowerCase() === 'custom endpoint' && !body.baseUrl?.trim()) return errorResponse(id, 400, 'INVALID_REQUEST', 'Custom Endpoint requires a Base URL');
+    if (body.baseUrl && !safeBaseUrl(body.baseUrl)) return errorResponse(id, 400, 'INVALID_REQUEST', 'Base URL must be a public HTTPS endpoint');
+    if (type.toLowerCase() === 'custom endpoint' && !safeBaseUrl(body.baseUrl)) return errorResponse(id, 400, 'INVALID_REQUEST', 'Custom Endpoint requires a public HTTPS Base URL');
     if (body.isDefault) await clearOtherDefaults(user.id);
     const { data, error } = await admin.from('ai_providers').insert({
       owner_id: user.id,
@@ -124,6 +136,7 @@ export async function PATCH(request: Request) {
     const providerId = new URL(request.url).searchParams.get('id');
     if (!providerId) return errorResponse(id, 400, 'INVALID_REQUEST', 'Provider id is required');
     const body = await request.json() as ProviderPatch;
+    if (body.baseUrl && !safeBaseUrl(body.baseUrl)) return errorResponse(id, 400, 'INVALID_REQUEST', 'Base URL must be a public HTTPS endpoint');
     const updates: Record<string, unknown> = providerFields(body);
     if (typeof body.secret === 'string' && body.secret.trim()) {
       if (body.secret.length > 4096) return errorResponse(id, 413, 'INVALID_REQUEST', 'Provider API key is too long');
