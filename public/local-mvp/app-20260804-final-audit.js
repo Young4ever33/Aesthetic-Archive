@@ -259,6 +259,16 @@ function cardDedupeKey(item) {
   return [recordKind, normalize(item.title), normalize(item.titleZh), normalize(item.category)].join('|');
 }
 
+function likeTargetKey(item) {
+  const id = String(item?.id || '').trim();
+  if (/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id)) return id;
+  const direct = id.match(/^([A-Z]-[0-9]{2})(?:$|[-_])/i)?.[1];
+  if (direct) return direct.toUpperCase();
+  const normalize = value => String(value || '').trim().toLowerCase();
+  const seed = publicCases.find(card => [card.id, card.title, card.titleZh].some(value => normalize(value) === normalize(id) || normalize(value) === normalize(item?.title) || normalize(value) === normalize(item?.titleZh)));
+  return seed?.id || id;
+}
+
 function cardCompleteness(item) {
   return (item.image ? 8 : 0) + (Array.isArray(item.gallery) ? item.gallery.length * 2 : 0) + (item.summary ? 2 : 0) + (item.promptEn ? 1 : 0) + (item.designElements ? 1 : 0);
 }
@@ -1212,9 +1222,10 @@ async function toggleLike(item) {
   item.likeCount = Math.max(0, oldCount + (wasLiked ? -1 : 1));
   renderCards(); renderArchive(); renderDetailLike(item);
   try {
-    const response = await fetch(`/api/cards/${encodeURIComponent(item.id)}/like`, { method: wasLiked ? 'DELETE' : 'POST', credentials: 'same-origin' });
+    const targetKey = likeTargetKey(item);
+    const response = await fetch(`/api/cards/${encodeURIComponent(targetKey)}/like`, { method: wasLiked ? 'DELETE' : 'POST', credentials: 'same-origin' });
     const payload = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error([payload.error?.message || `Like API ${response.status}`, payload.error?.code, payload.requestId].filter(Boolean).join(' · '));
+    if (!response.ok) throw new Error([payload.error?.message || `Like API ${response.status}`, payload.error?.code, payload.error?.normalizedTarget, payload.error?.databaseCode, payload.requestId].filter(Boolean).join(' · '));
     const result = payload.data || {};
     item.likedByViewer = Boolean(result.liked);
     item.likeCount = Number(result.likeCount || 0);

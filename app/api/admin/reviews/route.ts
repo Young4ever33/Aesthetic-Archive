@@ -20,14 +20,14 @@ export async function GET() {
     const admin = await createSupabaseAdminClient();
     const { data, error } = await admin
       .from('aesthetic_cards')
-      .select('id, owner_id, author_id, source, title, title_zh, category, visibility, publish_status, summary, cultural_background, design_elements, palette, style_tags, material_tags, scenario_tags, composition, use_cases, prompt_zh, prompt_en, negative_prompt, reviewed_at, created_at, updated_at')
+      .select('*')
       .in('publish_status', ['pending', 'rejected'])
       .neq('owner_id', user.id)
       .order('updated_at', { ascending: true })
       .limit(100);
     if (error) {
       console.error('REVIEW_CARDS_QUERY_FAILED', { requestId, code: error.code, message: error.message });
-      return out(requestId, 500, { code: 'REVIEW_QUERY_FAILED', message: 'Unable to load review queue' });
+      return out(requestId, 500, { code: 'REVIEW_QUERY_FAILED', message: 'Unable to load review queue', stage: 'cards', databaseCode: error.code || null });
     }
     const cards = data || [];
     const cardIds = cards.map(card => card.id);
@@ -40,7 +40,8 @@ export async function GET() {
     ]);
     if (reviewsError || imagesError) {
       console.error('REVIEW_ATTACHMENTS_QUERY_FAILED', { requestId, reviewsCode: reviewsError?.code, reviewsMessage: reviewsError?.message, imagesCode: imagesError?.code, imagesMessage: imagesError?.message });
-      return out(requestId, 500, { code: 'REVIEW_QUERY_FAILED', message: 'Unable to load review queue' });
+      const attachmentError = reviewsError || imagesError;
+      return out(requestId, 500, { code: 'REVIEW_QUERY_FAILED', message: 'Unable to load review queue', stage: reviewsError ? 'reviews' : 'images', databaseCode: attachmentError?.code || null });
     }
     const reviewsByCard = new Map<string, PublishReview[]>();
     (reviews || []).forEach(review => reviewsByCard.set(review.card_id, [...(reviewsByCard.get(review.card_id) || []), review]));
