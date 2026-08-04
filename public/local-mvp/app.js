@@ -1496,9 +1496,18 @@ function fallbackCopy(text) {
 
 let reviewQueue = [];
 let confirmedReviewUserId = '';
+let serverReviewAccess = document.documentElement.dataset.reviewAccess === 'granted';
+
+window.addEventListener('aa:review-access', event => {
+  serverReviewAccess = Boolean(event.detail?.allowed);
+  const profile = event.detail?.profile;
+  confirmedReviewUserId = serverReviewAccess && profile?.id ? profile.id : '';
+  updateReviewAccess();
+  if (serverReviewAccess && state.activeTab === 'reviews') loadReviewQueue();
+});
 
 function hasReviewAccess(user = getUser()) {
-  return Boolean(user?.provider === 'supabase' && user.id === confirmedReviewUserId && ['admin', 'reviewer'].includes(user.role));
+  return Boolean(serverReviewAccess && user?.provider === 'supabase' && ['admin', 'reviewer'].includes(user.role));
 }
 
 function updateReviewAccess(user = getUser()) {
@@ -1544,6 +1553,7 @@ async function loadReviewQueue() {
     const payload = await response.json().catch(() => ({}));
     if (response.status === 403 || response.status === 401) {
       confirmedReviewUserId = '';
+      serverReviewAccess = false;
       const user = getUser();
       if (user) setUser({ ...user, role: 'user' });
       updateReviewAccess();
@@ -1673,7 +1683,8 @@ async function openLogin() {
       const payload = await response.json().catch(() => ({}));
       if (response.ok && payload.data) {
         const profile = payload.data;
-        confirmedReviewUserId = ['admin', 'reviewer'].includes(profile.role || '') ? profile.id : '';
+        serverReviewAccess = ['admin', 'reviewer'].includes(profile.role || '');
+        confirmedReviewUserId = serverReviewAccess ? profile.id : '';
         setUser({ id: profile.id, provider: 'supabase', identity: profile.email || profile.id, name: profile.display_name?.trim() || profile.email?.split('@')[0] || 'Account', avatar: profile.avatar_url || '', role: profile.role || 'user', signedInAt: profile.created_at || new Date().toISOString() });
         saveJSON(STORAGE.profile, { ...defaultProfile(), name: profile.display_name?.trim() || '', avatar: profile.avatar_url || '', email: profile.email || '', bio: profile.bio || '', specialty: profile.design_focus || '' });
         renderAuthState();
@@ -3668,7 +3679,8 @@ function init() {
       const serverNameIsEmail = profile.email && serverName.toLowerCase() === profile.email.toLowerCase();
       const profileName = serverName && !serverNameIsEmail ? serverName : '';
       const authenticatedUser = { id: profile.id, provider: 'supabase', identity: profile.email || profile.id, name: profileName || profile.email?.split('@')[0] || 'Account', avatar: profile.avatar_url || '', role: profile.role || 'user', signedInAt: profile.created_at || new Date().toISOString() };
-      confirmedReviewUserId = ['admin', 'reviewer'].includes(profile.role || '') ? profile.id : '';
+      serverReviewAccess = ['admin', 'reviewer'].includes(profile.role || '');
+      confirmedReviewUserId = serverReviewAccess ? profile.id : '';
       setUser(authenticatedUser);
       const mergedProfile = { ...defaultProfile(), name: profileName, avatar: profile.avatar_url || '', email: profile.email || '', bio: profile.bio || '', specialty: profile.design_focus || '' };
       saveJSON(STORAGE.profile, mergedProfile);
