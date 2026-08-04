@@ -1101,7 +1101,7 @@ function cardKnowledgeHTML(item) {
 
 function renderCards() {
   const list = getVisibleCases();
-  els.resultCount.textContent = isEnglish() ? `${list.length} styles` : `${list.length} 个风格`; 
+  els.resultCount.textContent = isEnglish() ? `${list.length} styles` : `${list.length} 个风格`;
   if (!list.length) {
     els.grid.innerHTML = `<div class="empty-state"><span>${isEnglish() ? 'NO RESULTS' : '暂无结果'}</span><h3>${ui('noResults')}</h3><p>${ui('noResultsHint')}</p></div>`;
     return;
@@ -1641,7 +1641,7 @@ function renderAuthState() {
   if (els.loginGoogle) els.loginGoogle.hidden = Boolean(user);
   if (els.loginNote) els.loginNote.textContent = user ? (lang === 'en' ? 'Signed in with Supabase.' : '当前账号已通过 Supabase 登录。') : (lang === 'en' ? 'Sign in to sync your private workspace.' : '登录后同步私人工作区。');
   updateReviewAccess(user);
-} 
+}
 
 function loginWithIdentity(event) {
   event.preventDefault();
