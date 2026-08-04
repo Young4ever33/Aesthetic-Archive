@@ -1,4 +1,5 @@
 import { createCipheriv, createDecipheriv, randomBytes } from 'node:crypto';
+import { getServerEnv } from '@/lib/server-env';
 
 const ALGORITHM = 'aes-256-gcm';
 const IV_BYTES = 12;
@@ -6,7 +7,7 @@ const AUTH_TAG_BYTES = 16;
 const KEY_BYTES = 32;
 
 function encryptionKey() {
-  const encoded = process.env.PROVIDER_ENCRYPTION_KEY;
+  const encoded = getServerEnv('PROVIDER_ENCRYPTION_KEY');
   if (!encoded) throw new Error('PROVIDER_ENCRYPTION_KEY is not configured');
 
   const key = Buffer.from(encoded, 'base64');
