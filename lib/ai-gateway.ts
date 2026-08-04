@@ -97,37 +97,27 @@ async function requestTimeoutMs() {
 }
 
 async function requestJson(url: string, init: RequestInit): Promise<Record<string, unknown>> {
-  const timeoutMs = await requestTimeoutMs();
-  for (let attempt = 0; attempt < 2; attempt += 1) {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), timeoutMs);
-    try {
-      const response = await fetch(url, { ...init, signal: controller.signal });
-      const raw = await response.text();
-      let data: unknown = null;
-      try { data = raw ? JSON.parse(raw) : null; } catch { data = null; }
-      if (!response.ok) {
-        if (attempt === 0 && [502, 503, 504].includes(response.status)) {
-          await new Promise((resolve) => setTimeout(resolve, 1_000));
-          continue;
-        }
-        throw upstreamError(response.status, upstreamDetail(data) || raw);
-      }
-      if (!data || typeof data !== 'object' || Array.isArray(data)) {
-        throw gatewayError('PROVIDER_INVALID_RESPONSE', `The AI service returned a non-JSON response${raw ? `: ${raw.slice(0, 160)}` : ''}`, 502);
-      }
-      return data as Record<string, unknown>;
-    } catch (error) {
-      if (error instanceof Error && error.name === 'AbortError') throw gatewayError('PROVIDER_TIMEOUT', 'The AI service timed out', 504, true);
-      if (error instanceof TypeError || (error instanceof Error && /fetch failed|network|socket|connect|reset|dns/i.test(error.message))) {
-        throw gatewayError('PROVIDER_UNAVAILABLE', 'Unable to reach the AI service. Check the Provider endpoint and Cloudflare outbound connectivity.', 502, true);
-      }
-      throw error;
-    } finally {
-      clearTimeout(timeout);
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), await requestTimeoutMs());
+  try {
+    const response = await fetch(url, { ...init, signal: controller.signal });
+    const raw = await response.text();
+    let data: unknown = null;
+    try { data = raw ? JSON.parse(raw) : null; } catch { data = null; }
+    if (!response.ok) throw upstreamError(response.status, upstreamDetail(data) || raw);
+    if (!data || typeof data !== 'object' || Array.isArray(data)) {
+      throw gatewayError('PROVIDER_INVALID_RESPONSE', `The AI service returned a non-JSON response${raw ? `: ${raw.slice(0, 160)}` : ''}`, 502);
     }
+    return data as Record<string, unknown>;
+  } catch (error) {
+    if (error instanceof Error && error.name === 'AbortError') throw gatewayError('PROVIDER_TIMEOUT', 'The AI service timed out', 504, true);
+    if (error instanceof TypeError || (error instanceof Error && /fetch failed|network|socket|connect|reset|dns/i.test(error.message))) {
+      throw gatewayError('PROVIDER_UNAVAILABLE', 'Unable to reach the AI service. Check the Provider endpoint and Cloudflare outbound connectivity.', 502, true);
+    }
+    throw error;
+  } finally {
+    clearTimeout(timeout);
   }
-  throw gatewayError('PROVIDER_UNAVAILABLE', 'The AI service is temporarily unavailable', 502, true);
 }
 
 export function normalizeProviderType(value: string) {
@@ -224,7 +214,7 @@ export async function callVisionProvider(provider: ProviderRecord, model: string
   const data = await requestJson(`${baseUrl(provider)}/chat/completions`, {
     method: 'POST',
     headers: providerHeaders(provider, secret),
-    body: JSON.stringify({ model, temperature: 0.2, max_tokens: 3_000, messages: [{ role: 'user', content: [{ type: 'text', text: prompt }, { type: 'image_url', image_url: { url: `data:${image.mimeType};base64,${image.data}` } }] }] }),
+    body: JSON.stringify({ model, temperature: 0.2, max_tokens: 1_800, messages: [{ role: 'user', content: [{ type: 'text', text: prompt }, { type: 'image_url', image_url: { url: `data:${image.mimeType};base64,${image.data}` } }] }] }),
   });
   return extractOpenAiText(data);
 }
