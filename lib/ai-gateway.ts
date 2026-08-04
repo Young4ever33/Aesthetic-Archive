@@ -177,19 +177,26 @@ function textFromContent(content: unknown): string {
 }
 
 function extractOpenAiText(data: Record<string, unknown>): string {
-  if (typeof data.output_text === 'string' && data.output_text.trim()) return data.output_text.trim();
+  for (const key of ['output_text', 'text', 'content', 'response', 'result']) {
+    const value = textFromContent(data[key]);
+    if (value) return value;
+  }
   const choices = Array.isArray(data.choices) ? data.choices : [];
   const choice = choices[0] && typeof choices[0] === 'object' ? choices[0] as Record<string, unknown> : null;
   const message = choice?.message && typeof choice.message === 'object' ? choice.message as Record<string, unknown> : null;
-  const choiceText = textFromContent(message?.content) || (typeof choice?.text === 'string' ? choice.text.trim() : '');
+  const choiceText = textFromContent(message?.content)
+    || textFromContent(message?.reasoning_content)
+    || textFromContent(choice?.text)
+    || textFromContent(choice?.content);
   if (choiceText) return choiceText;
   const output = Array.isArray(data.output) ? data.output : [];
   const outputText = output
     .filter((item): item is Record<string, unknown> => Boolean(item && typeof item === 'object'))
-    .map((item) => textFromContent(item.content))
+    .map((item) => textFromContent(item.content) || textFromContent(item.text))
     .join('')
     .trim();
   if (outputText) return outputText;
+  console.error('Provider response contained no readable text', { responseKeys: Object.keys(data).slice(0, 20), choiceKeys: choice ? Object.keys(choice).slice(0, 20) : [] });
   throw gatewayError('PROVIDER_INVALID_RESPONSE', 'The AI response succeeded but did not contain readable text', 502);
 }
 
