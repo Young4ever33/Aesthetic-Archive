@@ -1,5 +1,5 @@
 import { decryptProviderSecret } from './provider-vault';
-import { createSupabaseAdminClient } from './supabase/admin';
+import { createSupabaseServerClient } from './supabase/server';
 import type { AiErrorCode, AiResponseMeta } from './contracts';
 
 export type ProviderRecord = {
@@ -34,17 +34,13 @@ export function gatewayError(code: AiErrorCode, message: string, status: number,
 
 export async function getOwnedProvider(providerId: string, userId: string): Promise<ProviderRecord> {
   if (!providerId) throw gatewayError('INVALID_REQUEST', 'Provider id is required', 400);
-  const admin = createSupabaseAdminClient();
-  const { data, error } = await admin
-    .from('ai_providers')
-    .select('id, owner_id, name, type, encrypted_api_key, base_url, image_capable, image_models, generation_models, text_models, default_image_model, default_generation_model, default_text_model')
-    .eq('id', providerId)
-    .eq('owner_id', userId)
-    .maybeSingle();
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase.rpc('get_owned_provider_secret', { p_provider_id: providerId }).maybeSingle();
+  const provider = data as ProviderRecord | null;
 
-  if (error) throw gatewayError('INTERNAL_ERROR', 'Unable to load Provider', 500);
-  if (!data) throw gatewayError('PROVIDER_NOT_FOUND', 'Provider was not found', 404);
-  return data as ProviderRecord;
+  if (error) throw gatewayError('INTERNAL_ERROR', 'Unable to load Provider securely. Apply migration 202608030011', 500);
+  if (!provider || provider.owner_id !== userId) throw gatewayError('PROVIDER_NOT_FOUND', 'Provider was not found', 404);
+  return provider;
 }
 
 export function providerMeta(provider: ProviderRecord, model: string, templateId?: string, templateVersion?: number): AiResponseMeta {

@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import { encryptProviderSecret } from '@/lib/provider-vault';
-import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 import { requireUser } from '@/lib/supabase/server';
 import { normalizeProviderType } from '@/lib/ai-gateway';
 
@@ -101,9 +100,8 @@ function validateDefaults(body: ProviderPatch, imageModels: string[], generation
   return '';
 }
 
-async function clearOtherDefaults(ownerId: string, providerId?: string) {
-  const admin = createSupabaseAdminClient();
-  let query = admin.from('ai_providers').update({ is_default: false }).eq('owner_id', ownerId);
+async function clearOtherDefaults(supabase: Awaited<ReturnType<typeof requireUser>>['supabase'], ownerId: string, providerId?: string) {
+  let query = supabase.from('ai_providers').update({ is_default: false }).eq('owner_id', ownerId);
   if (providerId) query = query.neq('id', providerId);
   const { error } = await query;
   if (error) throw new Error('Unable to update the default Provider');
@@ -112,9 +110,8 @@ async function clearOtherDefaults(ownerId: string, providerId?: string) {
 export async function GET() {
   const id = requestId();
   try {
-    const { user } = await requireUser();
-    const admin = createSupabaseAdminClient();
-    const { data, error } = await admin.from('ai_providers').select(publicColumns).eq('owner_id', user.id).order('created_at', { ascending: false });
+    const { supabase, user } = await requireUser();
+    const { data, error } = await supabase.from('ai_providers').select(publicColumns).eq('owner_id', user.id).order('created_at', { ascending: false });
     if (error) {
       console.error('PROVIDER_QUERY_FAILED', { requestId: id, code: error.code, message: error.message });
       return errorResponse(id, 500, 'PROVIDER_QUERY_FAILED', databaseMessage(error, 'Unable to load Provider settings'));
@@ -130,8 +127,7 @@ export async function GET() {
 export async function POST(request: Request) {
   const id = requestId();
   try {
-    const { user } = await requireUser();
-    const admin = createSupabaseAdminClient();
+    const { supabase, user } = await requireUser();
     const body = await request.json() as ProviderPatch;
     const secret = typeof body.secret === 'string' ? body.secret.trim() : '';
     const name = typeof body.name === 'string' ? body.name.trim() : '';
@@ -147,8 +143,8 @@ export async function POST(request: Request) {
     if (normalizeProviderType(type) === 'custom endpoint' && !safeBaseUrl(body.baseUrl)) return errorResponse(id, 400, 'INVALID_REQUEST', 'Custom Endpoint requires a public HTTPS Base URL');
     const defaultError = validateDefaults(body, imageModels, generationModels, textModels);
     if (defaultError) return errorResponse(id, 400, 'INVALID_REQUEST', defaultError);
-    if (body.isDefault) await clearOtherDefaults(user.id);
-    const { data, error } = await admin.from('ai_providers').insert({
+    if (body.isDefault) await clearOtherDefaults(supabase, user.id);
+    const { data, error } = await supabase.from('ai_providers').insert({
       owner_id: user.id,
       ...providerFields({ ...body, imageModels, generationModels, textModels }),
       name,
@@ -167,8 +163,7 @@ export async function POST(request: Request) {
 export async function PATCH(request: Request) {
   const id = requestId();
   try {
-    const { user } = await requireUser();
-    const admin = createSupabaseAdminClient();
+    const { supabase, user } = await requireUser();
     const providerId = new URL(request.url).searchParams.get('id');
     if (!providerId) return errorResponse(id, 400, 'INVALID_REQUEST', 'Provider id is required');
     const body = await request.json() as ProviderPatch;
@@ -187,8 +182,8 @@ export async function PATCH(request: Request) {
       updates.encrypted_api_key = encryptProviderSecret(body.secret.trim());
     }
     if (!Object.keys(updates).length) return errorResponse(id, 400, 'INVALID_REQUEST', 'No Provider changes supplied');
-    if (body.isDefault) await clearOtherDefaults(user.id, providerId);
-    const { data, error } = await admin.from('ai_providers').update(updates).eq('id', providerId).eq('owner_id', user.id).select(publicColumns).maybeSingle();
+    if (body.isDefault) await clearOtherDefaults(supabase, user.id, providerId);
+    const { data, error } = await supabase.from('ai_providers').update(updates).eq('id', providerId).eq('owner_id', user.id).select(publicColumns).maybeSingle();
     if (error) return errorResponse(id, 500, 'PROVIDER_UPDATE_FAILED', databaseMessage(error, 'Unable to update Provider settings'));
     if (!data) return errorResponse(id, 404, 'PROVIDER_NOT_FOUND', 'Provider was not found');
     return NextResponse.json({ requestId: id, data: { ...data, hasSecret: true } });
@@ -202,11 +197,10 @@ export async function PATCH(request: Request) {
 export async function DELETE(request: Request) {
   const id = requestId();
   try {
-    const { user } = await requireUser();
-    const admin = createSupabaseAdminClient();
+    const { supabase, user } = await requireUser();
     const providerId = new URL(request.url).searchParams.get('id');
     if (!providerId) return errorResponse(id, 400, 'INVALID_REQUEST', 'Provider id is required');
-    const { error } = await admin.from('ai_providers').delete().eq('id', providerId).eq('owner_id', user.id);
+    const { error } = await supabase.from('ai_providers').delete().eq('id', providerId).eq('owner_id', user.id);
     if (error) return errorResponse(id, 500, 'PROVIDER_DELETE_FAILED', 'Unable to delete Provider settings');
     return NextResponse.json({ requestId: id, data: { deleted: true } });
   } catch (error) {
