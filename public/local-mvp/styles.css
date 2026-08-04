@@ -290,6 +290,8 @@ h1 {
   padding: 24px 14px 28px;
   overflow: auto;
 }
+[hidden] { display: none !important; }
+
 .side-item {
   width: 100%;
   display: grid;

@@ -42,7 +42,7 @@
           <button class="side-item" type="button" data-tab="saved"><img class="side-icon" src="/local-mvp/icons/个人收藏.svg" alt=""><span>个人收藏</span><small>Saved</small></button>
           <button class="side-item" type="button" data-tab="collage"><img class="side-icon" src="/local-mvp/icons/Collage.svg" alt=""><span>Collage 画板</span><small>Board</small></button>
           <button class="side-item" type="button" data-tab="provider"><img class="side-icon" src="/local-mvp/icons/API.svg" alt=""><span>模型</span><small>API Provider</small></button>
-          <button class="side-item reviewer-only" type="button" data-tab="reviews"><img class="side-icon" src="/local-mvp/icons/review.svg" alt=""><span>审核队列</span><small>Review Queue</small></button>
+          <button class="side-item reviewer-only" type="button" data-tab="reviews" hidden><img class="side-icon" src="/local-mvp/icons/review.svg" alt=""><span>审核队列</span><small>Review Queue</small></button>
           <button class="side-item" type="button" data-tab="settings"><img class="side-icon" src="/local-mvp/icons/setting.svg" alt=""><span>设置</span><small>Settings</small></button>
           <button class="side-item feedback-link" type="button" data-feedback-open aria-label="意见箱"><img class="side-icon" src="/local-mvp/icons/feedback.svg" alt=""><span class="feedback-title"><b>意见箱</b></span><small>Feedback</small></button>
         </aside>
@@ -248,7 +248,7 @@
             </section>
           </div>
 
-          <div class="tab-panel reviewer-only" data-panel="reviews">
+          <div class="tab-panel reviewer-only" data-panel="reviews" hidden>
             <section class="review-page">
               <div class="review-intro"><div><p class="eyebrow" id="review-eyebrow">Review Queue / 内容审核</p><h2 id="review-title">审核公开视觉卡片。</h2><p id="review-copy">检查提交到 Public Plaza 的图片、描述、文化背景和版权提示。通过后仍需显式发布，审核中的内容不会出现在公开广场。</p></div><button class="button ghost" type="button" id="review-refresh-btn">刷新队列</button></div>
               <div class="review-status" id="review-status" role="status">正在读取审核队列…</div>

@@ -1495,6 +1495,18 @@ function fallbackCopy(text) {
 }
 
 let reviewQueue = [];
+let confirmedReviewUserId = '';
+
+function hasReviewAccess(user = getUser()) {
+  return Boolean(user?.provider === 'supabase' && user.id === confirmedReviewUserId && ['admin', 'reviewer'].includes(user.role));
+}
+
+function updateReviewAccess(user = getUser()) {
+  const allowed = hasReviewAccess(user);
+  document.querySelectorAll('.reviewer-only').forEach(node => { node.hidden = !allowed; });
+  if (!allowed && state.activeTab === 'reviews') switchTab('archive');
+  return allowed;
+}
 
 function reviewCardImage(card) {
   const images = Array.isArray(card.card_images) ? card.card_images : [];
@@ -1522,25 +1534,25 @@ function renderReviewQueue() {
 }
 
 async function loadReviewQueue() {
-  if (!els.reviewGrid) return;
-  if (els.reviewStatus) els.reviewStatus.textContent = isEnglish() ? 'Loading review queue…' : '正在读取审核队列…';
-  const user = getUser();
-  if (!user || user.provider !== 'supabase') {
-    if (els.reviewStatus) els.reviewStatus.textContent = isEnglish() ? 'Sign in with a Supabase reviewer or admin account to load the queue.' : '请使用 Supabase reviewer 或 admin 账号登录后加载审核队列。';
-    els.reviewGrid.innerHTML = `<div class="empty-state"><span>${isEnglish() ? 'REVIEW ACCESS REQUIRED' : '需要审核权限'}</span><h3>${isEnglish() ? 'Review Queue is ready.' : '审核队列页面已准备就绪。'}</h3><p>${isEnglish() ? 'Only authenticated reviewer and admin accounts can load or action public submissions.' : '只有已认证的 reviewer 或 admin 账号可以加载和处理公开提交。'}</p><button class="button primary" type="button" data-login-open>${isEnglish() ? 'Sign in' : '登录'}</button></div>`;
+  if (!els.reviewGrid || !hasReviewAccess()) {
+    updateReviewAccess();
     return;
   }
+  if (els.reviewStatus) els.reviewStatus.textContent = isEnglish() ? 'Loading review queue…' : '正在读取审核队列…';
   try {
     const response = await fetch('/api/admin/reviews', { credentials: 'same-origin' });
     const payload = await response.json().catch(() => ({}));
     if (response.status === 403 || response.status === 401) {
-      if (els.reviewStatus) els.reviewStatus.textContent = isEnglish() ? 'This account does not have review permission.' : '当前账号没有审核权限。';
-      els.reviewGrid.innerHTML = `<div class="empty-state"><span>${isEnglish() ? 'ACCESS DENIED' : '无审核权限'}</span><h3>${isEnglish() ? 'Reviewer or admin access is required.' : '需要 reviewer 或 admin 权限。'}</h3><p>${isEnglish() ? 'Ask an administrator to assign the reviewer role to this account.' : '请联系管理员为当前账号分配 reviewer 角色。'}</p></div>`;
+      confirmedReviewUserId = '';
+      const user = getUser();
+      if (user) setUser({ ...user, role: 'user' });
+      updateReviewAccess();
+      toast(isEnglish() ? 'Review access is not assigned to this account.' : '当前账号未分配审核权限。');
       return;
     }
     if (!response.ok) throw new Error(payload.error?.message || `Review API ${response.status}`);
     reviewQueue = Array.isArray(payload.data) ? payload.data : [];
-    document.querySelectorAll('.reviewer-only').forEach(node => { node.hidden = false; });
+    updateReviewAccess();
     if (els.reviewStatus) els.reviewStatus.textContent = `${reviewQueue.length} ${isEnglish() ? 'cards in queue' : '张卡片待审核'}`;
     renderReviewQueue();
   } catch (error) {
@@ -1560,6 +1572,7 @@ async function reviewCard(cardId, action) {
 }
 
 function switchTab(tab) {
+  if (tab === 'reviews' && !hasReviewAccess()) tab = 'archive';
   state.activeTab = tab;
   document.querySelectorAll('[data-tab]').forEach(button => button.classList.toggle('is-active', button.dataset.tab === tab));
   document.querySelectorAll('[data-panel]').forEach(panel => panel.classList.toggle('is-active', panel.dataset.panel === tab));
@@ -1624,6 +1637,7 @@ function renderAuthState() {
   if (els.loginEmail) els.loginEmail.hidden = Boolean(user);
   if (els.loginGoogle) els.loginGoogle.hidden = Boolean(user);
   if (els.loginNote) els.loginNote.textContent = user ? (lang === 'en' ? 'Signed in with Supabase.' : '当前账号已通过 Supabase 登录。') : (lang === 'en' ? 'Sign in to sync your private workspace.' : '登录后同步私人工作区。');
+  updateReviewAccess(user);
 } 
 
 function loginWithIdentity(event) {
@@ -1659,6 +1673,7 @@ async function openLogin() {
       const payload = await response.json().catch(() => ({}));
       if (response.ok && payload.data) {
         const profile = payload.data;
+        confirmedReviewUserId = ['admin', 'reviewer'].includes(profile.role || '') ? profile.id : '';
         setUser({ id: profile.id, provider: 'supabase', identity: profile.email || profile.id, name: profile.display_name?.trim() || profile.email?.split('@')[0] || 'Account', avatar: profile.avatar_url || '', role: profile.role || 'user', signedInAt: profile.created_at || new Date().toISOString() });
         saveJSON(STORAGE.profile, { ...defaultProfile(), name: profile.display_name?.trim() || '', avatar: profile.avatar_url || '', email: profile.email || '', bio: profile.bio || '', specialty: profile.design_focus || '' });
         renderAuthState();
@@ -3653,6 +3668,7 @@ function init() {
       const serverNameIsEmail = profile.email && serverName.toLowerCase() === profile.email.toLowerCase();
       const profileName = serverName && !serverNameIsEmail ? serverName : '';
       const authenticatedUser = { id: profile.id, provider: 'supabase', identity: profile.email || profile.id, name: profileName || profile.email?.split('@')[0] || 'Account', avatar: profile.avatar_url || '', role: profile.role || 'user', signedInAt: profile.created_at || new Date().toISOString() };
+      confirmedReviewUserId = ['admin', 'reviewer'].includes(profile.role || '') ? profile.id : '';
       setUser(authenticatedUser);
       const mergedProfile = { ...defaultProfile(), name: profileName, avatar: profile.avatar_url || '', email: profile.email || '', bio: profile.bio || '', specialty: profile.design_focus || '' };
       saveJSON(STORAGE.profile, mergedProfile);
