@@ -254,7 +254,9 @@ function closeNotificationPopover() {
 
 function cardDedupeKey(item) {
   const normalize = value => String(value || '').trim().toLowerCase().replace(/\s+/g, ' ');
-  return [normalize(item.title), normalize(item.titleZh), normalize(item.category)].join('|');
+  // Seed cards and user cards are distinct records even when their copy matches.
+  const recordKind = item?.source === 'private' || item?.ownerId || item?.owner_id ? 'user' : 'seed';
+  return [recordKind, normalize(item.title), normalize(item.titleZh), normalize(item.category)].join('|');
 }
 
 function cardCompleteness(item) {

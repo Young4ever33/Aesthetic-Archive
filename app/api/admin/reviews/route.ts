@@ -20,25 +20,43 @@ export async function GET() {
     const admin = await createSupabaseAdminClient();
     const { data, error } = await admin
       .from('aesthetic_cards')
-      .select('*, publish_reviews(*), card_images(id, url, storage_path, alt, sort_order)')
+      .select('id, owner_id, author_id, source, title, title_zh, category, visibility, publish_status, summary, cultural_background, design_elements, palette, style_tags, material_tags, space_tags, scenario_tags, composition, use_cases, prompt_zh, prompt_en, negative_prompt, reviewed_at, created_at, updated_at')
       .in('publish_status', ['pending', 'rejected'])
       .neq('owner_id', user.id)
       .order('updated_at', { ascending: true })
       .limit(100);
-    if (error) return out(requestId, 500, { code: 'REVIEW_QUERY_FAILED', message: 'Unable to load review queue' });
-    type ReviewImage = { id: string; url: string | null; storage_path: string | null; alt: string | null; sort_order: number | null };
-    const cards = await Promise.all((data || []).map(async card => ({
+    if (error) {
+      console.error('REVIEW_CARDS_QUERY_FAILED', { requestId, code: error.code, message: error.message });
+      return out(requestId, 500, { code: 'REVIEW_QUERY_FAILED', message: 'Unable to load review queue' });
+    }
+    const cards = data || [];
+    const cardIds = cards.map(card => card.id);
+    if (!cardIds.length) return out(requestId, 200, []);
+    type ReviewImage = { id: string; card_id: string; url: string | null; storage_path: string | null; alt: string | null; sort_order: number | null };
+    type PublishReview = { id: string; card_id: string; owner_id: string; reviewer_id: string | null; status: string; note: string | null; reviewed_at: string | null };
+    const [{ data: reviews, error: reviewsError }, { data: images, error: imagesError }] = await Promise.all([
+      admin.from('publish_reviews').select('id, card_id, owner_id, reviewer_id, status, note, reviewed_at').in('card_id', cardIds).order('reviewed_at', { ascending: true }),
+      admin.from('card_images').select('id, card_id, url, storage_path, alt, sort_order').in('card_id', cardIds).order('sort_order', { ascending: true }),
+    ]);
+    if (reviewsError || imagesError) {
+      console.error('REVIEW_ATTACHMENTS_QUERY_FAILED', { requestId, reviewsCode: reviewsError?.code, reviewsMessage: reviewsError?.message, imagesCode: imagesError?.code, imagesMessage: imagesError?.message });
+      return out(requestId, 500, { code: 'REVIEW_QUERY_FAILED', message: 'Unable to load review queue' });
+    }
+    const reviewsByCard = new Map<string, PublishReview[]>();
+    (reviews || []).forEach(review => reviewsByCard.set(review.card_id, [...(reviewsByCard.get(review.card_id) || []), review]));
+    const imagesByCard = new Map<string, ReviewImage[]>();
+    (images || []).forEach(image => imagesByCard.set(image.card_id, [...(imagesByCard.get(image.card_id) || []), image]));
+    const cardsWithAttachments = await Promise.all(cards.map(async card => ({
       ...card,
-      card_images: await Promise.all(((card.card_images || []) as ReviewImage[])
-        .sort((a, b) => Number(a.sort_order || 0) - Number(b.sort_order || 0))
-        .map(async image => ({
-          ...image,
-          url: image.storage_path
-            ? (await admin.storage.from('card-images').createSignedUrl(image.storage_path, 3600)).data?.signedUrl || image.url
-            : image.url,
-        }))),
+      publish_reviews: reviewsByCard.get(card.id) || [],
+      card_images: await Promise.all((imagesByCard.get(card.id) || []).map(async image => ({
+        ...image,
+        url: image.storage_path
+          ? (await admin.storage.from('card-images').createSignedUrl(image.storage_path, 3600)).data?.signedUrl || image.url
+          : image.url,
+      }))),
     })));
-    return out(requestId, 200, cards);
+    return out(requestId, 200, cardsWithAttachments);
   } catch (error) {
     const message = error instanceof Error ? error.message : '';
     const status = message === 'UNAUTHENTICATED' ? 401 : message === 'FORBIDDEN' ? 403 : 500;

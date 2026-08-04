@@ -42,6 +42,7 @@ requireMatch(app, /function readImageFile\(file\)/, 'original reference image re
 requireMatch(app, /images, templateId:/, 'vision request does not send the images array');
 requireMatch(app, /AI 返回的卡片不符合内容标准/, 'AI draft quality gate is missing');
 requireMatch(app, /const distinctField =/, 'cross-field structured content deduplication is missing');
+requireMatch(app, /const recordKind = item\?\.source === 'private' \|\| item\?\.ownerId \|\| item\?\.owner_id \? 'user' : 'seed'/, 'seed and user card identities are not kept separate');
 requireMatch(app, /payload\.error\?\.code, payload\.requestId/, 'state-changing UI errors do not expose safe diagnostics');
 requireMatch(app, /Promise\.allSettled\(\[/, 'workspace synchronization can still disable all interactions after one partial failure');
 
