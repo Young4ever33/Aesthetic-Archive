@@ -3514,28 +3514,34 @@ function init() {
   updateSavedUI();
   loadProvider();
   bindEvents();
-  syncCloudWorkspace().then(() => {
+  // Account identity is independent from cards, saves, and board synchronization.
+  // A slow private-workspace request must never make a valid session look signed out.
+  const profileReady = fetch('/api/profile', { credentials: 'same-origin' })
+    .then(async response => ({ response, payload: await response.json().catch(() => null) }))
+    .then(({ response, payload }) => {
+      const profile = response.ok ? payload?.data : null;
+      if (!profile) {
+        if (response.status !== 401) console.warn('Profile sync unavailable:', response.status, payload?.error?.code || 'unknown');
+        return false;
+      }
+      const localProfile = getProfile();
+      const serverName = profile.display_name?.trim() || '';
+      const localName = localProfile.name?.trim() || '';
+      const localLooksLikeEmail = localName.includes('@') && localName === localProfile.email;
+      const serverNameIsEmail = profile.email && serverName.toLowerCase() === profile.email.toLowerCase();
+      const profileName = serverName && !serverNameIsEmail ? serverName : (localLooksLikeEmail ? '' : localName);
+      const mergedProfile = { ...localProfile, name: profileName, avatar: profile.avatar_url || localProfile.avatar || '', email: profile.email || localProfile.email || '', bio: profile.bio || '', specialty: profile.design_focus || localProfile.specialty || '' };
+      saveJSON(STORAGE.profile, mergedProfile);
+      setUser({ id: profile.id, provider: 'supabase', identity: profile.email || profile.id, name: profileName || profile.email?.split('@')[0] || 'Account', avatar: mergedProfile.avatar, role: profile.role || 'user', signedInAt: profile.created_at || new Date().toISOString() });
+      if (!profile.author_ready) console.warn('Public author profile is pending; account profile remains available.');
+      if (['admin', 'reviewer'].includes(profile.role || '')) loadReviewQueue();
+      return true;
+    })
+    .catch(error => { console.warn('Profile sync failed:', error); return false; });
+
+  Promise.allSettled([syncCloudWorkspace(), profileReady]).then(() => {
     const requestedCard = params.get('card');
     if (requestedCard) openDetail(findCase(requestedCard));
-    fetch('/api/profile', { credentials: 'same-origin' }).then(response => response.ok ? response.json() : null).then(payload => {
-        const profile = payload?.data;
-        if (!profile) {
-          document.querySelectorAll('.reviewer-only').forEach(node => { node.hidden = false; });
-          return;
-        }
-        const localProfile = getProfile();
-        const serverName = profile.display_name?.trim() || '';
-        const localName = localProfile.name?.trim() || '';
-        const localLooksLikeEmail = localName.includes('@') && localName === localProfile.email;
-        const serverNameIsEmail = profile.email && serverName.toLowerCase() === profile.email.toLowerCase();
-        const profileName = serverName && !serverNameIsEmail ? serverName : (localLooksLikeEmail ? '' : localName);
-        const mergedProfile = { ...localProfile, name: profileName, avatar: profile.avatar_url || localProfile.avatar || '', email: profile.email || localProfile.email || '', bio: profile.bio || '', specialty: profile.design_focus || localProfile.specialty || '' };
-        saveJSON(STORAGE.profile, mergedProfile);
-        setUser({ id: profile.id, provider: 'supabase', identity: profile.email || profile.id, name: profileName || profile.email?.split('@')[0] || 'Account', avatar: mergedProfile.avatar, role: profile.role || 'user', signedInAt: profile.created_at || new Date().toISOString() });
-        document.querySelectorAll('.reviewer-only').forEach(node => { node.hidden = false; });
-        populateSettings();
-        if (['admin', 'reviewer'].includes(profile.role || '')) loadReviewQueue();
-      }).catch(() => { document.querySelectorAll('.reviewer-only').forEach(node => { node.hidden = false; }); loadReviewQueue(); });
   });
   const preferences = getPreferences();
   applyDensity(preferences.density);
