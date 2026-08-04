@@ -115,11 +115,15 @@ export async function GET() {
     const { user } = await requireUser();
     const admin = createSupabaseAdminClient();
     const { data, error } = await admin.from('ai_providers').select(publicColumns).eq('owner_id', user.id).order('created_at', { ascending: false });
-    if (error) return errorResponse(id, 500, 'PROVIDER_QUERY_FAILED', 'Unable to load Provider settings');
+    if (error) {
+      console.error('PROVIDER_QUERY_FAILED', { requestId: id, code: error.code, message: error.message });
+      return errorResponse(id, 500, 'PROVIDER_QUERY_FAILED', databaseMessage(error, 'Unable to load Provider settings'));
+    }
     return NextResponse.json({ requestId: id, data: (data || []).map((provider) => ({ ...provider, hasSecret: true })) });
   } catch (error) {
     if (error instanceof Error && error.message === 'UNAUTHENTICATED') return errorResponse(id, 401, 'UNAUTHENTICATED', 'Sign in required');
-    return errorResponse(id, 500, 'INTERNAL_ERROR', 'Unable to load Provider settings');
+    console.error('PROVIDER_QUERY_INTERNAL_ERROR', { requestId: id, message: error instanceof Error ? error.message : 'unknown' });
+    return errorResponse(id, 500, 'INTERNAL_ERROR', messageFor(error, 'Unable to load Provider settings'));
   }
 }
 
