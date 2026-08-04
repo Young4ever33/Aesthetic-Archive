@@ -1,4 +1,5 @@
 import { decryptProviderSecret } from './provider-vault';
+import { getServerEnvAsync } from './server-env';
 import { createSupabaseServerClient } from './supabase/server';
 import type { AiErrorCode, AiResponseMeta } from './contracts';
 
@@ -90,14 +91,14 @@ function upstreamDetail(value: unknown): string {
   return '';
 }
 
-function requestTimeoutMs() {
-  const configured = Number(process.env.AI_REQUEST_TIMEOUT_MS || 120_000);
+async function requestTimeoutMs() {
+  const configured = Number((await getServerEnvAsync('AI_REQUEST_TIMEOUT_MS')) || 120_000);
   return Number.isFinite(configured) ? Math.min(300_000, Math.max(15_000, configured)) : 120_000;
 }
 
 async function requestJson(url: string, init: RequestInit): Promise<Record<string, unknown>> {
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), requestTimeoutMs());
+  const timeout = setTimeout(() => controller.abort(), await requestTimeoutMs());
   try {
     const response = await fetch(url, { ...init, signal: controller.signal });
     const raw = await response.text();
