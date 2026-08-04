@@ -1503,11 +1503,13 @@ window.addEventListener('aa:review-access', event => {
   const profile = event.detail?.profile;
   confirmedReviewUserId = serverReviewAccess && profile?.id ? profile.id : '';
   updateReviewAccess();
-  if (serverReviewAccess && state.activeTab === 'reviews') loadReviewQueue();
+  const requestedTab = new URLSearchParams(window.location.search).get('tab');
+  if (serverReviewAccess && requestedTab === 'reviews') switchTab('reviews');
+  else if (serverReviewAccess && state.activeTab === 'reviews') loadReviewQueue();
 });
 
-function hasReviewAccess(user = getUser()) {
-  return Boolean(serverReviewAccess && user?.provider === 'supabase' && ['admin', 'reviewer'].includes(user.role));
+function hasReviewAccess() {
+  return serverReviewAccess;
 }
 
 function updateReviewAccess(user = getUser()) {
