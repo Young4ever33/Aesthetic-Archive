@@ -214,7 +214,7 @@ export async function callVisionProvider(provider: ProviderRecord, model: string
   const data = await requestJson(`${baseUrl(provider)}/chat/completions`, {
     method: 'POST',
     headers: providerHeaders(provider, secret),
-    body: JSON.stringify({ model, temperature: 0.2, max_tokens: 1_800, messages: [{ role: 'user', content: [{ type: 'text', text: prompt }, { type: 'image_url', image_url: { url: `data:${image.mimeType};base64,${image.data}` } }] }] }),
+    body: JSON.stringify({ model, temperature: 0.2, max_tokens: 4_000, response_format: { type: 'json_object' }, messages: [{ role: 'user', content: [{ type: 'text', text: prompt }, { type: 'image_url', image_url: { url: `data:${image.mimeType};base64,${image.data}` } }] }] }),
   });
   return extractOpenAiText(data);
 }
@@ -276,11 +276,18 @@ export async function callTextProvider(provider: ProviderRecord, model: string, 
 
 export function parseJsonObject(text: string): Record<string, unknown> {
   const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/i)?.[1] || text;
-  try {
-    const value: unknown = JSON.parse(fenced.trim());
-    if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error();
-    return value as Record<string, unknown>;
-  } catch {
-    throw gatewayError('PROVIDER_INVALID_RESPONSE', 'The AI response was not valid JSON', 502);
+  const trimmed = fenced.trim().replace(/^\uFEFF/, '');
+  const firstBrace = trimmed.indexOf('{');
+  const lastBrace = trimmed.lastIndexOf('}');
+  const candidates = [trimmed, firstBrace >= 0 && lastBrace > firstBrace ? trimmed.slice(firstBrace, lastBrace + 1) : ''];
+  for (const candidate of candidates) {
+    if (!candidate) continue;
+    try {
+      const value: unknown = JSON.parse(candidate);
+      if (value && typeof value === 'object' && !Array.isArray(value)) return value as Record<string, unknown>;
+    } catch {
+      // Try the next bounded JSON candidate.
+    }
   }
+  throw gatewayError('PROVIDER_INVALID_RESPONSE', 'The AI response was not valid JSON', 502);
 }
