@@ -9,7 +9,6 @@ These values are intentionally available to the browser bundle:
 ```text
 NEXT_PUBLIC_SUPABASE_URL=https://YOUR_PROJECT.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_KEY
-AI_REQUEST_TIMEOUT_MS=120000
 ```
 
 ## Encrypted Secrets
@@ -27,5 +26,6 @@ Security requirements:
 - `SUPABASE_SERVICE_ROLE_KEY` and `PROVIDER_ENCRYPTION_KEY` must never appear in browser storage, API responses, logs, screenshots, GitHub Actions output, or repository history.
 - Do not configure `AI_HTTP_PROXY`, `HTTP_PROXY`, or `HTTPS_PROXY` in Cloudflare. Production Provider calls use Cloudflare outbound `fetch`.
 - Individual Provider API keys are entered by authenticated users, encrypted server-side, and stored in Supabase. They are not Cloudflare environment variables.
+- Do not configure `AI_REQUEST_TIMEOUT_MS`. Provider calls are submitted once without an application deadline, automatic retry, image-quality reduction, or local substitute result.
 
 After the final domain is available, configure the same HTTPS domain in Supabase Auth Site URL and add `/auth/callback` to the allowed redirect URLs.

@@ -1,205 +1,150 @@
 # Aesthetic Archive Hand Off
 
-Updated: 2026-08-03
+Updated: 2026-08-04
 Project root: `A:/04-Pi Agent/01_Projects/05_AI产品优化/aesthetic-archive`
 Repository: `https://github.com/Young4ever33/Aesthetic-Archive`
-Production URL: `https://aesthetic-archive.laverneyue33.workers.dev`
-Provider fix baseline commit: `5db8f323b832f8f536fd84a0caba6346530d97c1`
+Production: `https://aesthetic-archive.laverneyue33.workers.dev`
 
-## Executive Conclusion
+## Current Release State
 
-The source code is buildable, the Cloudflare Worker bundle succeeds on GitHub's Ubuntu runner, and the Supabase production schema is aligned through migration `202608030010`. Cloudflare's Git integration has deployed the GitHub `main` history through handoff commit `7032842`, which contains Provider fix commit `5db8f32` in its ancestry.
+Cloudflare Git remains the only production deployer. GitHub Actions performs checks and the Ubuntu OpenNext Worker build only. Do not add Wrangler deployment credentials or a second deployment path.
 
-Cloudflare Dashboard evidence confirms that production deployment is active: version `a1612374` is marked deployed with 100% traffic and 0% error rate. The version history shows consecutive Git-backed versions for Prompt v3, the Provider fix, and the handoff update. This establishes that Cloudflare Git automatic deployment is enabled and the Provider fix is present in the active production bundle.
+Production unauthenticated smoke checks pass. Production HTML, JavaScript, and CSS have been checked directly rather than inferred from a successful deployment. Authenticated moderation, Like, Provider, and two-account acceptance still require real browser sessions and must not be marked complete until their state-changing actions are observed.
 
-The remaining release gap is authenticated Provider end-to-end acceptance with a real user-owned API key. Code deployment is no longer blocked.
+The local worktree should contain only the intentionally untracked `Prompt Test images/` directory after committed changes are pushed. Do not commit or delete that directory.
 
-Current release judgment:
+## Implemented Behavior
 
-- Source and standard Next.js build: **PASS**
-- Linux OpenNext Cloudflare Worker build: **PASS**
-- Supabase migration alignment: **PASS**
-- Cloudflare Git automatic deployment: **PASS — active version at 100% traffic**
-- Provider fix included in active production ancestry: **PASS**
-- Production unauthenticated smoke test from this machine: **INCONCLUSIVE — local DNS/network anomaly**
-- Production Provider save/test/vision/text/image calls: **PENDING AUTHENTICATED E2E**
+### Moderation
 
-## Final Test Matrix
+- `profiles.role` is resolved through the server-side admin context.
+- Only `reviewer` and `admin` can load or act on the review queue.
+- Regular users cannot expose moderation by using `?tab=reviews`.
+- Pending and rejected cards are loaded with signed private image URLs.
+- Reviewers cannot review their own cards on either moderation API path.
+- Unsupported review actions are rejected.
+- Approval writes `publish_status = published`, `visibility = public`, an audit row, and an author notification.
+- If the audit insert fails, the card update is rolled back to its prior state.
 
-| Area | Result | Evidence / issue |
-| --- | --- | --- |
-| Seed Prompt v3 validation | PASS | 22/22 cards pass static validation; A-04 records user-accepted generation review; 21 cards remain generation-pending |
-| ESLint | PASS | `pnpm lint` completed without errors |
-| TypeScript | PASS | `pnpm typecheck` completed without errors |
-| Repository safety check | PASS | No generated directories, sensitive filenames, obvious secrets, or oversized files detected |
-| Next.js production build | PASS | Next.js 16.2.12 compiled and generated 27 routes |
-| Local JS syntax | PASS | `node --check public/local-mvp/app.js` |
-| Git diff hygiene | PASS | `git diff --check` |
-| Linux OpenNext Worker build | PASS | GitHub Actions job `check`, run `30846903337`, completed successfully |
-| Windows OpenNext build | ENVIRONMENT LIMIT | Next.js stage passed, then Windows denied a symlink with `EPERM`; OpenNext itself warns Windows is not fully supported. Ubuntu CI is the authoritative Worker-build result |
-| Supabase remote migrations | PASS | Local and remote versions match from `202607300001` through `202608030010` |
-| GitHub push | PASS | GitHub `main` contains `7032842`, whose parent is Provider fix `5db8f32` |
-| Cloudflare Git production deploy | PASS | Active Cloudflare version `a1612374` is deployed with 100% traffic; version history matches GitHub commits through `7032842` |
-| GitHub quality checks | PASS | `pnpm check` and Linux `pnpm cloudflare:build` completed successfully; duplicate Wrangler deployment job was removed after Cloudflare Git ownership was confirmed |
-| Production smoke from this PC | INCONCLUSIVE | `workers.dev` resolved locally to abnormal Meta/X-associated addresses and connection timed out before any HTTP response |
-| Authenticated Provider E2E | PENDING | Requires a real signed-in browser session and a Provider key stored through the product UI |
+### Likes and notifications
 
-Deployment evidence supplied from Cloudflare Dashboard:
+- Seed cards use registered `system_cards.card_key` values; user cards use UUIDs.
+- All 22 frontend Seed IDs match the production migration registry.
+- Like and unlike are idempotent through `toggle_card_like`.
+- Own user cards cannot be Liked.
+- Unlike deletes the Like and its cascaded notification.
+- A failure in cards, Saved, or board synchronization no longer marks the entire account offline or disables Likes.
+- Like failures show the server code and request ID.
 
-- Worker: `aesthetic-archive`
-- Connected repository: `Young4ever33/Aesthetic-Archive`
-- Active Cloudflare version: `a1612374`
-- Status: deployed
-- Traffic: 100%
-- Error rate shown: 0%
-- Active commit message: `docs: record final production handoff status`
-- Active commit ancestry: `7032842` → Provider fix `5db8f32`
-- Prior version message: `fix(provider): harden compatible API calls and deployment`
+### Collage Board
 
-## Provider Fixes Included in `5db8f32`
+- A selected gallery image is stored on the board node and takes precedence over the card cover.
+- The image picker is viewport-contained and closes before the detail panel when Escape is pressed.
+- The desktop right rail uses one vertical scroll container; Inspector and element list no longer compete for fixed heights.
+- Mobile restores natural single-column height and page scrolling.
 
-The Provider path was revised across save, connection test, vision, text, and image generation:
+### AI card analysis
 
-1. Provider types are normalized across `OpenAI`, `Gemini`, `OpenRouter`, `Custom Endpoint`, and supported historical aliases.
-2. OpenAI-compatible Base URLs are normalized when users enter `/v1`, `/chat/completions`, `/responses`, `/images/generations`, or `/models` forms.
-3. OpenAI-compatible text extraction supports:
-   - `choices[].message.content` strings;
-   - array content parts;
-   - `choices[].text`;
-   - `output_text`;
-   - Responses-style `output[].content`.
-4. Forced `temperature` was removed from compatible requests because some third-party models reject it.
-5. OpenRouter receives `HTTP-Referer` and `X-Title` headers.
-6. Non-JSON upstream responses now return bounded diagnostics instead of a generic invalid-response error.
-7. Errors distinguish credential/model access, endpoint/model 404, quota/rate limit, timeout, upstream 5xx, and network failure.
-8. Providers without a text model can run a real `/models` authentication probe instead of being rejected by the UI.
-9. Providers with a text model still perform a real text-generation test.
-10. Provider save/update validates model lists, default models, HTTPS Base URLs, encryption configuration, migration state, and database permissions.
-11. User Provider keys remain encrypted server-side and are not returned to the browser.
+- Up to six JPG, PNG, or WebP references are sent in one Provider request.
+- Original uploaded image bytes are read without client-side resize, JPEG conversion, or quality reduction.
+- The Provider prompt requires per-image inspection before synthesis and forbids moving a subject or property from one image into another.
+- Title and prompts must represent the complete image set.
+- Unverified cultural attribution is labeled as requiring verification.
+- Design elements, composition, and use cases have separate responsibilities.
+- Duplicate phrases are removed within and across structured fields.
+- Palette values are unique hexadecimal colors.
+- Invalid generic titles, missing core fields, or mixed-language Prompts reject the draft instead of filling the form.
+- Existing malformed saved cards are not automatically repaired; they must be re-analyzed with the original image set or deleted.
 
-Important limitation: these changes are deployed in the active production commit ancestry, but have not yet completed a real authenticated upstream call using a user-owned Provider key.
+### Card detail contract
 
-## Cloudflare Automatic Deployment
+Left side:
 
-Cloudflare Git integration is the single production deployment owner:
+- Aesthetic Background / 风格背景 only.
+- It uses the saved cultural/aesthetic background, never the summary as a substitute.
+- Unknown cultural origin is explicitly marked as requiring verification.
 
-```text
-GitHub main push
-→ Cloudflare builds the connected repository
-→ Cloudflare activates the new Worker version
-```
+Right side, fixed order:
 
-GitHub Actions is quality control only. `.github/workflows/check.yml` installs dependencies, runs `pnpm check`, and verifies `pnpm cloudflare:build` on Ubuntu. It does not deploy and requires no Cloudflare API token.
+1. Design Elements / 设计要素
+2. Composition / 构图方式
+3. Palette / 色卡
+4. Use Cases / 使用场景
+5. Chinese Prompt / 中文提示词
+6. English Prompt / 英文提示词
 
-The duplicate GitHub Actions Wrangler deployment job was removed after Dashboard evidence confirmed Cloudflare Git deployment was already active. Do not create `CLOUDFLARE_API_TOKEN` or `CLOUDFLARE_ACCOUNT_ID` for the normal deployment path, and do not enable a second deployment system.
+The opposite-language title is hidden. Palette entries show one hex value only. Negative Prompt data remains stored for generation and export but is not a separate detail column.
 
-Application runtime values remain only in Cloudflare Dashboard:
+### Provider request policy
 
-```text
-NEXT_PUBLIC_SUPABASE_URL
-NEXT_PUBLIC_SUPABASE_ANON_KEY
-AI_REQUEST_TIMEOUT_MS
-SUPABASE_SERVICE_ROLE_KEY
-PROVIDER_ENCRYPTION_KEY
-```
+Provider calls are submitted once and awaited until the upstream responds. The application has no AbortController deadline, automatic retry, image-quality reduction, or local substitute AI result. Do not configure `AI_REQUEST_TIMEOUT_MS`.
 
-User Provider API keys remain in the encrypted Provider Vault, not in Cloudflare or GitHub.
+An upstream gateway can still return its own 504 or unavailable response; the application cannot override the Provider's deadline.
 
-## Production DNS / Network Finding
+## Production Evidence
 
-The local production smoke command failed before receiving an HTTP response:
+The production workspace loads fingerprinted static paths rather than query-string cache busting. Cloudflare was observed ignoring query parameters for old static assets, so new releases must use a new asset path or content-hashed build output.
 
-```text
-TypeError: fetch failed
-UND_ERR_CONNECT_TIMEOUT
-```
+The following were verified against production responses after deployment:
 
-Local DNS returned an abnormal address for the Worker hostname, including `157.240.0.35`; Node also attempted addresses in Meta/X-associated ranges. This is not a valid basis for diagnosing the Worker application itself. DNS-over-HTTPS checks also failed from this network.
+- workspace HTML contains the fixed six-field card detail order;
+- moderation JavaScript uses the current server-confirmed access state;
+- multi-image analysis sends an `images` array;
+- Like requests are isolated from unrelated workspace synchronization failures;
+- Collage Board CSS uses a single scrolling right rail;
+- unauthenticated profile and review APIs return `401`;
+- homepage and auth page return `200`;
+- `/app` redirects unauthenticated users to `/auth`;
+- security headers are present.
 
-Required follow-up:
+## Required Authenticated Acceptance
 
-1. Open production from a normal browser or another network.
-2. Run the smoke script from any independent network that resolves `workers.dev` correctly.
-3. If the hostname still resolves incorrectly, inspect the local/system DNS, VPN, filtering, hosts file, or network interception separately.
-4. Do not change application code to compensate for the local DNS anomaly.
+Use two real accounts: one ordinary author and one separate reviewer. Do not bypass permissions and do not let the reviewer approve their own card.
 
-## Required Production Acceptance Order
+1. Author submits a public card and sees Pending Review.
+2. Reviewer opens `/app?tab=reviews` and sees the queue and signed images.
+3. Reviewer approves one card.
+4. Confirm the queue decreases and the response is successful.
+5. Confirm the card is `published + public` and appears in Public Plaza.
+6. Confirm the author receives a publication notification showing the reviewer actor.
+7. From the other account, Like and unlike the published card.
+8. Confirm the total count changes and unlike removes the Like notification.
+9. Open Collage Board at desktop and mobile sizes and inspect all right-rail controls.
+10. Re-analyze a three-image set with the configured Provider and confirm the resulting title, background, six fields, and bilingual Prompts describe the complete set without repeated sections.
 
-Cloudflare deployment is active. Complete these remaining acceptance steps in order:
+## China Network and Custom Domain
 
-1. Confirm the deployed commit/version corresponds to `5db8f32` or a later commit containing it.
-2. Confirm Cloudflare Dashboard still contains all three normal variables and both encrypted runtime secrets.
-3. Run the unauthenticated production smoke test and require all checks to pass.
-4. Sign in with a real confirmed account.
-5. Open Provider settings and edit/re-save the old Agnes Provider as:
-   - type: `Custom Endpoint`;
-   - Base URL: `https://apihub.agnes-ai.com/v1`;
-   - model IDs exactly as exposed by that account/service;
-   - API key entered only in the product UI.
-6. Click `测试连接`:
-   - with a text model, require a real non-empty text reply;
-   - without a text model, require a successful authenticated model probe.
-7. Run image analysis with the configured vision model and require structured JSON.
-8. Run Prompt generation with the configured text model and require isolated Chinese/English positive and negative Prompts.
-9. Run image generation only if the configured Custom Endpoint explicitly supports the OpenAI Images API contract.
-10. Verify request IDs and `ai_usage_logs` record success/failure without credentials or image payloads.
-11. Repeat with a second account and verify Provider ownership isolation.
+The current machine resolves the `workers.dev` hostname to `198.18.0.61`, an address in a benchmarking/test range, showing that the current network does not provide trustworthy `workers.dev` resolution. Application code cannot repair DNS interception or regional reachability.
 
-Do not mark Provider production acceptance complete merely because connection testing passes. Vision, text, and image generation are distinct capabilities and must be tested independently.
+Before China-network release:
 
-## Known Remaining Issues
+1. Choose a user-owned domain managed in Cloudflare DNS.
+2. Add a dedicated hostname such as `archive.example.com` as the Worker custom domain.
+3. Add `https://archive.example.com/auth/callback` to Supabase Auth redirect URLs before moving traffic.
+4. Update the Supabase Site URL when the custom hostname becomes canonical.
+5. Update OpenRouter referer metadata and application documentation.
+6. Test DNS, TLS, homepage, authentication callback, APIs, and Provider outbound requests from at least two independent mainland networks.
 
-### Remaining production acceptance blocker
+Do not point production to an unowned or temporary domain.
 
-- Provider production E2E is not verified with a real account and real upstream service. Deployment itself is active and no Cloudflare deployment credential is required for the current Git integration.
-
-### Non-blocking engineering issues
-
-- Next.js warns that the `middleware` convention is deprecated in favor of `proxy`. The current build succeeds.
-- OpenNext local Worker bundling on Windows can fail while creating symlinks. Use Ubuntu CI or WSL for authoritative Worker builds.
-- The remaining 21 Seed cards have passed static Prompt v3 validation but still require real image-generation review.
-- Production desktop/mobile regression, two-account social acceptance, and reviewer publication acceptance remain outstanding.
-
-## Reproducible Commands
+## Validation Commands
 
 ```bash
-pnpm check
-pnpm cloudflare:build
-pnpm supabase:status
+node --check public/local-mvp/app.js
+pnpm lint
+pnpm typecheck
+pnpm build
 pnpm smoke:production -- https://aesthetic-archive.laverneyue33.workers.dev
+git diff --check
 git status --short --branch
-git rev-parse HEAD origin/main
 ```
 
-On this Windows machine, treat GitHub's Ubuntu `pnpm cloudflare:build` result as authoritative if local OpenNext fails only at symlink creation.
+The authoritative OpenNext Worker build runs on GitHub Ubuntu. Local Windows can fail at symlink creation even when the Next.js build succeeds.
 
-## Important Files
+## Known Remaining Acceptance Work
 
-- Provider CRUD: `app/api/providers/route.ts`
-- Provider connection test: `app/api/providers/test/route.ts`
-- AI Gateway: `lib/ai-gateway.ts`
-- Vision API: `app/api/ai/analyze-image/route.ts`
-- Prompt API: `app/api/ai/generate-prompt/route.ts`
-- Image generation API: `app/api/ai/generate-image/route.ts`
-- Provider UI: `public/local-mvp/app.js`, `public/local-mvp/index.html`
-- Cloudflare workflow: `.github/workflows/check.yml`
-- Worker configuration: `wrangler.jsonc`, `open-next.config.ts`
-- Deployment guide: `docs/DEPLOYMENT.md`
-- Production smoke: `scripts/smoke-production.mjs`
-- Production acceptance: `docs/PRODUCTION_ACCEPTANCE_SOCIAL_PROVIDER_PROMPT_V3.md`
-
-## Repository State and Local-Only Material
-
-- Cloudflare production was verified active through GitHub handoff commit `7032842`, including Provider fix `5db8f32` in its ancestry; later documentation/CI commits should appear automatically in Cloudflare version history.
-- `Prompt Test images/` remains an untracked local evidence directory and must not be bulk-added to Git.
-- Compressed README/marketing evidence images are already tracked under `docs/prompt-v3/validation/` and `public/marketing/`.
-- No `.env`, `.env.local`, `.dev.vars`, Provider key, Supabase service key, encryption key, cookie, or authorization header was added to the repository.
-
-## Safety Rules
-
-- Never expose Provider keys, Supabase service credentials, encryption keys, cookies, or authorization headers in code, Git, logs, screenshots, handoff documents, or chat.
-- Never run `supabase db reset` against the linked production project.
-- Apply database changes through new migrations only.
-- Do not rotate `PROVIDER_ENCRYPTION_KEY` without a data re-encryption migration.
-- Keep Provider calls server-side and enforce owner isolation before decrypting secrets.
-- Do not weaken TLS, disable certificate verification, add a proxy, or change API code to work around the current local DNS anomaly.
+- A real reviewer approval has not yet been observed from an authenticated browser session.
+- A real production Like/unlike has not yet been observed after the latest client isolation change.
+- The new multi-image contract has not yet completed a real Agnes response using the user's Provider key.
+- Twenty-one Seed cards remain `static-pass-generation-pending` and require real generation review.
+- A China-reachable custom domain is not configured because no owned hostname has been selected.

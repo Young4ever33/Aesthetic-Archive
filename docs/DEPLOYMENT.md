@@ -55,7 +55,6 @@ Public application variables:
 ```text
 NEXT_PUBLIC_SUPABASE_URL
 NEXT_PUBLIC_SUPABASE_ANON_KEY
-AI_REQUEST_TIMEOUT_MS=120000
 ```
 
 Encrypted server secrets:
@@ -71,6 +70,8 @@ Do not configure `AI_HTTP_PROXY`, `HTTP_PROXY`, or `HTTPS_PROXY` in Cloudflare. 
 
 Provider API keys are not global Cloudflare variables. Each authenticated user saves a Provider through the application; its key is encrypted with `PROVIDER_ENCRYPTION_KEY` and stored in Supabase.
 
+Do not configure `AI_REQUEST_TIMEOUT_MS`. Provider calls are submitted once and awaited until the upstream responds. The application does not add a deadline, automatic retry, image-quality reduction, or local substitute result.
+
 ## Supabase Production URLs
 
 Supabase Auth must use the final HTTPS product domain as its Site URL and allow:
@@ -79,7 +80,7 @@ Supabase Auth must use the final HTTPS product domain as its Site URL and allow:
 https://aesthetic-archive.laverneyue33.workers.dev/auth/callback
 ```
 
-If a custom domain is introduced, add its callback before moving traffic and retain the `workers.dev` callback during rollout if both addresses remain valid.
+A custom domain is required before China-network release because `workers.dev` resolution and reachability are not reliable on affected networks. Add the custom domain to the Worker first, then add its exact `/auth/callback` URL to Supabase before moving traffic. Retain the `workers.dev` callback during rollout while both addresses remain active.
 
 ## Verification Commands
 

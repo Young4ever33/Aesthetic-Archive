@@ -16,12 +16,13 @@ async function requireReviewer() {
 export async function GET() {
   const requestId = rid();
   try {
-    await requireReviewer();
+    const { user } = await requireReviewer();
     const admin = await createSupabaseAdminClient();
     const { data, error } = await admin
       .from('aesthetic_cards')
       .select('*, publish_reviews(*), card_images(id, url, storage_path, alt, sort_order)')
       .in('publish_status', ['pending', 'rejected'])
+      .neq('owner_id', user.id)
       .order('updated_at', { ascending: true })
       .limit(100);
     if (error) return out(requestId, 500, { code: 'REVIEW_QUERY_FAILED', message: 'Unable to load review queue' });
@@ -39,7 +40,10 @@ export async function GET() {
     })));
     return out(requestId, 200, cards);
   } catch (error) {
-    return out(requestId, error instanceof Error && error.message === 'FORBIDDEN' ? 403 : 401, { code: error instanceof Error && error.message === 'FORBIDDEN' ? 'FORBIDDEN' : 'UNAUTHENTICATED', message: error instanceof Error && error.message === 'FORBIDDEN' ? 'Reviewer access required' : 'Sign in required' });
+    const message = error instanceof Error ? error.message : '';
+    const status = message === 'UNAUTHENTICATED' ? 401 : message === 'FORBIDDEN' ? 403 : 500;
+    const code = status === 401 ? 'UNAUTHENTICATED' : status === 403 ? 'FORBIDDEN' : 'REVIEW_QUERY_FAILED';
+    return out(requestId, status, { code, message: status === 401 ? 'Sign in required' : status === 403 ? 'Reviewer access required' : 'Unable to load review queue' });
   }
 }
 
@@ -52,19 +56,32 @@ export async function POST(request: Request) {
     const body = await request.json().catch(() => ({})) as { action?: string; note?: string };
     if (body.action !== 'approve' && body.action !== 'reject') return out(requestId, 400, { code: 'INVALID_REQUEST', message: 'Action must be approve or reject' });
     const admin = await createSupabaseAdminClient();
-    const { data: card, error: cardError } = await admin.from('aesthetic_cards').select('id, owner_id, title, title_zh, publish_status').eq('id', cardId).single();
+    const { data: card, error: cardError } = await admin.from('aesthetic_cards').select('id, owner_id, title, title_zh, publish_status, visibility, reviewed_at').eq('id', cardId).single();
     if (cardError || !card) return out(requestId, 404, { code: 'CARD_NOT_FOUND', message: 'Review card not found' });
     if (card.owner_id === user.id) return out(requestId, 403, { code: 'SELF_REVIEW_FORBIDDEN', message: 'Reviewers cannot review their own cards' });
     if (!['pending', 'rejected'].includes(card.publish_status)) return out(requestId, 409, { code: 'INVALID_REVIEW_STATE', message: 'Card is not awaiting review' });
     const nextStatus = body.action === 'approve' ? 'published' : 'rejected';
     const note = typeof body.note === 'string' ? body.note.trim().slice(0, 4000) : null;
-    const { error: updateError } = await admin.from('aesthetic_cards').update({ publish_status: nextStatus, visibility: body.action === 'approve' ? 'public' : 'private', reviewed_at: new Date().toISOString() }).eq('id', cardId);
+    const { error: updateError } = await admin.from('aesthetic_cards').update({ publish_status: nextStatus, visibility: 'public', reviewed_at: new Date().toISOString() }).eq('id', cardId);
     if (updateError) return out(requestId, 500, { code: 'REVIEW_UPDATE_FAILED', message: 'Unable to update card review status' });
-    const { error: reviewError } = await admin.from('publish_reviews').insert({ card_id: cardId, owner_id: card.owner_id, status: nextStatus, reviewer_id: user.id, note, reviewed_at: new Date().toISOString() });
-    if (reviewError) return out(requestId, 500, { code: 'REVIEW_AUDIT_FAILED', message: 'Card status changed but audit record failed' });
+    const { data: audit, error: reviewError } = await admin.from('publish_reviews').insert({ card_id: cardId, owner_id: card.owner_id, status: nextStatus, reviewer_id: user.id, note, reviewed_at: new Date().toISOString() }).select('id').single();
+    if (reviewError || !audit) {
+      await admin.from('aesthetic_cards').update({ publish_status: card.publish_status, visibility: card.visibility, reviewed_at: card.reviewed_at }).eq('id', cardId);
+      return out(requestId, 500, { code: 'REVIEW_AUDIT_FAILED', message: 'Review was not completed because the audit record could not be saved' });
+    }
     const { error: notificationError } = await admin.from('notifications').insert({ recipient_id: card.owner_id, actor_id: user.id, type: nextStatus === 'published' ? 'card_published' : 'card_rejected', card_id: cardId, payload: { cardTitle: card.title_zh || card.title, note } });
-    return out(requestId, 200, { id: cardId, status: nextStatus, reviewerRole: role, ...(notificationError ? { notificationWarning: true } : {}) });
+    if (notificationError) {
+      await Promise.all([
+        admin.from('publish_reviews').delete().eq('id', audit.id),
+        admin.from('aesthetic_cards').update({ publish_status: card.publish_status, visibility: card.visibility, reviewed_at: card.reviewed_at }).eq('id', cardId),
+      ]);
+      return out(requestId, 500, { code: 'REVIEW_NOTIFICATION_FAILED', message: 'Review was not completed because the author notification could not be saved' });
+    }
+    return out(requestId, 200, { id: cardId, status: nextStatus, reviewerRole: role });
   } catch (error) {
-    return out(requestId, error instanceof Error && error.message === 'FORBIDDEN' ? 403 : 401, { code: error instanceof Error && error.message === 'FORBIDDEN' ? 'FORBIDDEN' : 'UNAUTHENTICATED', message: error instanceof Error && error.message === 'FORBIDDEN' ? 'Reviewer access required' : 'Sign in required' });
+    const message = error instanceof Error ? error.message : '';
+    const status = message === 'UNAUTHENTICATED' ? 401 : message === 'FORBIDDEN' ? 403 : 500;
+    const code = status === 401 ? 'UNAUTHENTICATED' : status === 403 ? 'FORBIDDEN' : 'REVIEW_FAILED';
+    return out(requestId, status, { code, message: status === 401 ? 'Sign in required' : status === 403 ? 'Reviewer access required' : 'Unable to process review' });
   }
 }
