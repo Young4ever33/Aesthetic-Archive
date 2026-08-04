@@ -23,7 +23,13 @@
             <button type="button" data-language-option="en">EN</button>
           </div>
         </div>
-        <a class="notification-button" id="notification-button" href="/notifications" target="_top" aria-label="消息"><span aria-hidden="true">♡</span><b id="notification-count" hidden>0</b></a>
+        <div class="notification-control">
+          <button class="notification-button" id="notification-button" type="button" aria-label="消息" aria-expanded="false"><span aria-hidden="true">♡</span><b id="notification-count" hidden>0</b></button>
+          <aside class="notification-popover" id="notification-popover" aria-hidden="true">
+            <header><strong>消息</strong><button id="notification-read-all" type="button">全部已读</button></header>
+            <div class="notification-popover-list" id="notification-popover-list"><p class="notification-popover-empty">加载中…</p></div>
+          </aside>
+        </div>
         <button class="login-lite account-button" type="button" data-login-open><span class="account-avatar" data-account-avatar>AA</span><span class="account-name" data-account-name>登录</span></button>
       </div>
     </header>

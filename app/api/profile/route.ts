@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { requireUser } from '@/lib/supabase/server';
-import { createSupabaseAdminClient } from '@/lib/supabase/admin';
-import { ensureAuthorForProfile } from '@/lib/social';
+import { ensureAuthorForCurrentUser } from '@/lib/social';
 
 export const runtime = 'nodejs';
 
@@ -32,9 +31,9 @@ export async function GET() {
     }
 
     // A social profile must not prevent an authenticated user from loading their account.
-    let author: Awaited<ReturnType<typeof ensureAuthorForProfile>> | null = null;
+    let author: Awaited<ReturnType<typeof ensureAuthorForCurrentUser>> | null = null;
     try {
-      author = await ensureAuthorForProfile(user.id);
+      author = await ensureAuthorForCurrentUser(supabase);
     } catch (authorError) {
       console.error('PROFILE_AUTHOR_UNAVAILABLE', { requestId, message: authorError instanceof Error ? authorError.message : 'unknown' });
     }
@@ -81,16 +80,16 @@ export async function PATCH(request: Request) {
       return out(requestId, 500, { code: 'PROFILE_UPDATE_FAILED', message: 'Unable to update profile' });
     }
 
-    let author: Awaited<ReturnType<typeof ensureAuthorForProfile>> | null = null;
+    let author: Awaited<ReturnType<typeof ensureAuthorForCurrentUser>> | null = null;
     let authorReady = true;
     try {
-      author = await ensureAuthorForProfile(user.id);
+      author = await ensureAuthorForCurrentUser(supabase);
       const authorUpdates = {
         bio: typeof body.bio === 'string' ? body.bio.trim().slice(0, 500) : author.bio,
         design_focus: typeof body.specialty === 'string' ? body.specialty.trim().slice(0, 300) : author.design_focus,
         updated_at: new Date().toISOString(),
       };
-      const { data: updatedAuthor, error: authorError } = await createSupabaseAdminClient()
+      const { data: updatedAuthor, error: authorError } = await supabase
         .from('authors')
         .update(authorUpdates)
         .eq('id', author.id)

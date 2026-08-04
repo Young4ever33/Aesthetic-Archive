@@ -727,7 +727,25 @@ input:focus, select:focus, textarea:focus { border-color: #111; box-shadow: 0 0 
 body.is-authenticated .login-provider.danger-text { display: block; }
 .login-note { margin: 12px 0 0; font-size: 12px !important; }
 .user-pill { display: inline-flex; align-items: center; min-height: 34px; max-width: 180px; padding: 0 12px; border: 1px solid var(--line); border-radius: 999px; background: #fff; color: var(--muted); font-size: 12px; font-weight: 720; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.notification-button { position: relative; width: 36px; height: 36px; display: grid; place-items: center; border: 1px solid var(--line); border-radius: 50%; background: #fff; color: #333; font-size: 16px; text-decoration: none; }.notification-button b { position: absolute; top: -5px; right: -6px; min-width: 17px; height: 17px; display: grid; place-items: center; padding: 0 4px; border: 2px solid #fff; border-radius: 9px; background: #171717; color: #fff; font-size: 8px; line-height: 1; }.notification-button b[hidden] { display: none; }
+.notification-control { position: relative; }
+.notification-button { position: relative; width: 36px; height: 36px; display: grid; place-items: center; border: 1px solid var(--line); border-radius: 50%; background: #fff; color: #333; font-size: 16px; cursor: pointer; }
+.notification-button b { position: absolute; top: -5px; right: -6px; min-width: 17px; height: 17px; display: grid; place-items: center; padding: 0 4px; border: 2px solid #fff; border-radius: 9px; background: #171717; color: #fff; font-size: 8px; line-height: 1; }
+.notification-button b[hidden] { display: none; }
+.notification-popover { position: absolute; z-index: 120; top: calc(100% + 10px); right: 0; width: min(360px, calc(100vw - 24px)); border: 1px solid var(--line); border-radius: 8px; background: #fff; box-shadow: 0 18px 45px rgba(0,0,0,.14); overflow: hidden; }
+.notification-popover[aria-hidden="true"] { display: none; }
+.notification-popover header { height: 46px; display: flex; align-items: center; justify-content: space-between; padding: 0 14px; border-bottom: 1px solid var(--line); }
+.notification-popover header strong { font-size: 14px; }
+.notification-popover header button { border: 0; background: transparent; color: var(--muted); font-size: 12px; cursor: pointer; }
+.notification-popover-list { max-height: min(440px, calc(100vh - 110px)); overflow-y: auto; overscroll-behavior: contain; }
+.notification-popover-item { width: 100%; display: grid; grid-template-columns: 34px minmax(0,1fr) 7px; gap: 10px; align-items: start; padding: 12px 14px; border: 0; border-bottom: 1px solid var(--line); background: #fff; text-align: left; cursor: pointer; }
+.notification-popover-item:hover { background: #f7f7f5; }
+.notification-popover-item-avatar { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 50%; background: #ecebe7 center/cover no-repeat; font-size: 11px; font-weight: 700; }
+.notification-popover-item-copy { min-width: 0; }
+.notification-popover-item-copy strong { display: block; color: #222; font-size: 12px; line-height: 1.45; font-weight: 600; }
+.notification-popover-item-copy small { display: block; margin-top: 4px; color: var(--muted); font-size: 10px; }
+.notification-popover-item-dot { width: 7px; height: 7px; margin-top: 6px; border-radius: 50%; background: #171717; }
+.notification-popover-item.is-read .notification-popover-item-dot { visibility: hidden; }
+.notification-popover-empty { margin: 0; padding: 28px 16px; color: var(--muted); font-size: 12px; text-align: center; }
 .account-button { display: inline-grid; grid-template-columns: 28px minmax(0, auto); align-items: center; gap: 8px; min-height: 36px; max-width: 210px; padding: 3px 10px 3px 4px; }
 .account-avatar, .card-author-avatar { display: grid; flex: 0 0 auto; place-items: center; overflow: hidden; border: 1px solid #d5d5d5; border-radius: 50%; background: #f1f1f1 center / cover no-repeat; color: #555; font-size: 9px; font-weight: 800; }
 .account-avatar { width: 28px; height: 28px; }

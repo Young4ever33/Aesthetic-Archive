@@ -29,7 +29,8 @@ function errorResponse(id: string, status: number, code: string, message: string
 const publicColumns = 'id, name, type, base_url, image_capable, image_models, generation_models, text_models, default_image_model, default_generation_model, default_text_model, image_api, image_api_url, is_default, created_at, updated_at';
 
 function messageFor(error: unknown, fallback: string) {
-  if (error instanceof Error && /PROVIDER_ENCRYPTION_KEY/.test(error.message)) return 'Provider encryption is not configured correctly in the Worker';
+  if (error instanceof Error && /PROVIDER_ENCRYPTION_KEY is not configured/.test(error.message)) return 'PROVIDER_ENCRYPTION_KEY is missing from the active Worker bindings';
+  if (error instanceof Error && /PROVIDER_ENCRYPTION_KEY must be/.test(error.message)) return 'PROVIDER_ENCRYPTION_KEY must be Base64 that decodes to exactly 32 bytes';
   if (error instanceof Error && /Supabase admin environment/.test(error.message)) return 'Supabase service configuration is missing from the Worker';
   return fallback;
 }
@@ -64,7 +65,7 @@ function providerFields(body: ProviderPatch) {
   const textModels = cleanModels(body.textModels);
   return {
     ...(typeof body.name === 'string' ? { name: body.name.trim().slice(0, 120) } : {}),
-    ...(typeof body.type === 'string' ? { type: canonicalProviderType(body.type) } : {}),
+    ...(typeof body.type === 'string' ? { type: canonicalProviderType(body.type, body.baseUrl) } : {}),
     ...(typeof body.baseUrl === 'string' || body.baseUrl === null ? { base_url: body.baseUrl ? safeBaseUrl(body.baseUrl) : null } : {}),
     ...(typeof body.imageCapable === 'boolean' ? { image_capable: body.imageCapable } : {}),
     ...(imageModels ? { image_models: imageModels } : {}),
@@ -79,7 +80,10 @@ function providerFields(body: ProviderPatch) {
   };
 }
 
-function canonicalProviderType(value: string) {
+function canonicalProviderType(value: string, baseUrl?: string | null) {
+  try {
+    if (baseUrl && new URL(baseUrl).hostname.toLowerCase() === 'apihub.agnes-ai.com') return 'Custom Endpoint';
+  } catch {}
   const normalized = normalizeProviderType(value);
   if (normalized === 'openai') return 'OpenAI';
   if (normalized === 'gemini') return 'Gemini';
@@ -131,7 +135,7 @@ export async function POST(request: Request) {
     const body = await request.json() as ProviderPatch;
     const secret = typeof body.secret === 'string' ? body.secret.trim() : '';
     const name = typeof body.name === 'string' ? body.name.trim() : '';
-    const type = typeof body.type === 'string' ? canonicalProviderType(body.type) : '';
+    const type = typeof body.type === 'string' ? canonicalProviderType(body.type, body.baseUrl) : '';
     const imageModels = cleanModels(body.imageModels) || [];
     const generationModels = cleanModels(body.generationModels) || [];
     const textModels = cleanModels(body.textModels) || [];
@@ -149,7 +153,7 @@ export async function POST(request: Request) {
       ...providerFields({ ...body, imageModels, generationModels, textModels }),
       name,
       type,
-      encrypted_api_key: encryptProviderSecret(secret),
+      encrypted_api_key: await encryptProviderSecret(secret),
     }).select(publicColumns).single();
     if (error) return errorResponse(id, 500, 'PROVIDER_SAVE_FAILED', databaseMessage(error, 'Unable to save Provider settings'));
     return NextResponse.json({ requestId: id, data: { ...data, hasSecret: true } }, { status: 201 });
@@ -179,7 +183,7 @@ export async function PATCH(request: Request) {
     const updates: Record<string, unknown> = providerFields(body);
     if (typeof body.secret === 'string' && body.secret.trim()) {
       if (body.secret.length > 4096) return errorResponse(id, 413, 'INVALID_REQUEST', 'Provider API key is too long');
-      updates.encrypted_api_key = encryptProviderSecret(body.secret.trim());
+      updates.encrypted_api_key = await encryptProviderSecret(body.secret.trim());
     }
     if (!Object.keys(updates).length) return errorResponse(id, 400, 'INVALID_REQUEST', 'No Provider changes supplied');
     if (body.isDefault) await clearOtherDefaults(supabase, user.id, providerId);

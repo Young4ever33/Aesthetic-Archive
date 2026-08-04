@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { requireUser } from '@/lib/supabase/server';
-import { createSupabaseAdminClient } from '@/lib/supabase/admin';
-import { ensureAuthorForProfile } from '@/lib/social';
+import { ensureAuthorForCurrentUser } from '@/lib/social';
 
 export const runtime = 'nodejs';
 
@@ -12,17 +11,18 @@ function response(requestId: string, status: number, data: unknown) {
   return NextResponse.json({ requestId, ...(status >= 400 ? { error: data } : { data }) }, { status });
 }
 function id() { return `req_${crypto.randomUUID()}`; }
-async function withSignedImages<T extends Record<string, unknown>>(cards: T[], viewerId: string, includeOwnerMetrics = false) {
-  const admin = createSupabaseAdminClient();
+async function withSignedImages<T extends Record<string, unknown>>(
+  supabase: Awaited<ReturnType<typeof requireUser>>['supabase'],
+  cards: T[],
+  viewerId: string,
+  includeOwnerMetrics = false,
+) {
   const cardIds = cards.map((card) => card.id).filter((value): value is string => typeof value === 'string');
-  const [{ data: allLikes }, { data: viewerLikes }, { data: saves }] = await Promise.all([
-    cardIds.length ? admin.from('card_likes').select('card_id').in('card_id', cardIds) : Promise.resolve({ data: [] }),
-    cardIds.length ? admin.from('card_likes').select('card_id').eq('user_id', viewerId).in('card_id', cardIds) : Promise.resolve({ data: [] }),
-    includeOwnerMetrics && cardIds.length ? admin.from('saved_cards').select('card_id').in('card_id', cardIds) : Promise.resolve({ data: [] }),
+  const [{ data: interactionData }, { data: saves }] = await Promise.all([
+    cardIds.length ? supabase.rpc('get_card_interactions', { target_keys: cardIds }) : Promise.resolve({ data: {} }),
+    includeOwnerMetrics && cardIds.length ? supabase.from('saved_cards').select('card_id').in('card_id', cardIds) : Promise.resolve({ data: [] }),
   ]);
-  const likeCounts = new Map<string, number>();
-  (allLikes || []).forEach((like) => { if (like.card_id) likeCounts.set(like.card_id, (likeCounts.get(like.card_id) || 0) + 1); });
-  const liked = new Set((viewerLikes || []).map((like) => like.card_id));
+  const interactions = interactionData && typeof interactionData === 'object' ? interactionData as Record<string, Record<string, unknown>> : {};
   const saveCounts = new Map<string, number>();
   (saves || []).forEach((save) => { if (save.card_id) saveCounts.set(save.card_id, (saveCounts.get(save.card_id) || 0) + 1); });
 
@@ -33,7 +33,7 @@ async function withSignedImages<T extends Record<string, unknown>>(cards: T[], v
       .sort((a, b) => Number(a.sort_order || 0) - Number(b.sort_order || 0))
       .map(async image => ({
         ...image,
-        signedUrl: (await admin.storage.from('card-images').createSignedUrl(String(image.storage_path), 3600)).data?.signedUrl || null
+        signedUrl: (await supabase.storage.from('card-images').createSignedUrl(String(image.storage_path), 3600)).data?.signedUrl || null
       })));
     const gallery = images.map(image => image.signedUrl).filter((url): url is string => Boolean(url));
     const rawAuthor = Array.isArray(card.authors) ? card.authors[0] : card.authors;
@@ -48,7 +48,8 @@ async function withSignedImages<T extends Record<string, unknown>>(cards: T[], v
     } : null;
     const cardId = typeof card.id === 'string' ? card.id : '';
     const { card_images: _cardImages, authors: _authors, ...rest } = card;
-    return { ...rest, image: gallery[0] || '', gallery, author, likeCount: likeCounts.get(cardId) || 0, likedByViewer: liked.has(cardId), ownCard: card.owner_id === viewerId, ...(includeOwnerMetrics && card.owner_id === viewerId ? { savedCount: saveCounts.get(cardId) || 0 } : {}) };
+    const interaction = interactions[cardId] || {};
+    return { ...rest, image: gallery[0] || '', gallery, author: interaction.author || author, likeCount: Number(interaction.likeCount || 0), likedByViewer: Boolean(interaction.likedByViewer), ownCard: card.owner_id === viewerId, ...(includeOwnerMetrics && card.owner_id === viewerId ? { savedCount: saveCounts.get(cardId) || 0 } : {}) };
   }));
 }
 
@@ -71,7 +72,7 @@ export async function GET(request: Request) {
     else query = query.eq('owner_id', user.id);
     const { data, error } = await query;
     if (error) return response(requestId, 500, { code: 'CARD_QUERY_FAILED', message: 'Unable to load cards' });
-    return response(requestId, 200, await withSignedImages((data || []) as Record<string, unknown>[], user.id, scope !== 'public'));
+    return response(requestId, 200, await withSignedImages(supabase, (data || []) as Record<string, unknown>[], user.id, scope !== 'public'));
   } catch (error) {
     return response(requestId, error instanceof Error && error.message === 'UNAUTHENTICATED' ? 401 : 500, { code: 'UNAUTHENTICATED', message: 'Sign in required' });
   }
@@ -84,7 +85,7 @@ export async function POST(request: Request) {
     const body = await request.json() as Record<string, unknown>;
     if (typeof body.title !== 'string' || body.title.trim().length < 2) return response(requestId, 400, { code: 'INVALID_REQUEST', message: 'title is required' });
     const data = fields(body);
-    const author = await ensureAuthorForProfile(user.id);
+    const author = await ensureAuthorForCurrentUser(supabase);
     data.owner_id = user.id;
     data.author_id = author.id;
     data.source = typeof data.source === 'string' ? data.source : 'private';
@@ -92,7 +93,7 @@ export async function POST(request: Request) {
     data.publish_status = data.visibility === 'public' ? 'pending' : 'private';
     const { data: card, error } = await supabase.from('aesthetic_cards').insert(data).select(publicColumns).single();
     if (error) return response(requestId, 500, { code: 'CARD_SAVE_FAILED', message: 'Unable to save card' });
-    return response(requestId, 201, (await withSignedImages([card as Record<string, unknown>], user.id, true))[0]);
+    return response(requestId, 201, (await withSignedImages(supabase, [card as Record<string, unknown>], user.id, true))[0]);
   } catch (error) {
     if (error instanceof SyntaxError) return response(requestId, 400, { code: 'INVALID_REQUEST', message: 'Invalid JSON body' });
     return response(requestId, error instanceof Error && error.message === 'UNAUTHENTICATED' ? 401 : 500, { code: 'CARD_SAVE_FAILED', message: 'Unable to save card' });
@@ -110,7 +111,7 @@ export async function PATCH(request: Request) {
     if (Object.keys(data).length === 0) return response(requestId, 400, { code: 'INVALID_REQUEST', message: 'No card changes supplied' });
     const { data: card, error } = await supabase.from('aesthetic_cards').update(data).eq('id', cardId).eq('owner_id', user.id).select(publicColumns).single();
     if (error) return response(requestId, 500, { code: 'CARD_UPDATE_FAILED', message: 'Unable to update card' });
-    return response(requestId, 200, (await withSignedImages([card as Record<string, unknown>], user.id, true))[0]);
+    return response(requestId, 200, (await withSignedImages(supabase, [card as Record<string, unknown>], user.id, true))[0]);
   } catch (error) {
     return response(requestId, error instanceof Error && error.message === 'UNAUTHENTICATED' ? 401 : 500, { code: 'CARD_UPDATE_FAILED', message: 'Unable to update card' });
   }

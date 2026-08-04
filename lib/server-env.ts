@@ -14,3 +14,17 @@ export function getServerEnv(name: string): string | undefined {
     return undefined;
   }
 }
+
+/** Read a binding from the request-scoped Cloudflare context when sync context is unavailable. */
+export async function getServerEnvAsync(name: string): Promise<string | undefined> {
+  const nodeValue = process.env[name];
+  if (nodeValue) return nodeValue;
+
+  try {
+    const { env } = await getCloudflareContext({ async: true });
+    const value = (env as Record<string, unknown>)[name];
+    return typeof value === 'string' && value.length > 0 ? value : undefined;
+  } catch {
+    return undefined;
+  }
+}

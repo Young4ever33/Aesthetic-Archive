@@ -192,7 +192,7 @@ function extractGeminiText(data: Record<string, unknown>): string {
 }
 
 export async function callVisionProvider(provider: ProviderRecord, model: string, image: { mimeType: string; data: string }, prompt: string) {
-  const secret = decryptProviderSecret(provider.encrypted_api_key);
+  const secret = await decryptProviderSecret(provider.encrypted_api_key);
   if (normalizeProviderType(provider.type) === 'gemini') {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(secret)}`;
     const data = await requestJson(url, {
@@ -216,7 +216,7 @@ export async function callImageGenerationProvider(provider: ProviderRecord, mode
   if (type !== 'openai' && type !== 'custom endpoint') {
     throw gatewayError('INVALID_REQUEST', 'Image generation currently supports OpenAI and explicit OpenAI-compatible Custom Endpoints only', 400);
   }
-  const secret = decryptProviderSecret(provider.encrypted_api_key);
+  const secret = await decryptProviderSecret(provider.encrypted_api_key);
   const data = await requestJson(`${baseUrl(provider)}/images/generations`, {
     method: 'POST',
     headers: providerHeaders(provider, secret),
@@ -235,7 +235,7 @@ export async function callImageGenerationProvider(provider: ProviderRecord, mode
 }
 
 export async function probeProvider(provider: ProviderRecord) {
-  const secret = decryptProviderSecret(provider.encrypted_api_key);
+  const secret = await decryptProviderSecret(provider.encrypted_api_key);
   if (normalizeProviderType(provider.type) === 'gemini') {
     const data = await requestJson(`https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(secret)}`, {
       method: 'GET',
@@ -251,7 +251,7 @@ export async function probeProvider(provider: ProviderRecord) {
 }
 
 export async function callTextProvider(provider: ProviderRecord, model: string, prompt: string) {
-  const secret = decryptProviderSecret(provider.encrypted_api_key);
+  const secret = await decryptProviderSecret(provider.encrypted_api_key);
   if (normalizeProviderType(provider.type) === 'gemini') {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(secret)}`;
     const data = await requestJson(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }) });

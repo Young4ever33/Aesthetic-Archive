@@ -1,13 +1,12 @@
 import { NextResponse } from 'next/server';
 import { requireUser } from '@/lib/supabase/server';
-import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 
 export const runtime = 'nodejs';
 export async function PATCH(_request: Request, context: { params: Promise<{ id: string }> }) {
   const requestId = `req_${crypto.randomUUID()}`;
   try {
-    const { user } = await requireUser();
-    const { data, error } = await createSupabaseAdminClient().from('notifications').update({ read_at: new Date().toISOString() }).eq('id', (await context.params).id).eq('recipient_id', user.id).select('id, read_at').maybeSingle();
+    const { supabase, user } = await requireUser();
+    const { data, error } = await supabase.from('notifications').update({ read_at: new Date().toISOString() }).eq('id', (await context.params).id).eq('recipient_id', user.id).select('id, read_at').maybeSingle();
     if (error || !data) return NextResponse.json({ requestId, error: { code: 'NOTIFICATION_NOT_FOUND', message: 'Notification not found' } }, { status: 404 });
     return NextResponse.json({ requestId, data: { id: data.id, read: true } });
   } catch {

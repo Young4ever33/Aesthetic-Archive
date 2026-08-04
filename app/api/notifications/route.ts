@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import { requireUser } from '@/lib/supabase/server';
-import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 import { actorPublicProfiles } from '@/lib/social';
 
 export const runtime = 'nodejs';
@@ -10,17 +9,16 @@ function out(requestId: string, status: number, value: unknown) { return NextRes
 export async function GET(request: Request) {
   const requestId = rid();
   try {
-    const { user } = await requireUser();
+    const { supabase, user } = await requireUser();
     const url = new URL(request.url);
     const limit = Math.min(50, Math.max(1, Number(url.searchParams.get('limit')) || 20));
     const before = url.searchParams.get('before');
-    const admin = createSupabaseAdminClient();
-    let query = admin.from('notifications').select('id, actor_id, type, card_id, system_card_key, author_id, payload, read_at, created_at').eq('recipient_id', user.id).order('created_at', { ascending: false }).limit(limit + 1);
+    let query = supabase.from('notifications').select('id, actor_id, type, card_id, system_card_key, author_id, payload, read_at, created_at').eq('recipient_id', user.id).order('created_at', { ascending: false }).limit(limit + 1);
     if (before) query = query.lt('created_at', before);
     const { data, error } = await query;
     if (error) return out(requestId, 500, { code: 'NOTIFICATIONS_QUERY_FAILED', message: 'Unable to load notifications' });
     const rows = data || [];
-    const actors = await actorPublicProfiles(rows.map((item) => item.actor_id).filter((value): value is string => Boolean(value)));
+    const actors = await actorPublicProfiles(supabase, rows.map((item) => item.actor_id).filter((value): value is string => Boolean(value)));
     const items = rows.slice(0, limit).map((item) => ({
       id: item.id,
       type: item.type,

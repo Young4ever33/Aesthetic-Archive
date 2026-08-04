@@ -191,6 +191,60 @@ async function syncUnreadCount() {
   } catch {}
 }
 
+function notificationMessage(item) {
+  const actor = item.actor?.name || '系统';
+  const title = item.payload?.cardTitle ? `《${item.payload.cardTitle}》` : '你的卡片';
+  if (item.type === 'card_liked') return `${actor} 点赞了${title}`;
+  if (item.type === 'author_followed') return `${actor} Follow 了你`;
+  if (item.type === 'card_rejected') return `${title}未通过审核`;
+  if (item.type === 'card_unpublished') return `${title}已下架`;
+  return `${title}已审核并公开发布`;
+}
+
+function renderNotificationPopover(items) {
+  const list = document.getElementById('notification-popover-list');
+  if (!list) return;
+  if (!items.length) {
+    list.innerHTML = '<p class="notification-popover-empty">暂时没有消息。</p>';
+    return;
+  }
+  list.innerHTML = items.map(item => {
+    const avatar = item.actor?.avatar || '';
+    const initial = escapeHTML(item.actor?.name?.trim().charAt(0) || 'AA');
+    const time = new Intl.DateTimeFormat('zh-CN', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(item.createdAt));
+    return `<button class="notification-popover-item ${item.read ? 'is-read' : ''}" type="button" data-notification-id="${escapeHTML(item.id)}" data-notification-card="${escapeHTML(item.cardId || '')}" data-notification-author="${escapeHTML(item.type === 'author_followed' ? item.actor?.publicId || '' : '')}"><span class="notification-popover-item-avatar" ${avatar ? `style="background-image:url('${escapeHTML(avatar)}')"` : ''}>${avatar ? '' : initial}</span><span class="notification-popover-item-copy"><strong>${escapeHTML(notificationMessage(item))}</strong><small>${escapeHTML(time)}</small></span><i class="notification-popover-item-dot"></i></button>`;
+  }).join('');
+}
+
+async function loadNotificationPopover() {
+  const list = document.getElementById('notification-popover-list');
+  if (list) list.innerHTML = '<p class="notification-popover-empty">加载中…</p>';
+  try {
+    const response = await fetch('/api/notifications?limit=20', { credentials: 'same-origin' });
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(payload.error?.message || '加载失败');
+    renderNotificationPopover(payload.data?.items || []);
+  } catch {
+    if (list) list.innerHTML = '<p class="notification-popover-empty">消息加载失败，请稍后重试。</p>';
+  }
+}
+
+async function toggleNotificationPopover(event) {
+  event.preventDefault();
+  const popover = document.getElementById('notification-popover');
+  const button = document.getElementById('notification-button');
+  if (!popover || !button) return;
+  const opening = popover.getAttribute('aria-hidden') === 'true';
+  popover.setAttribute('aria-hidden', String(!opening));
+  button.setAttribute('aria-expanded', String(opening));
+  if (opening) await loadNotificationPopover();
+}
+
+function closeNotificationPopover() {
+  document.getElementById('notification-popover')?.setAttribute('aria-hidden', 'true');
+  document.getElementById('notification-button')?.setAttribute('aria-expanded', 'false');
+}
+
 function cardDedupeKey(item) {
   const normalize = value => String(value || '').trim().toLowerCase().replace(/\s+/g, ' ');
   return [normalize(item.title), normalize(item.titleZh), normalize(item.category)].join('|');
@@ -1519,9 +1573,26 @@ function getUser() {
   return loadJSON(STORAGE.user, null);
 }
 
+function clearAccountLocalState() {
+  [STORAGE.privateCases, STORAGE.saved, STORAGE.collage, STORAGE.providers, STORAGE.provider, STORAGE.profile, STORAGE.preferences, STORAGE.usageStats].forEach(key => localStorage.removeItem(key));
+  providerCache = [];
+  providerSyncState = 'local';
+  cloudCards = [];
+  cloudPublicCards = [];
+  cloudSaved = new Set();
+  cloudBoardId = null;
+  cloudBoardSyncQueued = false;
+  cardInteractions = new Map();
+}
+
 function setUser(user) {
+  const previous = getUser();
+  if (user && previous && user.id && previous.id !== user.id) clearAccountLocalState();
   if (user) saveJSON(STORAGE.user, user);
-  else localStorage.removeItem(STORAGE.user);
+  else {
+    clearAccountLocalState();
+    localStorage.removeItem(STORAGE.user);
+  }
   renderAuthState();
   populateSettings();
 }
@@ -1578,8 +1649,31 @@ async function logout() {
   }
 }
 
-function openLogin() {
-  window.location.assign('/auth');
+async function openLogin() {
+  if (!getUser()) {
+    try {
+      const response = await fetch('/api/profile', { credentials: 'same-origin' });
+      const payload = await response.json().catch(() => ({}));
+      if (response.ok && payload.data) {
+        const profile = payload.data;
+        setUser({ id: profile.id, provider: 'supabase', identity: profile.email || profile.id, name: profile.display_name?.trim() || profile.email?.split('@')[0] || 'Account', avatar: profile.avatar_url || '', role: profile.role || 'user', signedInAt: profile.created_at || new Date().toISOString() });
+        saveJSON(STORAGE.profile, { ...defaultProfile(), name: profile.display_name?.trim() || '', avatar: profile.avatar_url || '', email: profile.email || '', bio: profile.bio || '', specialty: profile.design_focus || '' });
+        renderAuthState();
+        populateSettings();
+      } else if (response.status === 401) {
+        window.location.assign('/auth');
+        return;
+      } else {
+        toast(isEnglish() ? 'Unable to verify the account. Please try again.' : '暂时无法确认账号状态，请稍后重试。');
+        return;
+      }
+    } catch {
+      toast(isEnglish() ? 'Unable to verify the account. Please try again.' : '暂时无法确认账号状态，请稍后重试。');
+      return;
+    }
+  }
+  els.loginPopover.classList.add('is-open');
+  els.loginPopover.setAttribute('aria-hidden', 'false');
 }
 
 function closeLogin() {
@@ -2956,12 +3050,15 @@ function providerFormData(existingId = '') {
   const generationModels = splitList(document.getElementById('provider-generation-models').value);
   const textModels = splitList(document.getElementById('provider-text-models').value);
   const now = new Date().toISOString();
+  const baseUrl = document.getElementById('provider-base-url').value.trim();
+  const selectedType = document.getElementById('provider-type').value;
+  const type = /^https:\/\/apihub\.agnes-ai\.com(?:\/|$)/i.test(baseUrl) ? 'Custom Endpoint' : selectedType;
   return {
     id: existingId || `provider-${Date.now()}`,
-    name: document.getElementById('provider-name').value.trim() || document.getElementById('provider-type').value,
-    type: document.getElementById('provider-type').value,
+    name: document.getElementById('provider-name').value.trim() || type,
+    type,
     secret: document.getElementById('provider-key').value.trim(),
-    baseUrl: document.getElementById('provider-base-url').value.trim(),
+    baseUrl,
     imageCapable: document.getElementById('provider-image-capable').checked,
     imageModels,
     generationModels,
@@ -3181,10 +3278,28 @@ function reorderDetailPrompts() {
 
 function bindEvents() {
   document.querySelectorAll('[data-tab]').forEach(button => button.addEventListener('click', () => switchTab(button.dataset.tab)));
-  document.querySelectorAll('[data-login-open]').forEach(button => button.addEventListener('click', openLogin));
   els.loginForm?.addEventListener('submit', loginWithIdentity);
   els.loginGoogle?.addEventListener('click', loginWithGoogle);
   els.logout.addEventListener('click', logout);
+  document.getElementById('notification-button')?.addEventListener('click', toggleNotificationPopover);
+  document.getElementById('notification-read-all')?.addEventListener('click', async () => {
+    try {
+      await cloudRequest('/api/notifications/read-all', { method: 'PATCH' });
+      await Promise.all([loadNotificationPopover(), syncUnreadCount()]);
+    } catch { toast('消息状态更新失败'); }
+  });
+  document.getElementById('notification-popover-list')?.addEventListener('click', async event => {
+    const row = event.target.closest('[data-notification-id]');
+    if (!row) return;
+    try { await cloudRequest(`/api/notifications/${encodeURIComponent(row.dataset.notificationId)}`, { method: 'PATCH' }); } catch {}
+    closeNotificationPopover();
+    if (row.dataset.notificationAuthor) window.top.location.assign(`/authors/${encodeURIComponent(row.dataset.notificationAuthor)}`);
+    else if (row.dataset.notificationCard) {
+      const item = findCase(row.dataset.notificationCard);
+      if (item) openDetail(item);
+      else window.top.location.assign(`/app?tab=plaza&card=${encodeURIComponent(row.dataset.notificationCard)}`);
+    }
+  });
   document.querySelectorAll('[data-language-toggle]').forEach(button => button.addEventListener('click', toggleLanguageMenu));
   document.querySelectorAll('[data-language-option]').forEach(button => {
     button.addEventListener('click', () => setLanguage(button.dataset.languageOption));
@@ -3216,6 +3331,7 @@ function bindEvents() {
       openLogin();
       return;
     }
+    if (!event.target.closest('.notification-control')) closeNotificationPopover();
     if (!event.target.closest('[data-language-menu]')) {
       document.querySelectorAll('[data-language-menu]').forEach(menu => {
         menu.classList.remove('is-open');
@@ -3524,22 +3640,22 @@ function init() {
         if (response.status !== 401) console.warn('Profile sync unavailable:', response.status, payload?.error?.code || 'unknown');
         return false;
       }
-      const localProfile = getProfile();
       const serverName = profile.display_name?.trim() || '';
-      const localName = localProfile.name?.trim() || '';
-      const localLooksLikeEmail = localName.includes('@') && localName === localProfile.email;
       const serverNameIsEmail = profile.email && serverName.toLowerCase() === profile.email.toLowerCase();
-      const profileName = serverName && !serverNameIsEmail ? serverName : (localLooksLikeEmail ? '' : localName);
-      const mergedProfile = { ...localProfile, name: profileName, avatar: profile.avatar_url || localProfile.avatar || '', email: profile.email || localProfile.email || '', bio: profile.bio || '', specialty: profile.design_focus || localProfile.specialty || '' };
+      const profileName = serverName && !serverNameIsEmail ? serverName : '';
+      const authenticatedUser = { id: profile.id, provider: 'supabase', identity: profile.email || profile.id, name: profileName || profile.email?.split('@')[0] || 'Account', avatar: profile.avatar_url || '', role: profile.role || 'user', signedInAt: profile.created_at || new Date().toISOString() };
+      setUser(authenticatedUser);
+      const mergedProfile = { ...defaultProfile(), name: profileName, avatar: profile.avatar_url || '', email: profile.email || '', bio: profile.bio || '', specialty: profile.design_focus || '' };
       saveJSON(STORAGE.profile, mergedProfile);
-      setUser({ id: profile.id, provider: 'supabase', identity: profile.email || profile.id, name: profileName || profile.email?.split('@')[0] || 'Account', avatar: mergedProfile.avatar, role: profile.role || 'user', signedInAt: profile.created_at || new Date().toISOString() });
+      renderAuthState();
+      populateSettings();
       if (!profile.author_ready) console.warn('Public author profile is pending; account profile remains available.');
       if (['admin', 'reviewer'].includes(profile.role || '')) loadReviewQueue();
       return true;
     })
     .catch(error => { console.warn('Profile sync failed:', error); return false; });
 
-  Promise.allSettled([syncCloudWorkspace(), profileReady]).then(() => {
+  profileReady.then(authenticated => authenticated ? syncCloudWorkspace() : false).then(() => {
     const requestedCard = params.get('card');
     if (requestedCard) openDetail(findCase(requestedCard));
   });
