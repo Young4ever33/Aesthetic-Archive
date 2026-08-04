@@ -1,5 +1,4 @@
 import { decryptProviderSecret } from './provider-vault';
-import { getServerEnvAsync } from './server-env';
 import { createSupabaseServerClient } from './supabase/server';
 import type { AiErrorCode, AiResponseMeta } from './contracts';
 
@@ -91,16 +90,9 @@ function upstreamDetail(value: unknown): string {
   return '';
 }
 
-async function requestTimeoutMs() {
-  const configured = Number((await getServerEnvAsync('AI_REQUEST_TIMEOUT_MS')) || 120_000);
-  return Number.isFinite(configured) ? Math.min(300_000, Math.max(15_000, configured)) : 120_000;
-}
-
 async function requestJson(url: string, init: RequestInit): Promise<Record<string, unknown>> {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), await requestTimeoutMs());
   try {
-    const response = await fetch(url, { ...init, signal: controller.signal });
+    const response = await fetch(url, init);
     const raw = await response.text();
     let data: unknown = null;
     try { data = raw ? JSON.parse(raw) : null; } catch { data = null; }
@@ -110,13 +102,10 @@ async function requestJson(url: string, init: RequestInit): Promise<Record<strin
     }
     return data as Record<string, unknown>;
   } catch (error) {
-    if (error instanceof Error && error.name === 'AbortError') throw gatewayError('PROVIDER_TIMEOUT', 'The AI service timed out', 504, true);
     if (error instanceof TypeError || (error instanceof Error && /fetch failed|network|socket|connect|reset|dns/i.test(error.message))) {
       throw gatewayError('PROVIDER_UNAVAILABLE', 'Unable to reach the AI service. Check the Provider endpoint and Cloudflare outbound connectivity.', 502, true);
     }
     throw error;
-  } finally {
-    clearTimeout(timeout);
   }
 }
 
