@@ -20,7 +20,7 @@ export async function GET() {
     const admin = await createSupabaseAdminClient();
     const { data, error } = await admin
       .from('aesthetic_cards')
-      .select('id, owner_id, author_id, source, title, title_zh, category, visibility, publish_status, summary, cultural_background, design_elements, palette, style_tags, material_tags, space_tags, scenario_tags, composition, use_cases, prompt_zh, prompt_en, negative_prompt, reviewed_at, created_at, updated_at')
+      .select('id, owner_id, author_id, source, title, title_zh, category, visibility, publish_status, summary, cultural_background, design_elements, palette, style_tags, material_tags, scenario_tags, composition, use_cases, prompt_zh, prompt_en, negative_prompt, reviewed_at, created_at, updated_at')
       .in('publish_status', ['pending', 'rejected'])
       .neq('owner_id', user.id)
       .order('updated_at', { ascending: true })

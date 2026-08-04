@@ -5,11 +5,19 @@ export const runtime = 'nodejs';
 function rid() { return `req_${crypto.randomUUID()}`; }
 function out(requestId: string, status: number, value: unknown) { return NextResponse.json({ requestId, ...(status >= 400 ? { error: value } : { data: value }) }, { status }); }
 
+function normalizeLikeTarget(value: string) {
+  const trimmed = value.trim();
+  if (/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(trimmed)) return trimmed;
+  const seedKey = trimmed.match(/^([A-Z]-[0-9]{2})(?:$|[-_])/i)?.[1];
+  return seedKey ? seedKey.toUpperCase() : trimmed;
+}
+
 async function toggle(cardId: string, shouldLike: boolean) {
   const requestId = rid();
+  const targetKey = normalizeLikeTarget(cardId);
   try {
     const { supabase } = await requireUser();
-    const { data, error } = await supabase.rpc('toggle_card_like', { target_key: cardId, should_like: shouldLike });
+    const { data, error } = await supabase.rpc('toggle_card_like', { target_key: targetKey, should_like: shouldLike });
     if (error) {
       const message = error.message || '';
       const code = message.includes('OWN_CARD') ? 'OWN_CARD_LIKE_FORBIDDEN' : message.includes('NOT_PUBLIC') ? 'CARD_NOT_PUBLIC' : message.includes('NOT_FOUND') ? 'CARD_NOT_FOUND' : message.includes('UNAUTHENTICATED') ? 'UNAUTHENTICATED' : 'LIKE_UPDATE_FAILED';
