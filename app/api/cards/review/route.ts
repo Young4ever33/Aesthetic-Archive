@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { requireUser } from '@/lib/supabase/server';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
+import { getAccountRole } from '@/lib/review-access';
 
 export const runtime = 'nodejs';
 const transitions: Record<string, string[]> = { private: ['pending'], pending: ['rejected', 'published'], rejected: ['pending'], approved: ['published', 'unpublished'], published: ['unpublished'], unpublished: ['pending'] };
@@ -15,7 +16,7 @@ export async function POST(request: Request) {
     if (!body.cardId || !body.action) return out(requestId, 400, { code: 'INVALID_REQUEST', message: 'cardId and action are required' });
     const { data: card, error: cardError } = await supabase.from('aesthetic_cards').select('id, owner_id, publish_status, visibility').eq('id', body.cardId).single();
     if (cardError || !card) return out(requestId, 404, { code: 'CARD_NOT_FOUND', message: 'Card not found' });
-    const reviewerRole = await supabase.from('profiles').select('role').eq('id', user.id).single().then(({ data }) => data?.role || 'user');
+    const reviewerRole = await getAccountRole(user.id);
     const isReviewer = reviewerRole === 'admin' || reviewerRole === 'reviewer';
     const target = body.action === 'submit' ? 'pending' : body.action === 'approve' || body.action === 'publish' ? 'published' : body.action === 'reject' ? 'rejected' : 'unpublished';
     if (!transitions[card.publish_status]?.includes(target)) return out(requestId, 409, { code: 'INVALID_TRANSITION', message: `Cannot move card from ${card.publish_status} to ${target}` });

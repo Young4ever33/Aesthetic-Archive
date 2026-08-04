@@ -1,16 +1,15 @@
 import { NextResponse } from 'next/server';
 import { requireUser } from '@/lib/supabase/server';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
+import { requireReviewRole } from '@/lib/review-access';
 
 export const runtime = 'nodejs';
 function rid() { return `req_${crypto.randomUUID()}`; }
 function out(requestId: string, status: number, value: unknown) { return NextResponse.json({ requestId, ...(status >= 400 ? { error: value } : { data: value }) }, { status }); }
 
 async function requireReviewer() {
-  const { supabase, user } = await requireUser();
-  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
-  const role = profile?.role;
-  if (role !== 'admin' && role !== 'reviewer') throw new Error('FORBIDDEN');
+  const { user } = await requireUser();
+  const role = await requireReviewRole(user.id);
   return { user, role };
 }
 

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { requireUser } from '@/lib/supabase/server';
 import { ensureAuthorForCurrentUser } from '@/lib/social';
+import { getAccountRole } from '@/lib/review-access';
 
 export const runtime = 'nodejs';
 
@@ -38,8 +39,16 @@ export async function GET() {
       console.error('PROFILE_AUTHOR_UNAVAILABLE', { requestId, message: authorError instanceof Error ? authorError.message : 'unknown' });
     }
 
+    let role = profile.role;
+    try {
+      role = await getAccountRole(user.id);
+    } catch (roleError) {
+      console.error('PROFILE_ROLE_UNAVAILABLE', { requestId, message: roleError instanceof Error ? roleError.message : 'unknown' });
+    }
+
     return out(requestId, 200, {
       ...profile,
+      role,
       email: user.email ?? null,
       public_id: author?.public_id ?? null,
       bio: author?.bio || '',
@@ -103,8 +112,16 @@ export async function PATCH(request: Request) {
       console.error('PROFILE_AUTHOR_UPDATE_UNAVAILABLE', { requestId, message: authorError instanceof Error ? authorError.message : 'unknown' });
     }
 
+    let role = profile.role;
+    try {
+      role = await getAccountRole(user.id);
+    } catch (roleError) {
+      console.error('PROFILE_ROLE_UNAVAILABLE', { requestId, message: roleError instanceof Error ? roleError.message : 'unknown' });
+    }
+
     return out(requestId, 200, {
       ...profile,
+      role,
       public_id: author?.public_id ?? null,
       bio: author?.bio || '',
       design_focus: author?.design_focus || '',
