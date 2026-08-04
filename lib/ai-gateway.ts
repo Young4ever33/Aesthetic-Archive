@@ -214,7 +214,7 @@ export async function callVisionProvider(provider: ProviderRecord, model: string
   const data = await requestJson(`${baseUrl(provider)}/chat/completions`, {
     method: 'POST',
     headers: providerHeaders(provider, secret),
-    body: JSON.stringify({ model, temperature: 0.1, max_tokens: 1_600, messages: [{ role: 'user', content: [{ type: 'text', text: prompt }, { type: 'image_url', image_url: { url: `data:${image.mimeType};base64,${image.data}`, detail: 'low' } }] }] }),
+    body: JSON.stringify({ model, temperature: 0.2, max_tokens: 4_000, response_format: { type: 'json_object' }, messages: [{ role: 'user', content: [{ type: 'text', text: prompt }, { type: 'image_url', image_url: { url: `data:${image.mimeType};base64,${image.data}` } }] }] }),
   });
   return extractOpenAiText(data);
 }
