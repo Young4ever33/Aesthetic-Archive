@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Aesthetic Archive｜AI Aesthetic Knowledge Base</title>
   <meta name="description" content="Aesthetic Archive helps designers turn visual references into reusable aesthetic systems: cultural context, design elements, palettes, composition types, and bilingual prompts.">
-  <link rel="stylesheet" href="/local-mvp/styles.css?v=20260804-review-access">
+  <link rel="stylesheet" href="/local-mvp/styles-20260804-review-ai.css">
   <link rel="icon" type="image/svg+xml" href="/brand/archive-mark.svg">
 </head>
 <body data-view="app">
@@ -310,7 +310,7 @@
       <div class="detail-gallery">
         <div class="gallery-main" id="detail-main-image"></div>
         <div class="gallery-thumbs" id="detail-thumbs"></div>
-        <div class="gallery-note"><span>图册备注 / Gallery Notes</span><p id="detail-gallery-note">低饱和、结构清晰、适合沉淀为项目风格参考。</p></div>
+        <div class="gallery-note"><span id="detail-background-title">风格背景</span><p id="detail-gallery-note">文化来源待考证。</p></div>
         <button class="button ghost" type="button" id="detail-add-gallery">选择图片加入画板</button>
         <div class="detail-social-row"><a class="card-author detail-author" id="detail-author" href="#" target="_top"><span class="card-author-avatar" id="detail-author-avatar">AA</span><span><strong id="detail-author-name">系统作者yy</strong><small id="detail-author-role">系统策展</small></span></a><button class="detail-like-button" type="button" id="detail-like" aria-label="点赞"><span>♡</span><b id="detail-like-count">0</b></button></div>
       </div>
@@ -318,15 +318,14 @@
         <p class="eyebrow" id="detail-category">Style Case</p>
         <h2 id="detail-title">Style title</h2>
         <p class="detail-subtitle" id="detail-subtitle">中文标题</p>
-        <section class="prompt-block is-primary"><div class="prompt-head"><h3>中文提示词</h3><button type="button" class="copy-link" data-copy="zh">复制中文</button></div><pre id="detail-prompt-zh"></pre></section>
-        <section class="prompt-block is-secondary"><div class="prompt-head"><h3>英文提示词</h3><button type="button" class="copy-link" data-copy="en">复制英文</button></div><pre id="detail-prompt-en"></pre></section>
-        <section class="detail-block"><h3>负面提示词</h3><p id="detail-negative"></p></section>
-        <section class="detail-block generation-test"><div class="generation-test-head"><div><h3>Prompt 生图回测</h3><p>使用当前默认 Provider 的生图模型生成候选图，不自动保存或发布。</p></div><div><select id="detail-generation-language" aria-label="Prompt language"><option value="zh">中文 Prompt</option><option value="en">English Prompt</option></select><button class="button ghost" type="button" id="detail-generate-image">测试生图</button></div></div><div class="generation-test-status" id="detail-generation-status">需要先配置支持生图的 Provider。</div><div class="generation-result-grid" id="detail-generation-results"></div></section>
-        <section class="detail-block"><h3>文化背景</h3><p id="detail-cultural"></p></section>
-        <section class="detail-block"><h3>设计要素</h3><p id="detail-elements"></p></section>
-        <section class="detail-block"><h3>色卡</h3><div class="detail-palette" id="detail-palette"></div></section>
-        <section class="detail-block"><h3>构图方式</h3><p id="detail-composition"></p></section>
-        <section class="detail-block"><h3>使用场景</h3><p id="detail-use-cases"></p></section>
+        <section class="detail-block" id="detail-elements-block"><h3>设计要素</h3><p id="detail-elements"></p></section>
+        <section class="detail-block" id="detail-composition-block"><h3>构图方式</h3><p id="detail-composition"></p></section>
+        <section class="detail-block" id="detail-palette-block"><h3>色卡</h3><div class="detail-palette" id="detail-palette"></div></section>
+        <section class="detail-block" id="detail-use-cases-block"><h3>使用场景</h3><p id="detail-use-cases"></p></section>
+        <section class="prompt-block is-primary" id="detail-prompt-zh-block"><div class="prompt-head"><h3>中文提示词</h3><button type="button" class="copy-link" data-copy="zh">复制中文</button></div><pre id="detail-prompt-zh"></pre></section>
+        <section class="prompt-block is-secondary" id="detail-prompt-en-block"><div class="prompt-head"><h3>英文提示词</h3><button type="button" class="copy-link" data-copy="en">复制英文</button></div><pre id="detail-prompt-en"></pre></section>
+        <section class="detail-block" id="detail-negative-block"><h3>负面提示词</h3><p id="detail-negative"></p></section>
+        <section class="detail-block generation-test" id="detail-generation-block"><div class="generation-test-head"><div><h3>提示词生图回测</h3><p>使用当前默认服务的生图模型生成候选图，不自动保存或发布。</p></div><div><select id="detail-generation-language" aria-label="提示词语言"><option value="zh">中文提示词</option><option value="en">英文提示词</option></select><button class="button ghost" type="button" id="detail-generate-image">测试生图</button></div></div><div class="generation-test-status" id="detail-generation-status">需要先配置支持生图的服务。</div><div class="generation-result-grid" id="detail-generation-results"></div></section>
         <div class="detail-actions">
           <button class="button primary" type="button" id="detail-save">Save</button>
           <button class="button ghost" type="button" id="detail-copy-edit">Copy to My Archive</button>
@@ -355,7 +354,6 @@
   </div>
 
   <script src="/local-mvp/src/data/cases.js"></script>
-  <script src="/local-mvp/review-access-20260804.js"></script>
-  <script src="/local-mvp/app-review-access-bf5f965.js"></script>
+  <script src="/local-mvp/app-20260804-review-ai.js"></script>
 </body>
 </html>

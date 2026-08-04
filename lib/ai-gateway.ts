@@ -188,14 +188,14 @@ function extractGeminiText(data: Record<string, unknown>): string {
   return (text as Record<string, unknown>).text as string;
 }
 
-export async function callVisionProvider(provider: ProviderRecord, model: string, image: { mimeType: string; data: string }, prompt: string) {
+export async function callVisionProvider(provider: ProviderRecord, model: string, images: Array<{ mimeType: string; data: string }>, prompt: string) {
   const secret = await decryptProviderSecret(provider.encrypted_api_key);
   if (normalizeProviderType(provider.type) === 'gemini') {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(secret)}`;
     const data = await requestJson(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ contents: [{ parts: [{ text: prompt }, { inline_data: { mime_type: image.mimeType, data: image.data } }] }] }),
+      body: JSON.stringify({ contents: [{ parts: [{ text: prompt }, ...images.map(image => ({ inline_data: { mime_type: image.mimeType, data: image.data } }))] }] }),
     });
     return extractGeminiText(data);
   }
@@ -203,7 +203,7 @@ export async function callVisionProvider(provider: ProviderRecord, model: string
   const data = await requestJson(`${baseUrl(provider)}/chat/completions`, {
     method: 'POST',
     headers: providerHeaders(provider, secret),
-    body: JSON.stringify({ model, temperature: 0.2, max_tokens: 4_000, response_format: { type: 'json_object' }, messages: [{ role: 'user', content: [{ type: 'text', text: prompt }, { type: 'image_url', image_url: { url: `data:${image.mimeType};base64,${image.data}` } }] }] }),
+    body: JSON.stringify({ model, temperature: 0.2, max_tokens: 4_000, response_format: { type: 'json_object' }, messages: [{ role: 'user', content: [{ type: 'text', text: prompt }, ...images.map(image => ({ type: 'image_url', image_url: { url: `data:${image.mimeType};base64,${image.data}` } }))] }] }),
   });
   return extractOpenAiText(data);
 }

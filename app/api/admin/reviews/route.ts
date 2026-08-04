@@ -18,9 +18,26 @@ export async function GET() {
   try {
     await requireReviewer();
     const admin = await createSupabaseAdminClient();
-    const { data, error } = await admin.from('aesthetic_cards').select('*, publish_reviews(*)').in('publish_status', ['pending', 'rejected']).order('updated_at', { ascending: true }).limit(100);
+    const { data, error } = await admin
+      .from('aesthetic_cards')
+      .select('*, publish_reviews(*), card_images(id, url, storage_path, alt, sort_order)')
+      .in('publish_status', ['pending', 'rejected'])
+      .order('updated_at', { ascending: true })
+      .limit(100);
     if (error) return out(requestId, 500, { code: 'REVIEW_QUERY_FAILED', message: 'Unable to load review queue' });
-    return out(requestId, 200, data || []);
+    type ReviewImage = { id: string; url: string | null; storage_path: string | null; alt: string | null; sort_order: number | null };
+    const cards = await Promise.all((data || []).map(async card => ({
+      ...card,
+      card_images: await Promise.all(((card.card_images || []) as ReviewImage[])
+        .sort((a, b) => Number(a.sort_order || 0) - Number(b.sort_order || 0))
+        .map(async image => ({
+          ...image,
+          url: image.storage_path
+            ? (await admin.storage.from('card-images').createSignedUrl(image.storage_path, 3600)).data?.signedUrl || image.url
+            : image.url,
+        }))),
+    })));
+    return out(requestId, 200, cards);
   } catch (error) {
     return out(requestId, error instanceof Error && error.message === 'FORBIDDEN' ? 403 : 401, { code: error instanceof Error && error.message === 'FORBIDDEN' ? 'FORBIDDEN' : 'UNAUTHENTICATED', message: error instanceof Error && error.message === 'FORBIDDEN' ? 'Reviewer access required' : 'Sign in required' });
   }
@@ -37,6 +54,7 @@ export async function POST(request: Request) {
     const admin = await createSupabaseAdminClient();
     const { data: card, error: cardError } = await admin.from('aesthetic_cards').select('id, owner_id, title, title_zh, publish_status').eq('id', cardId).single();
     if (cardError || !card) return out(requestId, 404, { code: 'CARD_NOT_FOUND', message: 'Review card not found' });
+    if (card.owner_id === user.id) return out(requestId, 403, { code: 'SELF_REVIEW_FORBIDDEN', message: 'Reviewers cannot review their own cards' });
     if (!['pending', 'rejected'].includes(card.publish_status)) return out(requestId, 409, { code: 'INVALID_REVIEW_STATE', message: 'Card is not awaiting review' });
     const nextStatus = body.action === 'approve' ? 'published' : 'rejected';
     const note = typeof body.note === 'string' ? body.note.trim().slice(0, 4000) : null;

@@ -74,7 +74,11 @@ export interface AnalyzeImageRequest {
   model?: string;
   templateId?: string;
   templateVersion?: number;
-  image: {
+  images: Array<{
+    mimeType: 'image/jpeg' | 'image/png' | 'image/webp';
+    data: string;
+  }>;
+  image?: {
     mimeType: 'image/jpeg' | 'image/png' | 'image/webp';
     data: string;
   };

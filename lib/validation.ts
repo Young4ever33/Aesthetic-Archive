@@ -118,14 +118,14 @@ export function validateAnalyzeImageRequest(input: unknown): AnalyzeImageRequest
   if (!isRecord(input)) throw new ContractValidationError(['request must be an object']);
   const issues: string[] = [];
   addRequired(issues, input.providerId, 'providerId');
-  if (!isRecord(input.image)) issues.push('image must be an object');
-  else {
-    if (!oneOf(input.image.mimeType, ['image/jpeg', 'image/png', 'image/webp'] as const)) {
-      issues.push('image.mimeType is unsupported');
-    }
-    addRequired(issues, input.image.data, 'image.data');
-    maxString(issues, input.image.data, 'image.data', MAX_BASE64_IMAGE_CHARS);
-  }
+  const images = Array.isArray(input.images) ? input.images : (isRecord(input.image) ? [input.image] : []);
+  if (images.length < 1 || images.length > 6) issues.push('images must contain between 1 and 6 images');
+  images.forEach((image, index) => {
+    if (!isRecord(image)) { issues.push(`images[${index}] must be an object`); return; }
+    if (!oneOf(image.mimeType, ['image/jpeg', 'image/png', 'image/webp'] as const)) issues.push(`images[${index}].mimeType is unsupported`);
+    addRequired(issues, image.data, `images[${index}].data`);
+    maxString(issues, image.data, `images[${index}].data`, MAX_BASE64_IMAGE_CHARS);
+  });
   if (input.model !== undefined) addRequired(issues, input.model, 'model');
   maxString(issues, input.topic, 'topic', 2_000);
   maxString(issues, input.projectContext, 'projectContext', 5_000);
@@ -133,7 +133,7 @@ export function validateAnalyzeImageRequest(input: unknown): AnalyzeImageRequest
     issues.push('templateVersion must be a positive integer');
   }
   if (issues.length) throw new ContractValidationError(issues);
-  return input as unknown as AnalyzeImageRequest;
+  return { ...input, images } as unknown as AnalyzeImageRequest;
 }
 
 export function validateGeneratePromptRequest(input: unknown): GeneratePromptRequest {
