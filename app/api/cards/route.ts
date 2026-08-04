@@ -107,7 +107,25 @@ export async function PATCH(request: Request) {
     const cardId = new URL(request.url).searchParams.get('id');
     if (!cardId) return response(requestId, 400, { code: 'INVALID_REQUEST', message: 'Card id is required' });
     const data = fields(await request.json() as Record<string, unknown>);
-    delete data.visibility;
+    const requestedVisibility = data.visibility;
+    const { data: existing, error: existingError } = await supabase
+      .from('aesthetic_cards')
+      .select('id, publish_status, visibility')
+      .eq('id', cardId)
+      .eq('owner_id', user.id)
+      .single();
+    if (existingError || !existing) return response(requestId, 404, { code: 'CARD_NOT_FOUND', message: 'Card not found' });
+    if (requestedVisibility === 'public' && existing.publish_status !== 'published') {
+      data.visibility = 'public';
+      data.publish_status = 'pending';
+      data.reviewed_at = null;
+    } else if (requestedVisibility === 'private' && existing.publish_status !== 'published') {
+      data.visibility = 'private';
+      data.publish_status = 'private';
+      data.reviewed_at = null;
+    } else {
+      delete data.visibility;
+    }
     if (Object.keys(data).length === 0) return response(requestId, 400, { code: 'INVALID_REQUEST', message: 'No card changes supplied' });
     const { data: card, error } = await supabase.from('aesthetic_cards').update(data).eq('id', cardId).eq('owner_id', user.id).select(publicColumns).single();
     if (error) return response(requestId, 500, { code: 'CARD_UPDATE_FAILED', message: 'Unable to update card' });

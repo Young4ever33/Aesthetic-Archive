@@ -30,7 +30,7 @@ export async function POST(request: Request) {
       supabase = session.supabase;
       ownerId = session.user.id;
     } catch {
-      supabase = createSupabaseAdminClient();
+      supabase = await createSupabaseAdminClient();
     }
     const length = Number(request.headers.get('content-length') || 0);
     if (length > 20_000) return out(id, 413, { code: 'REQUEST_TOO_LARGE', message: 'Feedback request is too large' });

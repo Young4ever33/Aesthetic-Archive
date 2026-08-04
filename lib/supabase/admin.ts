@@ -1,9 +1,11 @@
 import { createClient } from '@supabase/supabase-js';
-import { getServerEnv } from '@/lib/server-env';
+import { getServerEnvAsync } from '@/lib/server-env';
 
-export function createSupabaseAdminClient() {
-  const url = getServerEnv('NEXT_PUBLIC_SUPABASE_URL');
-  const serviceRoleKey = getServerEnv('SUPABASE_SERVICE_ROLE_KEY');
+export async function createSupabaseAdminClient() {
+  const [url, serviceRoleKey] = await Promise.all([
+    getServerEnvAsync('NEXT_PUBLIC_SUPABASE_URL'),
+    getServerEnvAsync('SUPABASE_SERVICE_ROLE_KEY'),
+  ]);
 
   if (!url || !serviceRoleKey) {
     throw new Error('Supabase admin environment is not configured');

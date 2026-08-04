@@ -21,7 +21,7 @@ export async function POST(request: Request) {
     if (!transitions[card.publish_status]?.includes(target)) return out(requestId, 409, { code: 'INVALID_TRANSITION', message: `Cannot move card from ${card.publish_status} to ${target}` });
     if (body.action !== 'submit' && !isReviewer) return out(requestId, 403, { code: 'FORBIDDEN', message: 'Only reviewers can perform this action' });
     if (body.action === 'submit' && card.owner_id !== user.id) return out(requestId, 403, { code: 'FORBIDDEN', message: 'Only the owner can submit this card' });
-    const client = isReviewer ? createSupabaseAdminClient() : supabase;
+    const client = isReviewer ? await createSupabaseAdminClient() : supabase;
     const { data: updated, error } = await client.from('aesthetic_cards').update({ publish_status: target, visibility: target === 'published' ? 'public' : card.visibility, reviewed_at: isReviewer ? new Date().toISOString() : null }).eq('id', body.cardId).select('id, publish_status, visibility, reviewed_at').single();
     if (error) return out(requestId, 500, { code: 'REVIEW_UPDATE_FAILED', message: 'Unable to update review status' });
     await client.from('publish_reviews').insert({ card_id: body.cardId, owner_id: card.owner_id, reviewer_id: isReviewer ? user.id : null, status: target, note: body.note || null, reviewed_at: isReviewer ? new Date().toISOString() : null });

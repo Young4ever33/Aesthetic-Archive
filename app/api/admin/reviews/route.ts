@@ -18,7 +18,7 @@ export async function GET() {
   const requestId = rid();
   try {
     await requireReviewer();
-    const admin = createSupabaseAdminClient();
+    const admin = await createSupabaseAdminClient();
     const { data, error } = await admin.from('aesthetic_cards').select('*, publish_reviews(*)').in('publish_status', ['pending', 'rejected']).order('updated_at', { ascending: true }).limit(100);
     if (error) return out(requestId, 500, { code: 'REVIEW_QUERY_FAILED', message: 'Unable to load review queue' });
     return out(requestId, 200, data || []);
@@ -35,7 +35,7 @@ export async function POST(request: Request) {
     if (!cardId) return out(requestId, 400, { code: 'INVALID_REQUEST', message: 'Card id is required' });
     const body = await request.json().catch(() => ({})) as { action?: string; note?: string };
     if (body.action !== 'approve' && body.action !== 'reject') return out(requestId, 400, { code: 'INVALID_REQUEST', message: 'Action must be approve or reject' });
-    const admin = createSupabaseAdminClient();
+    const admin = await createSupabaseAdminClient();
     const { data: card, error: cardError } = await admin.from('aesthetic_cards').select('id, owner_id, title, title_zh, publish_status').eq('id', cardId).single();
     if (cardError || !card) return out(requestId, 404, { code: 'CARD_NOT_FOUND', message: 'Review card not found' });
     if (!['pending', 'rejected'].includes(card.publish_status)) return out(requestId, 409, { code: 'INVALID_REVIEW_STATE', message: 'Card is not awaiting review' });

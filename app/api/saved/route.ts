@@ -30,7 +30,7 @@ export async function POST(request: Request) {
     if (isUuid(body.cardId)) {
       ({ error } = await supabase.from('saved_cards').insert({ user_id: user.id, card_id: body.cardId }));
     } else {
-      const admin = createSupabaseAdminClient();
+      const admin = await createSupabaseAdminClient();
       const { data: registered } = await admin.from('system_cards').select('card_key').eq('card_key', body.cardId).maybeSingle();
       if (!registered) return out(requestId, 404, { code: 'CARD_NOT_FOUND', message: 'Card not found' });
       ({ error } = await supabase.from('system_saved_cards').insert({ user_id: user.id, system_card_key: body.cardId }));
