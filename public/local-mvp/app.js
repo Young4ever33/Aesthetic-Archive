@@ -298,7 +298,10 @@ async function cloudRequest(url, options = {}) {
   if (cloudState !== 'online') return null;
   const response = await fetch(url, { credentials: 'same-origin', ...options, headers: { 'Content-Type': 'application/json', ...(options.headers || {}) } });
   const payload = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(payload.error?.message || `Cloud API ${response.status}`);
+  if (!response.ok) {
+    const detail = [payload.error?.message || `Cloud API ${response.status}`, payload.error?.code, payload.requestId].filter(Boolean).join(' · ');
+    throw new Error(detail);
+  }
   return payload.data;
 }
 
@@ -2568,7 +2571,7 @@ function clearLastStroke() {
   setCollageBoard(board);
   toast('已清除上一笔');
 }
-function collageImage(item) { return (item.gallery || []).find(Boolean) || item.image || ''; }
+function collageImage(item) { return item.image || (item.gallery || []).find(Boolean) || ''; }
 function nextBoardZ(board) { return Math.max(0, ...board.items.map(item => item.z || 0)) + 1; }
 
 function addToCollage(item, image = '') {
@@ -2602,6 +2605,7 @@ function openCollagePicker(item) {
   if (!els.collagePicker || !els.collagePickerOptions) return addToCollage(item, images[0]);
   els.collagePickerOptions.innerHTML = `<button class="collage-picker-all" type="button" data-collage-all>将全部 ${images.length} 张图片加入画板</button>${images.map((image, index) => `<button type="button" class="collage-picker-option" data-collage-image-index="${index}"><img src="${escapeHTML(asset(image))}" alt="图片 ${index + 1}"><span>加入第 ${index + 1} 张</span></button>`).join('')}`;
   els.collagePicker.hidden = false;
+  document.body.classList.add('has-collage-picker');
   els.collagePicker.dataset.caseId = item.id;
   els.collagePicker._images = images;
 }
@@ -3360,6 +3364,11 @@ function bindEvents() {
     if (card) openDetail(findCase(card.dataset.caseId));
   });
   document.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && els.collagePicker && !els.collagePicker.hidden) {
+      els.collagePicker.hidden = true;
+      document.body.classList.remove('has-collage-picker');
+      return;
+    }
     if (event.key === 'Escape' && els.overlay.classList.contains('is-open')) closeDetail();
     if (event.key === 'Escape' && els.loginPopover.classList.contains('is-open')) closeLogin();
     if (event.key === 'Escape') document.querySelectorAll('[data-language-menu]').forEach(menu => menu.classList.remove('is-open'));
@@ -3418,12 +3427,12 @@ function bindEvents() {
   document.getElementById('detail-add-collage').addEventListener('click', () => openCollagePicker(state.selectedCase));
   document.getElementById('detail-add-gallery').addEventListener('click', () => openCollagePicker(state.selectedCase));
   els.collagePicker?.addEventListener('click', event => {
-    if (event.target.closest('[data-collage-picker-close]')) { els.collagePicker.hidden = true; return; }
+    if (event.target.closest('[data-collage-picker-close]')) { els.collagePicker.hidden = true; document.body.classList.remove('has-collage-picker'); return; }
     const item = findCase(els.collagePicker.dataset.caseId);
     if (!item) return;
-    if (event.target.closest('[data-collage-all]')) { els.collagePicker._images.forEach(image => addToCollage(item, image)); els.collagePicker.hidden = true; return; }
+    if (event.target.closest('[data-collage-all]')) { els.collagePicker._images.forEach(image => addToCollage(item, image)); els.collagePicker.hidden = true; document.body.classList.remove('has-collage-picker'); return; }
     const option = event.target.closest('[data-collage-image-index]');
-    if (option) { addToCollage(item, els.collagePicker._images[Number(option.dataset.collageImageIndex)]); els.collagePicker.hidden = true; }
+    if (option) { addToCollage(item, els.collagePicker._images[Number(option.dataset.collageImageIndex)]); els.collagePicker.hidden = true; document.body.classList.remove('has-collage-picker'); }
   });
   document.getElementById('detail-export').addEventListener('click', () => {
     if (!state.selectedCase) return;
