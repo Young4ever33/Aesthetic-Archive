@@ -8,19 +8,21 @@ Provider fix baseline commit: `5db8f323b832f8f536fd84a0caba6346530d97c1`
 
 ## Executive Conclusion
 
-The source code is buildable and the Cloudflare Worker bundle succeeds on GitHub's Ubuntu runner. The Supabase production schema is aligned through migration `202608030010`. The Provider gateway fixes and automatic deployment workflow are committed and pushed to `main`.
+The source code is buildable, the Cloudflare Worker bundle succeeds on GitHub's Ubuntu runner, and the Supabase production schema is aligned through migration `202608030010`. Cloudflare's Git integration has deployed the GitHub `main` history through handoff commit `7032842`, which contains Provider fix commit `5db8f32` in its ancestry.
 
-The release is **not yet production-complete**. GitHub Actions stopped before deployment because the Cloudflare deployment credentials are not configured for the repository or its `production` environment. Therefore commit `5db8f32` has not been proven to be the active production Worker version, and real Provider calls cannot be declared fixed in production yet.
+Cloudflare Dashboard evidence confirms that production deployment is active: version `a1612374` is marked deployed with 100% traffic and 0% error rate. The version history shows consecutive Git-backed versions for Prompt v3, the Provider fix, and the handoff update. This establishes that Cloudflare Git automatic deployment is enabled and the Provider fix is present in the active production bundle.
+
+The remaining release gap is authenticated Provider end-to-end acceptance with a real user-owned API key. Code deployment is no longer blocked.
 
 Current release judgment:
 
 - Source and standard Next.js build: **PASS**
 - Linux OpenNext Cloudflare Worker build: **PASS**
 - Supabase migration alignment: **PASS**
-- Cloudflare automatic deployment workflow definition: **PASS**
-- Cloudflare deployment execution: **BLOCKED**
+- Cloudflare Git automatic deployment: **PASS — active version at 100% traffic**
+- Provider fix included in active production ancestry: **PASS**
 - Production unauthenticated smoke test from this machine: **INCONCLUSIVE — local DNS/network anomaly**
-- Production Provider save/test/vision/text/image calls: **NOT YET VERIFIED on the new Worker**
+- Production Provider save/test/vision/text/image calls: **PENDING AUTHENTICATED E2E**
 
 ## Final Test Matrix
 
@@ -36,21 +38,23 @@ Current release judgment:
 | Linux OpenNext Worker build | PASS | GitHub Actions job `check`, run `30846903337`, completed successfully |
 | Windows OpenNext build | ENVIRONMENT LIMIT | Next.js stage passed, then Windows denied a symlink with `EPERM`; OpenNext itself warns Windows is not fully supported. Ubuntu CI is the authoritative Worker-build result |
 | Supabase remote migrations | PASS | Local and remote versions match from `202607300001` through `202608030010` |
-| GitHub push | PASS | Local `HEAD` and `origin/main` both equal `5db8f323...` |
-| Automatic production deploy | BLOCKED | `deploy-production` failed at `Verify Cloudflare deployment credentials`; deploy and smoke steps were skipped |
+| GitHub push | PASS | GitHub `main` contains `7032842`, whose parent is Provider fix `5db8f32` |
+| Cloudflare Git production deploy | PASS | Active Cloudflare version `a1612374` is deployed with 100% traffic; version history matches GitHub commits through `7032842` |
+| GitHub quality checks | PASS | `pnpm check` and Linux `pnpm cloudflare:build` completed successfully; duplicate Wrangler deployment job was removed after Cloudflare Git ownership was confirmed |
 | Production smoke from this PC | INCONCLUSIVE | `workers.dev` resolved locally to abnormal Meta/X-associated addresses and connection timed out before any HTTP response |
-| Authenticated Provider E2E | BLOCKED | Requires the new Worker deployment, a real signed-in browser session, and a Provider key stored through the product UI |
+| Authenticated Provider E2E | PENDING | Requires a real signed-in browser session and a Provider key stored through the product UI |
 
-GitHub Actions evidence:
+Deployment evidence supplied from Cloudflare Dashboard:
 
-- Run: `https://github.com/Young4ever33/Aesthetic-Archive/actions/runs/30846903337`
-- Commit: `5db8f323b832f8f536fd84a0caba6346530d97c1`
-- `check`: success
-- `pnpm check`: success
-- `pnpm cloudflare:build`: success
-- `deploy-production`: failure at credential preflight
-- `Deploy production Worker`: skipped
-- `Run production smoke checks`: skipped
+- Worker: `aesthetic-archive`
+- Connected repository: `Young4ever33/Aesthetic-Archive`
+- Active Cloudflare version: `a1612374`
+- Status: deployed
+- Traffic: 100%
+- Error rate shown: 0%
+- Active commit message: `docs: record final production handoff status`
+- Active commit ancestry: `7032842` → Provider fix `5db8f32`
+- Prior version message: `fix(provider): harden compatible API calls and deployment`
 
 ## Provider Fixes Included in `5db8f32`
 
@@ -73,37 +77,23 @@ The Provider path was revised across save, connection test, vision, text, and im
 10. Provider save/update validates model lists, default models, HTTPS Base URLs, encryption configuration, migration state, and database permissions.
 11. User Provider keys remain encrypted server-side and are not returned to the browser.
 
-Important limitation: these changes passed compilation and Worker bundling, but have not completed a real production upstream call because the new Worker was not deployed.
+Important limitation: these changes are deployed in the active production commit ancestry, but have not yet completed a real authenticated upstream call using a user-owned Provider key.
 
 ## Cloudflare Automatic Deployment
 
-`.github/workflows/check.yml` now defines two gated jobs:
-
-1. `check`
-   - install with frozen lockfile;
-   - run `pnpm check`;
-   - run `pnpm cloudflare:build`.
-2. `deploy-production`
-   - runs only for a push to `main`;
-   - waits for `check`;
-   - validates Cloudflare deployment credentials;
-   - runs `pnpm cloudflare:deploy`;
-   - runs `pnpm smoke:production -- https://aesthetic-archive.laverneyue33.workers.dev`.
-
-`wrangler.jsonc` includes `keep_vars: true`. Wrangler deployments should preserve application variables and secrets already managed in the Cloudflare Dashboard.
-
-### Required GitHub Actions Secrets
-
-Configure these in either repository Actions secrets or the `production` environment:
+Cloudflare Git integration is the single production deployment owner:
 
 ```text
-CLOUDFLARE_API_TOKEN
-CLOUDFLARE_ACCOUNT_ID
+GitHub main push
+→ Cloudflare builds the connected repository
+→ Cloudflare activates the new Worker version
 ```
 
-Do not send their values through chat or commit them. The API token should have the minimum permissions required to deploy the target Worker, including Workers Scripts edit access.
+GitHub Actions is quality control only. `.github/workflows/check.yml` installs dependencies, runs `pnpm check`, and verifies `pnpm cloudflare:build` on Ubuntu. It does not deploy and requires no Cloudflare API token.
 
-Do not move these application runtime values into GitHub:
+The duplicate GitHub Actions Wrangler deployment job was removed after Dashboard evidence confirmed Cloudflare Git deployment was already active. Do not create `CLOUDFLARE_API_TOKEN` or `CLOUDFLARE_ACCOUNT_ID` for the normal deployment path, and do not enable a second deployment system.
+
+Application runtime values remain only in Cloudflare Dashboard:
 
 ```text
 NEXT_PUBLIC_SUPABASE_URL
@@ -113,9 +103,7 @@ SUPABASE_SERVICE_ROLE_KEY
 PROVIDER_ENCRYPTION_KEY
 ```
 
-They remain in Cloudflare Dashboard. User Provider API keys remain in the encrypted Provider Vault, not in Cloudflare or GitHub.
-
-After adding the two deployment secrets, re-run failed jobs for Actions run `30846903337`, or push a later commit to `main`. A successful run must show both `check` and `deploy-production` as green.
+User Provider API keys remain in the encrypted Provider Vault, not in Cloudflare or GitHub.
 
 ## Production DNS / Network Finding
 
@@ -130,14 +118,14 @@ Local DNS returned an abnormal address for the Worker hostname, including `157.2
 
 Required follow-up:
 
-1. Run the post-deploy smoke test from GitHub Actions, which uses an independent Ubuntu network.
-2. Open production from a normal browser or another network.
+1. Open production from a normal browser or another network.
+2. Run the smoke script from any independent network that resolves `workers.dev` correctly.
 3. If the hostname still resolves incorrectly, inspect the local/system DNS, VPN, filtering, hosts file, or network interception separately.
 4. Do not change application code to compensate for the local DNS anomaly.
 
 ## Required Production Acceptance Order
 
-Complete these steps in order after Cloudflare deployment succeeds:
+Cloudflare deployment is active. Complete these remaining acceptance steps in order:
 
 1. Confirm the deployed commit/version corresponds to `5db8f32` or a later commit containing it.
 2. Confirm Cloudflare Dashboard still contains all three normal variables and both encrypted runtime secrets.
@@ -161,11 +149,9 @@ Do not mark Provider production acceptance complete merely because connection te
 
 ## Known Remaining Issues
 
-### Release blockers
+### Remaining production acceptance blocker
 
-- Cloudflare deployment credentials are missing from GitHub Actions.
-- Commit `5db8f32` is not yet proven deployed to production.
-- Provider production E2E is not verified with a real account and real upstream service.
+- Provider production E2E is not verified with a real account and real upstream service. Deployment itself is active and no Cloudflare deployment credential is required for the current Git integration.
 
 ### Non-blocking engineering issues
 
@@ -204,7 +190,7 @@ On this Windows machine, treat GitHub's Ubuntu `pnpm cloudflare:build` result as
 
 ## Repository State and Local-Only Material
 
-- `main` and `origin/main` are aligned at `5db8f32` before this handoff document update.
+- Cloudflare production was verified active through GitHub handoff commit `7032842`, including Provider fix `5db8f32` in its ancestry; later documentation/CI commits should appear automatically in Cloudflare version history.
 - `Prompt Test images/` remains an untracked local evidence directory and must not be bulk-added to Git.
 - Compressed README/marketing evidence images are already tracked under `docs/prompt-v3/validation/` and `public/marketing/`.
 - No `.env`, `.env.local`, `.dev.vars`, Provider key, Supabase service key, encryption key, cookie, or authorization header was added to the repository.

@@ -1,34 +1,54 @@
 # Cloudflare Workers Deployment
 
-Aesthetic Archive is a full-stack Next.js application. Deploy it to **Cloudflare Workers** through the OpenNext adapter. Do not use a static Cloudflare Pages deployment: authentication callbacks, server APIs, the Provider vault, AI Gateway, moderation, and feedback require a server runtime.
+Aesthetic Archive is a full-stack Next.js application deployed to **Cloudflare Workers** through the OpenNext adapter. Do not use a static Cloudflare Pages deployment: authentication callbacks, server APIs, the Provider vault, AI Gateway, moderation, and feedback require a server runtime.
 
-## GitHub Actions Deployment
+## Production Deployment Owner
 
-Production deploys run from `.github/workflows/check.yml`. A push to `main` must pass `pnpm check` and `pnpm cloudflare:build`; only then does the `deploy-production` job publish the Worker and run production smoke checks.
-
-Configure these repository or `production` environment secrets in GitHub:
+Cloudflare's Git integration is the single production deployment path:
 
 ```text
-CLOUDFLARE_API_TOKEN
-CLOUDFLARE_ACCOUNT_ID
+GitHub main push
+→ Cloudflare Git integration builds the repository
+→ Cloudflare activates the new Worker version
 ```
 
-The API token should be scoped to the target account with Workers Scripts edit access and the minimum read permissions Wrangler requires. It is a deployment credential only. Do not copy Supabase keys, `PROVIDER_ENCRYPTION_KEY`, or user Provider keys into GitHub.
+The connected repository is `Young4ever33/Aesthetic-Archive`, the production branch is `main`, and the Worker is `aesthetic-archive`.
 
-Keep the Worker name aligned with `wrangler.jsonc`: `aesthetic-archive`. The config uses `keep_vars: true`, so Wrangler deployments preserve the runtime variables and secrets already managed in the Cloudflare Dashboard. Avoid enabling a second Cloudflare Git-integration deployment for the same branch, because two independent deployment systems create ambiguous production versions.
+Do not add a second Wrangler deployment job to GitHub Actions while this integration remains active. Two independent deployment systems create duplicate versions and ambiguous production ownership.
 
-The repository contains:
+GitHub Actions in `.github/workflows/check.yml` performs quality checks only:
 
-- `wrangler.jsonc`: Worker entry point, static assets, compatibility flags, and observability;
-- `open-next.config.ts`: OpenNext Cloudflare adapter configuration;
+- install with the frozen lockfile;
+- run `pnpm check`;
+- run `pnpm cloudflare:build` on Ubuntu.
+
+It does not require `CLOUDFLARE_API_TOKEN` or `CLOUDFLARE_ACCOUNT_ID` and does not publish production.
+
+## Verify a Production Deployment
+
+After a push to `main`:
+
+1. Confirm GitHub Actions `Repository checks` is green.
+2. Open **Cloudflare Dashboard → Workers 和 Pages → aesthetic-archive → 部署**.
+3. Confirm the latest version references the expected GitHub commit.
+4. Confirm it is shown under **可用部署** as **已部署** with **流量百分比 100%**.
+5. Confirm the Worker error rate remains normal.
+6. Open the production URL and complete the authenticated acceptance checklist.
+
+Cloudflare version IDs are not Git commit SHAs. Match deployments by commit message, source repository, branch, timestamp, and commit ancestry.
+
+The repository also contains manual engineering commands:
+
 - `pnpm cloudflare:build`: production-compatible Worker build;
-- `pnpm cloudflare:preview`: local workerd preview for engineering verification only;
-- `pnpm cloudflare:deploy`: build and deploy production;
-- `pnpm cloudflare:upload`: build and upload a version without activating it.
+- `pnpm cloudflare:preview`: local workerd preview;
+- `pnpm cloudflare:deploy`: manual deployment for an explicitly approved recovery procedure;
+- `pnpm cloudflare:upload`: upload a version without activating it.
+
+Do not run the manual deployment commands in normal operation while Cloudflare Git deployment is active.
 
 ## Cloudflare Variables and Secrets
 
-Configure these only in **Cloudflare Dashboard → Worker → Settings → Variables and Secrets**. Do not create or commit local environment files. GitHub Actions preserves these values during deployment and does not receive them.
+Configure these only in **Cloudflare Dashboard → Worker → 设置 → 变量和机密**. Do not create or commit local environment files.
 
 Public application variables:
 
@@ -45,7 +65,7 @@ SUPABASE_SERVICE_ROLE_KEY
 PROVIDER_ENCRYPTION_KEY
 ```
 
-`PROVIDER_ENCRYPTION_KEY` must be a Base64 string that decodes to exactly 32 bytes. Generate it in a secure secret-management session and store it directly in Cloudflare; never place it in GitHub, documentation, screenshots, build logs, or browser storage.
+`PROVIDER_ENCRYPTION_KEY` must be a Base64 string that decodes to exactly 32 bytes. Never place it in GitHub, documentation, screenshots, build logs, or browser storage. Do not rotate it without a data re-encryption migration.
 
 Do not configure `AI_HTTP_PROXY`, `HTTP_PROXY`, or `HTTPS_PROXY` in Cloudflare. The Worker calls configured AI Providers through Cloudflare outbound `fetch`.
 
@@ -53,34 +73,34 @@ Provider API keys are not global Cloudflare variables. Each authenticated user s
 
 ## Supabase Production URLs
 
-After Cloudflare issues the production `workers.dev` URL or the custom domain:
+Supabase Auth must use the final HTTPS product domain as its Site URL and allow:
 
-1. Set Supabase Auth **Site URL** to the final HTTPS product domain.
-2. Add `https://YOUR_DOMAIN/auth/callback` to Supabase Auth redirect URLs.
-3. If both `workers.dev` and a custom domain are used during rollout, add both callback URLs temporarily.
-4. Replace the README product URL placeholder with the final domain.
+```text
+https://aesthetic-archive.laverneyue33.workers.dev/auth/callback
+```
 
-## Build Verification
+If a custom domain is introduced, add its callback before moving traffic and retain the `workers.dev` callback during rollout if both addresses remain valid.
 
-Before connecting production traffic, run:
+## Verification Commands
+
+Before pushing:
 
 ```bash
 pnpm check
 pnpm cloudflare:build
 ```
 
-After deployment, run:
+After Cloudflare activates a deployment, run from a network that resolves `workers.dev` correctly:
 
 ```bash
-pnpm smoke:production -- https://YOUR_DOMAIN
+pnpm smoke:production -- https://aesthetic-archive.laverneyue33.workers.dev
 ```
 
-Then complete authenticated checks for sign-up/sign-in, Provider creation, image analysis, card persistence, saving, board persistence, review approval/rejection, public visibility, and anonymous feedback.
+Then complete authenticated checks for sign-in, Provider creation, connection testing, image analysis, Prompt generation, image generation where supported, card persistence, social interactions, review publication, and account isolation.
 
 ## Operational Notes
 
 - Keep Cloudflare Worker logs enabled, but never log authorization headers, cookies, Provider keys, image data, or decrypted secrets.
 - Use Cloudflare deployment versions for rollback.
 - Rotate `SUPABASE_SERVICE_ROLE_KEY` through Supabase and Cloudflare together.
-- Do not rotate `PROVIDER_ENCRYPTION_KEY` without a data re-encryption migration; changing it makes existing Provider secrets unreadable.
 - Confirm every public seed image is licensed before public launch.
