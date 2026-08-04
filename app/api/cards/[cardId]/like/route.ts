@@ -1,25 +1,30 @@
 import { NextResponse } from 'next/server';
 import { requireUser } from '@/lib/supabase/server';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
+import { isUuid } from '@/lib/social';
 
 export const runtime = 'nodejs';
+
 function rid() { return `req_${crypto.randomUUID()}`; }
-function out(requestId: string, status: number, value: unknown) { return NextResponse.json({ requestId, ...(status >= 400 ? { error: value } : { data: value }) }, { status }); }
+function out(requestId: string, status: number, value: unknown) {
+  return NextResponse.json({ requestId, ...(status >= 400 ? { error: value } : { data: value }) }, { status });
+}
 
 function normalizeLikeTarget(value: string) {
   const trimmed = value.trim();
-  if (/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(trimmed)) return trimmed;
+  if (isUuid(trimmed)) return trimmed;
   const seedKey = trimmed.match(/^([A-Z]-[0-9]{2})(?:$|[-_])/i)?.[1];
   return seedKey ? seedKey.toUpperCase() : trimmed;
 }
 
 async function resolveLikeTarget(cardId: string) {
   const normalized = normalizeLikeTarget(cardId);
-  if (/^[A-Z]-[0-9]{2}$/.test(normalized) || /^[0-9a-f-]{36}$/i.test(normalized)) return normalized;
+  if (/^[A-Z]-[0-9]{2}$/.test(normalized) || isUuid(normalized)) return normalized;
   const admin = await createSupabaseAdminClient();
   const { data } = await admin.from('system_cards').select('card_key, title, title_zh');
   const requested = cardId.trim().toLowerCase();
-  const match = (data || []).find(card => [card.card_key, card.title, card.title_zh].some(value => String(value || '').trim().toLowerCase() === requested));
+  const match = (data || []).find(card => [card.card_key, card.title, card.title_zh]
+    .some(value => String(value || '').trim().toLowerCase() === requested));
   return match?.card_key || normalized;
 }
 
@@ -27,22 +32,79 @@ async function toggle(cardId: string, shouldLike: boolean) {
   const requestId = rid();
   let targetKey = normalizeLikeTarget(cardId);
   try {
-    const { supabase } = await requireUser();
+    const { user } = await requireUser();
+    const admin = await createSupabaseAdminClient();
     targetKey = await resolveLikeTarget(cardId);
-    const { data, error } = await supabase.rpc('toggle_card_like', { target_key: targetKey, should_like: shouldLike });
-    if (error) {
-      const message = error.message || '';
-      const code = message.includes('OWN_CARD') ? 'OWN_CARD_LIKE_FORBIDDEN' : message.includes('NOT_PUBLIC') ? 'CARD_NOT_PUBLIC' : message.includes('NOT_FOUND') ? 'CARD_NOT_FOUND' : message.includes('UNAUTHENTICATED') ? 'UNAUTHENTICATED' : 'LIKE_UPDATE_FAILED';
-      const status = code === 'UNAUTHENTICATED' ? 401 : code === 'OWN_CARD_LIKE_FORBIDDEN' ? 403 : code === 'CARD_NOT_PUBLIC' || code === 'CARD_NOT_FOUND' ? 404 : 500;
-      console.error('LIKE_RPC_FAILED', { requestId, cardId, targetKey, databaseCode: error.code, message });
-      const publicMessage = code === 'UNAUTHENTICATED' ? 'Sign in required' : code === 'OWN_CARD_LIKE_FORBIDDEN' ? 'You cannot like your own card' : code === 'CARD_NOT_PUBLIC' ? 'Only published public cards can be liked' : code === 'CARD_NOT_FOUND' ? 'Card not found' : `Unable to update Like (${error.code || 'database error'})`;
-      return out(requestId, status, { code, message: publicMessage, receivedTarget: cardId, normalizedTarget: targetKey, databaseCode: error.code || null });
+
+    const uuidTarget = isUuid(targetKey);
+    const targetQuery = uuidTarget
+      ? admin.from('aesthetic_cards').select('id, author_id, owner_id, title, title_zh, visibility, publish_status').eq('id', targetKey).maybeSingle()
+      : admin.from('system_cards').select('card_key, author_id, title, title_zh').eq('card_key', targetKey).maybeSingle();
+    const { data: target, error: targetError } = await targetQuery;
+    if (targetError || !target) {
+      console.error('LIKE_TARGET_QUERY_FAILED', { requestId, targetKey, databaseCode: targetError?.code });
+      return out(requestId, 404, { code: 'CARD_NOT_FOUND', message: 'Card not found', normalizedTarget: targetKey, databaseCode: targetError?.code || null });
     }
-    return out(requestId, 200, data);
+    if (uuidTarget && ('visibility' in target) && (target.visibility !== 'public' || target.publish_status !== 'published')) {
+      return out(requestId, 404, { code: 'CARD_NOT_PUBLIC', message: 'Only published public cards can be liked', normalizedTarget: targetKey });
+    }
+    if (uuidTarget && 'owner_id' in target && target.owner_id === user.id) {
+      return out(requestId, 403, { code: 'OWN_CARD_LIKE_FORBIDDEN', message: 'You cannot like your own card', normalizedTarget: targetKey });
+    }
+
+    const targetColumn = uuidTarget ? 'card_id' : 'system_card_key';
+    const authorId = target.author_id;
+    const existingQuery = admin.from('card_likes').select('id').eq('user_id', user.id).eq(targetColumn, targetKey).maybeSingle();
+    const { data: existing, error: existingError } = await existingQuery;
+    if (existingError) throw new Error(`LIKE_LOOKUP_FAILED:${existingError.code || 'database'}`);
+
+    let insertedLikeId: string | null = null;
+    if (shouldLike && !existing) {
+      const { data: inserted, error: insertError } = await admin.from('card_likes').insert({
+        user_id: user.id,
+        author_id: authorId,
+        card_id: uuidTarget ? targetKey : null,
+        system_card_key: uuidTarget ? null : targetKey,
+      }).select('id').single();
+      if (insertError) throw new Error(`LIKE_INSERT_FAILED:${insertError.code || 'database'}`);
+      insertedLikeId = inserted.id;
+    } else if (!shouldLike && existing) {
+      const { error: deleteError } = await admin.from('card_likes').delete().eq('id', existing.id);
+      if (deleteError) throw new Error(`LIKE_DELETE_FAILED:${deleteError.code || 'database'}`);
+    }
+
+    if (insertedLikeId) {
+      const { data: author } = await admin.from('authors').select('profile_id').eq('id', authorId).maybeSingle();
+      if (author?.profile_id && author.profile_id !== user.id) {
+        const title = ('title_zh' in target && target.title_zh) || target.title || '';
+        const { error: notificationError } = await admin.from('notifications').insert({
+          recipient_id: author.profile_id,
+          actor_id: user.id,
+          type: 'card_liked',
+          card_id: uuidTarget ? targetKey : null,
+          system_card_key: uuidTarget ? null : targetKey,
+          author_id: authorId,
+          like_id: insertedLikeId,
+          payload: { cardTitle: title },
+        });
+        if (notificationError) console.error('LIKE_NOTIFICATION_FAILED', { requestId, databaseCode: notificationError.code });
+      }
+    }
+
+    const { count, error: countError } = await admin.from('card_likes').select('id', { count: 'exact', head: true }).eq(targetColumn, targetKey);
+    if (countError) throw new Error(`LIKE_COUNT_FAILED:${countError.code || 'database'}`);
+    return out(requestId, 200, { liked: shouldLike, likeCount: count || 0 });
   } catch (error) {
-    const unauthenticated = error instanceof Error && error.message === 'UNAUTHENTICATED';
-    console.error('LIKE_ROUTE_FAILED', { requestId, cardId, message: error instanceof Error ? error.message : 'Unknown error' });
-    return out(requestId, unauthenticated ? 401 : 500, { code: unauthenticated ? 'UNAUTHENTICATED' : 'LIKE_UPDATE_FAILED', message: unauthenticated ? 'Sign in required' : 'Unable to update Like' });
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    const unauthenticated = message === 'UNAUTHENTICATED';
+    const databaseCode = message.includes(':') ? message.split(':').at(-1) : null;
+    console.error('LIKE_ROUTE_FAILED', { requestId, cardId, targetKey, errorType: message.split(':')[0] });
+    return out(requestId, unauthenticated ? 401 : 500, {
+      code: unauthenticated ? 'UNAUTHENTICATED' : 'LIKE_UPDATE_FAILED',
+      message: unauthenticated ? 'Sign in required' : 'Unable to update Like',
+      normalizedTarget: targetKey,
+      databaseCode,
+    });
   }
 }
 

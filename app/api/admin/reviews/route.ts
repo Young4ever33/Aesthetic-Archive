@@ -40,20 +40,18 @@ export async function GET() {
     ]);
     if (reviewsError || imagesError) {
       console.error('REVIEW_ATTACHMENTS_QUERY_FAILED', { requestId, reviewsCode: reviewsError?.code, reviewsMessage: reviewsError?.message, imagesCode: imagesError?.code, imagesMessage: imagesError?.message });
-      const attachmentError = reviewsError || imagesError;
-      return out(requestId, 500, { code: 'REVIEW_QUERY_FAILED', message: 'Unable to load review queue', stage: reviewsError ? 'reviews' : 'images', databaseCode: attachmentError?.code || null });
     }
     const reviewsByCard = new Map<string, PublishReview[]>();
-    (reviews || []).forEach(review => reviewsByCard.set(review.card_id, [...(reviewsByCard.get(review.card_id) || []), review]));
+    (reviewsError ? [] : reviews || []).forEach(review => reviewsByCard.set(review.card_id, [...(reviewsByCard.get(review.card_id) || []), review]));
     const imagesByCard = new Map<string, ReviewImage[]>();
-    (images || []).forEach(image => imagesByCard.set(image.card_id, [...(imagesByCard.get(image.card_id) || []), image]));
+    (imagesError ? [] : images || []).forEach(image => imagesByCard.set(image.card_id, [...(imagesByCard.get(image.card_id) || []), image]));
     const cardsWithAttachments = await Promise.all(cards.map(async card => ({
       ...card,
       publish_reviews: reviewsByCard.get(card.id) || [],
       card_images: await Promise.all((imagesByCard.get(card.id) || []).map(async image => ({
         ...image,
         url: image.storage_path
-          ? (await admin.storage.from('card-images').createSignedUrl(image.storage_path, 3600)).data?.signedUrl || image.url
+          ? await admin.storage.from('card-images').createSignedUrl(image.storage_path, 3600).then(result => result.data?.signedUrl || image.url).catch(() => image.url)
           : image.url,
       }))),
     })));
@@ -62,7 +60,8 @@ export async function GET() {
     const message = error instanceof Error ? error.message : '';
     const status = message === 'UNAUTHENTICATED' ? 401 : message === 'FORBIDDEN' ? 403 : 500;
     const code = status === 401 ? 'UNAUTHENTICATED' : status === 403 ? 'FORBIDDEN' : 'REVIEW_QUERY_FAILED';
-    return out(requestId, status, { code, message: status === 401 ? 'Sign in required' : status === 403 ? 'Reviewer access required' : 'Unable to load review queue' });
+    console.error('REVIEW_ROUTE_FAILED', { requestId, errorType: error instanceof Error ? error.name : 'UnknownError' });
+    return out(requestId, status, { code, message: status === 401 ? 'Sign in required' : status === 403 ? 'Reviewer access required' : 'Unable to load review queue', ...(status === 500 ? { stage: 'route' } : {}) });
   }
 }
 

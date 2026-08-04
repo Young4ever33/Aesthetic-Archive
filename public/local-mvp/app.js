@@ -153,7 +153,7 @@ async function syncCloudWorkspace() {
     const payload = await savedResult.value.json().catch(() => ({}));
     cloudSaved = new Set((payload.data || []).map(item => item.card_id));
   }
-  cases = mergeDisplayCases(publicCases, cloudPublicCards, cloudCards);
+  cases = mergeDisplayCases(publicCases, cloudPublicCards, cloudCards.filter(card => card.publishStatus !== 'published'));
   renderCards(); renderArchive(); updateSavedUI();
   await syncCardInteractions();
   await syncUnreadCount();
@@ -1061,8 +1061,8 @@ function publishClass(item) {
 }
 
 function getVisibleCases() {
-  const cloudPublished = cloudState === 'online' ? cloudPublicCards : [];
-  let list = mergeDisplayCases(publicCases, cloudPublished, getPublishedPrivateCases()).filter(item => state.activeCategory === 'All' || item.category === state.activeCategory);
+  const publishedUserCards = cloudState === 'online' ? cloudPublicCards : getPublishedPrivateCases();
+  let list = mergeDisplayCases(publicCases, publishedUserCards).filter(item => state.activeCategory === 'All' || item.category === state.activeCategory);
   if (state.query.trim()) {
     list = list
       .map(item => ({ item, score: scoreCase(item, state.query) }))
@@ -1563,7 +1563,7 @@ async function loadReviewQueue() {
       toast(isEnglish() ? 'Review access is not assigned to this account.' : '当前账号未分配审核权限。');
       return;
     }
-    if (!response.ok) throw new Error([payload.error?.message || `Review API ${response.status}`, payload.error?.code, payload.requestId].filter(Boolean).join(' · '));
+    if (!response.ok) throw new Error([payload.error?.message || `Review API ${response.status}`, payload.error?.code, payload.error?.stage, payload.error?.databaseCode, payload.requestId].filter(Boolean).join(' · '));
     reviewQueue = Array.isArray(payload.data) ? payload.data : [];
     updateReviewAccess();
     if (els.reviewStatus) els.reviewStatus.textContent = `${reviewQueue.length} ${isEnglish() ? 'cards in queue' : '张卡片待审核'}`;
