@@ -2091,7 +2091,7 @@ async function callGatewayVision(imageData, settings) {
     method: 'POST',
     credentials: 'same-origin',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ providerId: settings.id, model: settings.visionModel, image: { mimeType: match[1].toLowerCase(), data: match[2] }, templateId: template.id, templateVersion: template.version || 1, projectContext: `使用模板「${template.name}」。分析重点：${template.focus}。生成规则：${template.instructions}` })
+    body: JSON.stringify({ providerId: settings.id, model: settings.visionModel, image: { mimeType: match[1].toLowerCase(), data: match[2] }, templateId: template.id, templateVersion: template.version || 1 })
   });
   const payload = await response.json().catch(() => ({}));
   if (!response.ok) throw providerError(payload, response.status);

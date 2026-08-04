@@ -13,7 +13,43 @@ function failure(requestId: string, error: unknown) {
   return NextResponse.json({ requestId, error: { code: known.code || (error instanceof ContractValidationError ? 'INVALID_REQUEST' : 'INTERNAL_ERROR'), message: known.message || 'Unable to analyze image', retryable: known.retryable || false } }, { status });
 }
 
-const prompt = (body: ReturnType<typeof validateAnalyzeImageRequest>) => `Analyze this reference image and return ONLY compact valid JSON with: category, title, titleZh, summary, visibleFacts (max 5), culturalContext (max 2; mark uncertainty), palette (max 6 hex colors), composition, useCases (max 4), promptZh, promptEn, negativePromptZh, negativePromptEn, confidence, reviewNotes (max 3). Do not invent identity, attribution, location, date, provenance, software, or hidden materials. Keep visible facts separate from interpretation. The Chinese and English Prompts must describe the same concrete scene and be directly runnable: specify subject quantity and relation, foreground/midground/background, one camera view, light direction, material surfaces, color proportions, and texture. No placeholders, parameters, slogans, unsupported attribution, text, logos, or watermarks. Chinese fields use Chinese only; English fields use English only. Keep every string concise and the complete JSON under 6000 characters. Topic: ${body.topic || 'not provided'}. Context: ${body.projectContext || 'not provided'}.`;
+const prompt = (body: ReturnType<typeof validateAnalyzeImageRequest>) => `Inspect only visible evidence in this image. Return one compact JSON object under 2500 characters with exactly: category, title, titleZh, summary, summaryZh, visibleFactsEn (max 5 short strings), visibleFactsZh (max 5 short strings), palette (max 6 hex colors), compositionEn, compositionZh, confidence. Category must be one of Architecture, Interior, Graphic Design, Brand Identity, Product Design, Fashion, Photography, Art Direction, Typography, Web / UI, Landscape, Furniture, Packaging, Other. Do not identify or invent people, brands, designers, architects, locations, dates, provenance, software, or hidden materials. No markdown and no commentary. Topic: ${body.topic || 'not provided'}.`;
+
+function strings(value: unknown, limit: number): string[] {
+  return Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string' && item.trim().length > 0).map((item) => item.trim()).slice(0, limit) : [];
+}
+
+function text(value: unknown, fallback: string): string {
+  return typeof value === 'string' && value.trim() ? value.trim() : fallback;
+}
+
+function assembleCard(raw: Record<string, unknown>) {
+  const factsEn = strings(raw.visibleFactsEn, 5);
+  const factsZh = strings(raw.visibleFactsZh, 5);
+  const title = text(raw.title, 'Visual reference study');
+  const titleZh = text(raw.titleZh, '视觉参考研究');
+  const summary = text(raw.summary, factsEn.join(', ') || title);
+  const summaryZh = text(raw.summaryZh, factsZh.join('，') || titleZh);
+  const compositionEn = text(raw.compositionEn, 'balanced composition with a clear primary subject');
+  const compositionZh = text(raw.compositionZh, '主体明确、层次清晰的平衡构图');
+  const palette = strings(raw.palette, 6).filter((color) => /^#[0-9a-f]{6}$/i.test(color));
+  const colorsEn = palette.length ? ` Color proportions are led by ${palette.join(', ')}.` : '';
+  const colorsZh = palette.length ? ` 色彩以${palette.join('、')}为主，并保持参考图中的面积比例。` : '';
+  return {
+    category: text(raw.category, 'Other'), title, titleZh, summary,
+    visibleFacts: factsEn,
+    culturalContext: [],
+    palette,
+    composition: compositionEn,
+    useCases: ['visual reference', 'moodboard', 'image generation'],
+    promptZh: `${titleZh}。${summaryZh}。保持${factsZh.join('、') || '参考图中可见主体、空间关系与表面特征'}；采用${compositionZh}，锁定单一视角、前中后景关系、光线方向、材质表面与接缝。${colorsZh}保持真实尺度和结构边界，不添加品牌、人物身份、文字或标志。`,
+    promptEn: `${title}. ${summary}. Preserve ${factsEn.join(', ') || 'the visible subject, spatial relationships, and surface characteristics'}; use ${compositionEn}, one fixed camera view, explicit foreground, middle ground and background, directional light, material surfaces and joints.${colorsEn} Preserve realistic scale and structural boundaries without adding brands, identities, text, or logos.`,
+    negativePromptZh: '结构断裂，比例错误，透视畸变，材质漂移，过度装饰，虚构品牌，身份仿冒，乱码文字，标志，水印',
+    negativePromptEn: 'broken structure, incorrect proportions, distorted perspective, material drift, excessive decoration, invented brands, identity imitation, garbled text, logos, watermarks',
+    confidence: typeof raw.confidence === 'number' ? raw.confidence : 0.7,
+    reviewNotes: ['文化语境与来源需人工核验。'],
+  };
+}
 
 export async function POST(request: Request) {
   const requestId = id();
@@ -31,7 +67,7 @@ export async function POST(request: Request) {
     providerId = provider.id;
     if (!provider.image_capable) throw gatewayError('FORBIDDEN', 'Provider does not support image analysis', 403);
     model = resolveModel(provider, body.model, 'image');
-    const result = parseJsonObject(await callVisionProvider(provider, model, body.image, prompt(body)));
+    const result = assembleCard(parseJsonObject(await callVisionProvider(provider, model, body.image, prompt(body))));
     await logAiUsage(supabase, { ownerId: userId, providerId, route: '/api/ai/analyze-image', model, status: 'success', requestId, durationMs: Date.now() - startedAt });
     return NextResponse.json({ requestId, data: result, meta: providerMeta(provider, model, body.templateId, body.templateVersion) });
   } catch (error) {
