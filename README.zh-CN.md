@@ -129,7 +129,7 @@ pnpm check
 - `evals/`：Prompt 评分规则、数据集和结果。
 - `docs/`：产品契约、部署、QA、决策与纠偏证据。
 
-Provider Key 在服务端加密保存，不得进入浏览器存储、API 响应、日志、截图或 Git 历史。配置说明见 `.env.example` 和 [`docs/ENVIRONMENT_TEMPLATE.md`](docs/ENVIRONMENT_TEMPLATE.md)。
+Provider Key 在服务端加密保存，不得进入浏览器存储、API 响应、日志、截图或 Git 历史。配置说明见 [`docs/ENVIRONMENT_TEMPLATE.md`](docs/ENVIRONMENT_TEMPLATE.md)。
 
 ## 许可证与素材
 

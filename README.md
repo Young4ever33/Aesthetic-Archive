@@ -129,7 +129,7 @@ This validates seed Prompts, workspace contracts, lint, types, repository safety
 - `evals/`: Prompt rubric, datasets, and results.
 - `docs/`: product contracts, deployment, QA, decisions, and correction evidence.
 
-Provider keys are encrypted and stored server-side. They must never appear in browser storage, API responses, logs, screenshots, or Git history. See `.env.example` and [`docs/ENVIRONMENT_TEMPLATE.md`](docs/ENVIRONMENT_TEMPLATE.md) for configuration.
+Provider keys are encrypted and stored server-side. They must never appear in browser storage, API responses, logs, screenshots, or Git history. See [`docs/ENVIRONMENT_TEMPLATE.md`](docs/ENVIRONMENT_TEMPLATE.md) for configuration.
 
 ## License and Assets
 
