@@ -80,9 +80,9 @@ Aesthetic Archive 面向所有希望建立、理解和复用审美知识的人�
 
 下面是实际产品中的两种卡片详情：一个偏复古数字终端视觉系统，一个偏侘寂室内与有机材料主义。它们展示了从公开广场进入详情后，如何查看结构化分析和可复用 Prompt。
 
-![复古数字终端机美学卡片详情](./docs/screenshots/card-detail-retro-digital.png)
-![侘寂室内有机材料主义卡片详情](./docs/screenshots/card-detail-wabi-sabi.png)
-![个人设置中的卡片生成模板](./docs/screenshots/prompt-templates.png)
+<p><img src="./docs/screenshots/card-detail-retro-digital.png" alt="复古数字终端机美学卡片详情" width="620"></p>
+<p><img src="./docs/screenshots/card-detail-wabi-sabi.png" alt="侘寂室内有机材料主义卡片详情" width="620"></p>
+<p><img src="./docs/screenshots/prompt-templates.png" alt="个人设置中的卡片生成模板" width="620"></p>
 
 ### 画板 / Collage Board
 
@@ -94,9 +94,9 @@ Aesthetic Archive 面向所有希望建立、理解和复用审美知识的人�
 
 保存公开案例，添加项目语境，并复用分析模板。模板可以按照专业方向、工作室方法或个人描述视觉判断的方式进行调整。
 
-### 审核队列与消息 / Review Queue
+### 审核队列、审核历史与消息 / Review Queue, History and Messages
 
-AI 生成并不等于可以自动公开。Admin 和 Reviewer 可以查看提交内容、通过或驳回案例，并保留审核记录，之后卡片才会进入视觉库广场。系统公告、Feedback 回复、点赞、Follow 和审核结果也会进入统一消息流。
+AI 生成并不等于可以自动公开。Admin 和 Reviewer 可以查看提交内容、通过或驳回案例；待审核、已通过和已驳回内容都会保留在审核历史中，而不是审核后消失。系统公告、Feedback 回复、点赞、Follow 和审核结果会进入统一消息流；系统公告首次进入工作台时显示居中确认框，个人消息保持未读直到用户查看。
 
 ## 如何使用生成
 
@@ -126,8 +126,9 @@ Aesthetic Archive 不把“模型生成了结果”当成质量证明。当前�
 
 这些数字是单一受控案例中、经人工评分的最佳候选结果，不是自动准确率或项目整体平均值。评分规则、数据集和限制见 [`evals/`](evals/README.md)。
 
-![A-04 中文基线](docs/prompt-v3/validation/A-04/zh-v1-best.webp)
-![A-04 中文修订版](docs/prompt-v3/validation/A-04/zh-v31-best.webp)
+![A-04 双语 Prompt 评测对比矩阵](docs/screenshots/prompt-evaluation-matrix.png)
+
+矩阵展示同一参考图、同一评分规则下的中文/英文 Prompt baseline 与 revised 候选，读者可以直接比较结构约束、场景稳定性、双连廊和商业灯光偏移，而不是只看一组分数。原始候选图仍保留在 [`docs/prompt-v3/validation/A-04/`](docs/prompt-v3/validation/A-04/)。
 
 实现过程中也建立了明确的产品纪律：不能用“看起来合理”的结果替代真实失败；Provider 没有真实上游结果时不能编造本地 AI 输出；账户隔离、隐私和公开审核必须成为产品边界，而不是上线后的补丁。完整记录见 [`docs/ai-correction-log.md`](docs/ai-correction-log.md)。
 
@@ -151,6 +152,14 @@ Aesthetic Archive 追求的是持续积累的价值，而不只是一次性的 A
 - **默认保护隐私。** 项目研究和 Provider 配置受到保护，只有明确分享后才会公开。
 - **解释优先于炫技。** 一张有用的卡片应该告诉设计师该观察什么，以及下一步如何行动。
 - **来源和版权同样重要。** 公开案例需要来源和版权信息，不确定的判断必须保持不确定标记。
+
+## 当前官网与产品功能
+
+正式官网 [myaestheticarchive.com](https://myaestheticarchive.com) 当前展示完整的“WHAT / WHO / WHY / HOW / TRY”产品叙事：从重复搜索、杂乱文件夹和临时拼图的问题开始，经过参考图输入、AI 审美卡片、Prompt 验证、Collage 组合和 Public Plaza 分享，最终形成可以持续调用的个人与共享审美知识库。
+
+![当前正式官网首页](./docs/screenshots/official-home-current.png)
+
+当前工作台包含：视觉库广场与搜索、卡片详情画廊、作者主页与 Follow、收藏与点赞、消息通知、个人审美库、图片分析和手动编辑、双语 Prompt 与 Negative Prompt、Prompt 模板编辑与测试、Collage 画板、PNG/JPG/PDF/HTML/Markdown 导出、Provider Vault、默认私有与版权提醒、Reviewer/Admin 审核队列、审核历史、系统公告发布、Feedback 工单筛选与线程回复。
 
 ## 当前状态
 

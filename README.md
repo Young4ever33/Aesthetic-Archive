@@ -78,9 +78,9 @@ Each card keeps the visual reference, design reasoning, cultural context, materi
 
 The following product screenshots show two real card details: a retro digital terminal system and a wabi-sabi interior with organic material language. They demonstrate how structured analysis and reusable Prompts appear after opening a case from the Plaza.
 
-![Retro-digital terminal aesthetic card detail](./docs/screenshots/card-detail-retro-digital.png)
-![Wabi-sabi organic-material interior card detail](./docs/screenshots/card-detail-wabi-sabi.png)
-![Card generation templates in personal settings](./docs/screenshots/prompt-templates.png)
+<p><img src="./docs/screenshots/card-detail-retro-digital.png" alt="Retro-digital terminal aesthetic card detail" width="620"></p>
+<p><img src="./docs/screenshots/card-detail-wabi-sabi.png" alt="Wabi-sabi organic-material interior card detail" width="620"></p>
+<p><img src="./docs/screenshots/prompt-templates.png" alt="Card generation templates in personal settings" width="620"></p>
 
 ### Collage Board
 
@@ -92,9 +92,9 @@ Arrange references into a visual board, add notes, define a direction, and summa
 
 Save public references, attach project context, and reuse analysis templates tuned to a discipline, studio method, or personal design vocabulary.
 
-### Review Queue and Messages
+### Review Queue, History, and Messages
 
-AI generation does not automatically make a case public. Admin and reviewer roles approve or reject submissions and retain review history before publication. System messages, Feedback replies, likes, follows, and review results share one notification stream.
+AI generation does not automatically make a case public. Admin and reviewer roles inspect submissions, approve or reject them, and retain pending, approved, and rejected history instead of making reviewed cards disappear. System messages, Feedback replies, likes, follows, and review results share one notification stream. System announcements open as a centered confirmation dialog on first workspace entry; personal messages remain unread until viewed.
 
 ## How Generation Works
 
@@ -122,8 +122,9 @@ A generated result is not treated as proof of quality. The current reviewable ev
 
 These are human-rated best-candidate scores for one controlled case, not automated accuracy or a project-wide average. The rubric, dataset, metadata gaps, and limits are recorded in [`evals/`](evals/README.md).
 
-![A-04 Chinese baseline](docs/prompt-v3/validation/A-04/zh-v1-best.webp)
-![A-04 Chinese revised](docs/prompt-v3/validation/A-04/zh-v31-best.webp)
+![A-04 bilingual Prompt evaluation matrix](docs/screenshots/prompt-evaluation-matrix.png)
+
+The matrix compares Chinese and English baseline/revised candidates from the same reference under the same rubric. It makes structural constraints, setting stability, two-skybridge control, and commercial-lighting drift visible instead of asking readers to infer the difference from isolated scores. The raw candidate images remain in [`docs/prompt-v3/validation/A-04/`](docs/prompt-v3/validation/A-04/).
 
 The implementation also established a firm rule: a plausible-looking result must never replace a real failure. No verified upstream Provider result means no fabricated local AI fallback. Account isolation, privacy, and human review are product boundaries rather than post-launch patches. See [`docs/ai-correction-log.md`](docs/ai-correction-log.md).
 
@@ -147,6 +148,14 @@ The long-term loop is: **collect references → build aesthetic knowledge → re
 - **Private by default.** Project research and Provider configuration remain protected unless explicitly shared.
 - **Explainability over spectacle.** A useful card should show what to notice and how to act on it.
 - **Source and rights matter.** Public cases need provenance and rights information; uncertainty stays visible.
+
+## Current Website and Product Surface
+
+The current website at [myaestheticarchive.com](https://myaestheticarchive.com) presents the complete WHAT / WHO / WHY / HOW / TRY narrative: it starts with repeated searching, scattered folders, and improvised visual patchwork, then moves through reference input, AI aesthetic cards, Prompt validation, Collage composition, and Public Plaza sharing to form a personal and shared aesthetic knowledge base.
+
+![Current official website homepage](docs/screenshots/official-home-current.png)
+
+The current workbench includes the Public Plaza and search, card-detail galleries, author profiles and Follow, saves and likes, notifications, My Archive, image analysis and manual editing, bilingual Prompts and negative Prompts, editable Prompt templates with testing, Collage Board, PNG/JPG/PDF/HTML/Markdown export, Provider Vault, private-by-default and rights reminders, reviewer/admin queue and history, system-message publishing, and Feedback inbox filtering with threaded replies.
 
 ## Current Status
 
