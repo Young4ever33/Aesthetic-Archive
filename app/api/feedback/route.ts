@@ -42,6 +42,8 @@ export async function POST(request: Request) {
     const targetId = typeof body.targetId === 'string' && /^[0-9a-f-]{36}$/i.test(body.targetId) ? body.targetId : null;
     const { data, error } = await supabase.from('user_feedback').insert({ owner_id: ownerId, kind, target_type: targetType, target_id: targetId, message }).select('id, kind, target_type, target_id, message, status, created_at').single();
     if (error) return out(id, 500, { code: 'FEEDBACK_CREATE_FAILED', message: 'Unable to save feedback' });
+    const { error: threadError } = await supabase.from('feedback_messages').insert({ feedback_id: data.id, sender_id: ownerId, sender_role: 'user', message });
+    if (threadError) return out(id, 500, { code: 'FEEDBACK_THREAD_FAILED', message: 'Unable to save feedback thread' });
     return out(id, 201, data);
   } catch { return out(id, 401, { code: 'UNAUTHENTICATED', message: 'Sign in required' }); }
 }

@@ -157,6 +157,7 @@ async function syncCloudWorkspace() {
   renderCards(); renderArchive(); updateSavedUI();
   await syncCardInteractions();
   await syncUnreadCount();
+  await loadNotificationPopover();
   await syncCloudBoard().catch(error => console.warn('Board sync unavailable:', error));
   renderCollage();
   return true;
@@ -164,18 +165,18 @@ async function syncCloudWorkspace() {
 
 async function syncCardInteractions() {
   if (cloudState !== 'online') return;
-  const keys = [...new Set(cases.map(item => item.id).filter(Boolean))].slice(0, 100);
+  const keys = [...new Set(cases.map(item => likeTargetKey(item)).filter(Boolean))].slice(0, 100);
   if (!keys.length) return;
   try {
     const payload = await cloudRequest(`/api/cards/interactions?keys=${encodeURIComponent(keys.join(','))}`);
     cardInteractions = new Map(Object.entries(payload || {}));
     cases.forEach(item => {
-      const interaction = cardInteractions.get(item.id);
+      const interaction = cardInteractions.get(likeTargetKey(item));
       if (interaction) Object.assign(item, interaction);
     });
     renderCards(); renderArchive(); updateSavedUI();
     if (state.selectedCase) {
-      const interaction = cardInteractions.get(state.selectedCase.id);
+      const interaction = cardInteractions.get(likeTargetKey(state.selectedCase));
       if (interaction) Object.assign(state.selectedCase, interaction);
       renderDetailLike(state.selectedCase);
       renderDetailAuthor(state.selectedCase);
@@ -201,6 +202,8 @@ async function syncUnreadCount() {
 function notificationMessage(item) {
   const actor = item.actor?.name || '系统';
   const title = item.payload?.cardTitle ? `《${item.payload.cardTitle}》` : '你的卡片';
+  if (item.type === 'system_message') return isEnglish() ? (item.payload?.titleEn || 'System message') : (item.payload?.titleZh || '系统公告');
+  if (item.type === 'feedback_reply') return isEnglish() ? 'Your feedback received a reply' : '你的反馈收到回复';
   if (item.type === 'card_liked') return `${actor} 点赞了${title}`;
   if (item.type === 'author_followed') return `${actor} Follow 了你`;
   if (item.type === 'card_rejected') return `${title}未通过审核`;
@@ -208,7 +211,21 @@ function notificationMessage(item) {
   return `${title}已审核并公开发布`;
 }
 
+function maybeShowSystemMessage(item) {
+  if (item.type !== 'system_message' || item.read || sessionStorage.getItem(`aa_system_message_seen_${item.id}`)) return;
+  sessionStorage.setItem(`aa_system_message_seen_${item.id}`, '1');
+  if (els.systemMessageModalTitle) els.systemMessageModalTitle.textContent = isEnglish() ? (item.payload?.titleEn || 'System message') : (item.payload?.titleZh || '系统公告');
+  if (els.systemMessageModalBody) els.systemMessageModalBody.textContent = isEnglish() ? (item.payload?.bodyEn || '') : (item.payload?.bodyZh || '');
+  if (els.systemMessageModal) {
+    els.systemMessageModal.dataset.notificationId = item.id;
+    els.systemMessageModal.hidden = false;
+  }
+}
+
+let notificationItems = new Map();
+
 function renderNotificationPopover(items) {
+  notificationItems = new Map(items.map(item => [item.id, item]));
   const list = document.getElementById('notification-popover-list');
   if (!list) return;
   if (!items.length) {
@@ -230,7 +247,10 @@ async function loadNotificationPopover() {
     const response = await fetch('/api/notifications?limit=20', { credentials: 'same-origin' });
     const payload = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(payload.error?.message || '加载失败');
-    renderNotificationPopover(payload.data?.items || []);
+    const items = payload.data?.items || [];
+    renderNotificationPopover(items);
+    const newestSystemMessage = items.find(item => item.type === 'system_message' && !item.read && !sessionStorage.getItem(`aa_system_message_seen_${item.id}`));
+    if (newestSystemMessage) maybeShowSystemMessage(newestSystemMessage);
   } catch {
     if (list) list.innerHTML = '<p class="notification-popover-empty">消息加载失败，请稍后重试。</p>';
   }
@@ -434,7 +454,15 @@ const els = {
   feedbackMessage: document.getElementById('feedback-message'),
   reviewGrid: document.getElementById('review-grid'),
   reviewStatus: document.getElementById('review-status'),
-  reviewRefresh: document.getElementById('review-refresh-btn')
+  reviewRefresh: document.getElementById('review-refresh-btn'),
+  systemMessageForm: document.getElementById('system-message-form'),
+  systemMessageList: document.getElementById('system-message-list'),
+  systemMessageStatus: document.getElementById('system-message-status'),
+  feedbackInboxList: document.getElementById('feedback-inbox-list'),
+  feedbackFilter: document.getElementById('feedback-filter'),
+  systemMessageModal: document.getElementById('system-message-modal'),
+  systemMessageModalTitle: document.getElementById('system-message-modal-title'),
+  systemMessageModalBody: document.getElementById('system-message-modal-body')
 };
 
 const tabCopy = {
@@ -444,7 +472,9 @@ const tabCopy = {
   collage: ['Collage Board', '把参考图整理成项目风格板。'],
   provider: ['AI Provider', '连接你自己的 AI Provider。'],
   settings: ['Workspace Settings', '管理资料、工作区、卡片模板与本地数据。'],
-  reviews: ['Review Queue', '审核公开视觉卡片。']
+  reviews: ['Review Queue', '审核公开视觉卡片。'],
+  messages: ['System Messages', '发布系统公告。'],
+  'feedback-inbox': ['Feedback Inbox', '处理用户反馈工单。']
 };
 
 const i18n = {
@@ -1111,8 +1141,21 @@ function cardKnowledgeHTML(item) {
   return `<div class="card-knowledge"><span>${escapeHTML(composition)}</span><span>${escapeHTML(useCase)}</span></div>`;
 }
 
+function interactionForCard(item) {
+  return cardInteractions.get(likeTargetKey(item)) || item || {};
+}
+
+function applyLikeState(targetKey, likedByViewer, likeCount) {
+  const interaction = { ...(cardInteractions.get(targetKey) || {}), likedByViewer: Boolean(likedByViewer), likeCount: Number(likeCount || 0) };
+  cardInteractions.set(targetKey, interaction);
+  [...publicCases, ...cases, ...cloudCards, ...cloudPublicCards].forEach(card => {
+    if (likeTargetKey(card) === targetKey) Object.assign(card, interaction);
+  });
+  if (state.selectedCase && likeTargetKey(state.selectedCase) === targetKey) Object.assign(state.selectedCase, interaction);
+}
+
 function renderCards() {
-  const list = getVisibleCases();
+  const list = getVisibleCases().map(item => Object.assign(item, interactionForCard(item)));
   els.resultCount.textContent = isEnglish() ? `${list.length} styles` : `${list.length} 个风格`;
   if (!list.length) {
     els.grid.innerHTML = `<div class="empty-state"><span>${isEnglish() ? 'NO RESULTS' : '暂无结果'}</span><h3>${ui('noResults')}</h3><p>${ui('noResultsHint')}</p></div>`;
@@ -1171,7 +1214,7 @@ function authorForCard(item) {
       publicId: item.author?.publicId || ''
     };
   }
-  const interaction = cardInteractions.get(item?.id) || {};
+  const interaction = cardInteractions.get(likeTargetKey(item)) || {};
   return { name: '系统作者yy', avatar: '', role: 'curator', publicId: interaction.author?.publicId || '' };
 }
 
@@ -1216,25 +1259,23 @@ function renderDetailLike(item) {
 async function toggleLike(item) {
   if (!item || item.ownCard) return;
   if (cloudState !== 'online') return toast(isEnglish() ? 'Sign in to Like public cards.' : '登录后才能点赞公开卡片。');
-  const wasLiked = Boolean(item.likedByViewer);
-  const oldCount = Number(item.likeCount || 0);
-  item.likedByViewer = !wasLiked;
-  item.likeCount = Math.max(0, oldCount + (wasLiked ? -1 : 1));
-  renderCards(); renderArchive(); renderDetailLike(item);
+  const targetKey = likeTargetKey(item);
+  const current = interactionForCard(item);
+  const wasLiked = Boolean(current.likedByViewer);
+  const oldCount = Number(current.likeCount || 0);
+  applyLikeState(targetKey, !wasLiked, Math.max(0, oldCount + (wasLiked ? -1 : 1)));
+  renderCards(); renderArchive(); renderDetailLike(state.selectedCase || item);
   try {
-    const targetKey = likeTargetKey(item);
     const response = await fetch(`/api/cards/${encodeURIComponent(targetKey)}/like`, { method: wasLiked ? 'DELETE' : 'POST', credentials: 'same-origin' });
     const payload = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error([payload.error?.message || `Like API ${response.status}`, payload.error?.code, payload.error?.normalizedTarget, payload.error?.databaseCode, payload.requestId].filter(Boolean).join(' · '));
     const result = payload.data || {};
-    item.likedByViewer = Boolean(result.liked);
-    item.likeCount = Number(result.likeCount || 0);
-    cardInteractions.set(item.id, { ...(cardInteractions.get(item.id) || {}), likedByViewer: item.likedByViewer, likeCount: item.likeCount });
+    applyLikeState(targetKey, Boolean(result.liked), Number(result.likeCount || 0));
   } catch (error) {
-    item.likedByViewer = wasLiked; item.likeCount = oldCount;
+    applyLikeState(targetKey, wasLiked, oldCount);
     toast(`点赞操作失败：${error.message}`);
   }
-  renderCards(); renderArchive(); renderDetailLike(item); await syncUnreadCount();
+  renderCards(); renderArchive(); renderDetailLike(state.selectedCase || item); await syncUnreadCount();
 }
 
 function openDetail(item) {
@@ -1652,7 +1693,7 @@ async function reviewCard(cardId, action) {
 }
 
 function switchTab(tab) {
-  if (tab === 'reviews' && !hasReviewAccess()) tab = 'archive';
+  if (['reviews', 'messages', 'feedback-inbox'].includes(tab) && !hasReviewAccess()) tab = 'archive';
   state.activeTab = tab;
   document.querySelectorAll('[data-tab]').forEach(button => button.classList.toggle('is-active', button.dataset.tab === tab));
   document.querySelectorAll('[data-panel]').forEach(panel => panel.classList.toggle('is-active', panel.dataset.panel === tab));
@@ -1663,6 +1704,8 @@ function switchTab(tab) {
     renderProviderSelectors();
   }
   if (tab === 'reviews') loadReviewQueue();
+  if (tab === 'messages') loadSystemMessages();
+  if (tab === 'feedback-inbox') loadFeedbackInbox();
 }
 
 function getUser() {
@@ -1883,6 +1926,8 @@ function applyTranslations(lang) {
     collage: t.boardNav,
     provider: lang === 'en' ? 'Models' : '模型',
     reviews: lang === 'en' ? 'Review Queue' : '审核队列',
+    messages: lang === 'en' ? 'System Messages' : '系统消息',
+    'feedback-inbox': lang === 'en' ? 'Feedback Inbox' : 'Feedback 工单',
     settings: lang === 'en' ? 'Settings' : '设置',
     feedback: lang === 'en' ? 'Feedback' : '意见箱'
   };
@@ -3336,6 +3381,45 @@ function toast(message) {
   setTimeout(() => node.remove(), 2200);
 }
 
+let systemMessages = [];
+let feedbackInbox = [];
+
+async function loadSystemMessages() {
+  if (!hasReviewAccess() || !els.systemMessageList) return;
+  try {
+    const response = await fetch('/api/admin/messages', { credentials: 'same-origin' });
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(payload.error?.message || '加载失败');
+    systemMessages = payload.data || [];
+    els.systemMessageList.innerHTML = systemMessages.length ? systemMessages.map(item => `<article class="review-card message-history-card"><div class="review-card-body"><div class="card-meta"><span>SYSTEM MESSAGE</span><span class="review-status-badge ${item.published ? 'is-approved' : 'is-rejected'}">${item.published ? '已发布' : '草稿'}</span></div><h3>${escapeHTML(item.title_zh)}</h3><p>${escapeHTML(item.title_en)}</p><p>${escapeHTML(item.body_zh)}</p>${!item.published ? `<button class="button primary" type="button" data-publish-message="${escapeHTML(item.id)}">发布公告</button>` : ''}</div></article>`).join('') : '<div class="empty-state">暂无系统消息记录。</div>';
+  } catch (error) { els.systemMessageStatus.textContent = `系统消息加载失败：${error.message}`; }
+}
+
+async function publishSystemMessage(event) {
+  event.preventDefault();
+  const form = els.systemMessageForm;
+  const body = { titleZh: document.getElementById('system-title-zh')?.value, titleEn: document.getElementById('system-title-en')?.value, bodyZh: document.getElementById('system-body-zh')?.value, bodyEn: document.getElementById('system-body-en')?.value, publish: true };
+  try { const response = await fetch('/api/admin/messages', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }); const payload = await response.json(); if (!response.ok) throw new Error(payload.error?.message || '发布失败'); form.reset(); els.systemMessageStatus.textContent = '系统消息已发布，并已进入用户消息列表。'; await loadSystemMessages(); } catch (error) { els.systemMessageStatus.textContent = `发布失败：${error.message}`; }
+}
+
+function renderFeedbackInbox() {
+  if (!els.feedbackInboxList) return;
+  const filter = els.feedbackFilter?.value || 'all';
+  const rows = feedbackInbox.filter(item => filter === 'all' || item.status === filter);
+  els.feedbackInboxList.innerHTML = rows.length ? rows.map(item => `<article class="feedback-ticket" data-feedback-ticket="${escapeHTML(item.id)}"><header><div><strong>${escapeHTML(item.kind === 'report' ? 'Report' : 'Feedback')}</strong><small>${escapeHTML(new Date(item.created_at).toLocaleString())}</small></div><select data-feedback-status><option value="open" ${item.status === 'open' ? 'selected' : ''}>未处理</option><option value="reviewing" ${item.status === 'reviewing' ? 'selected' : ''}>处理中</option><option value="resolved" ${item.status === 'resolved' ? 'selected' : ''}>已处理</option><option value="dismissed" ${item.status === 'dismissed' ? 'selected' : ''}>已关闭</option></select></header><p class="feedback-ticket-original">${escapeHTML(item.message)}</p><div class="feedback-thread">${(item.messages || []).map(message => `<p class="feedback-thread-message ${message.sender_role === 'admin' ? 'is-admin' : ''}"><b>${message.sender_role === 'admin' ? '审核员' : '用户'}</b>${escapeHTML(message.message)}</p>`).join('')}</div><form class="feedback-reply-form"><textarea rows="3" maxlength="10000" placeholder="回复这位用户"></textarea><button class="button primary" type="submit">回复并保存</button></form></article>`).join('') : '<div class="empty-state">当前筛选下暂无工单。</div>';
+}
+
+async function loadFeedbackInbox() {
+  if (!hasReviewAccess() || !els.feedbackInboxList) return;
+  try { const response = await fetch('/api/admin/feedback', { credentials: 'same-origin' }); const payload = await response.json(); if (!response.ok) throw new Error(payload.error?.message || '加载失败'); feedbackInbox = payload.data || []; renderFeedbackInbox(); } catch (error) { els.feedbackInboxList.innerHTML = `<div class="empty-state">Feedback 加载失败：${escapeHTML(error.message)}</div>`; }
+}
+
+async function updateFeedbackTicket(form, ticket, status, message) {
+  const response = await fetch(`/api/admin/feedback?id=${encodeURIComponent(ticket.dataset.feedbackTicket)}`, { method: 'PATCH', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status, message }) });
+  const payload = await response.json(); if (!response.ok) throw new Error(payload.error?.message || '保存失败');
+  await loadFeedbackInbox();
+}
+
 function bindEvents() {
   document.querySelectorAll('[data-tab]').forEach(button => button.addEventListener('click', () => switchTab(button.dataset.tab)));
   els.loginForm?.addEventListener('submit', loginWithIdentity);
@@ -3348,10 +3432,29 @@ function bindEvents() {
       await Promise.all([loadNotificationPopover(), syncUnreadCount()]);
     } catch { toast('消息状态更新失败'); }
   });
+  document.querySelectorAll('[data-system-message-close]').forEach(button => button.addEventListener('click', async () => {
+    const notificationId = els.systemMessageModal?.dataset.notificationId;
+    if (els.systemMessageModal) els.systemMessageModal.hidden = true;
+    if (notificationId) {
+      await fetch(`/api/notifications/${encodeURIComponent(notificationId)}`, { method: 'PATCH', credentials: 'same-origin' }).catch(() => {});
+      delete els.systemMessageModal.dataset.notificationId;
+      await syncUnreadCount();
+    }
+  }));
+  els.systemMessageForm?.addEventListener('submit', publishSystemMessage);
+  els.feedbackFilter?.addEventListener('change', renderFeedbackInbox);
+  document.getElementById('feedback-refresh')?.addEventListener('click', loadFeedbackInbox);
   document.getElementById('notification-popover-list')?.addEventListener('click', async event => {
     const row = event.target.closest('[data-notification-id]');
     if (!row) return;
     try { await cloudRequest(`/api/notifications/${encodeURIComponent(row.dataset.notificationId)}`, { method: 'PATCH' }); } catch {}
+    const notification = notificationItems.get(row.dataset.notificationId);
+    if (notification?.type === 'system_message' || notification?.type === 'feedback_reply') {
+      if (els.systemMessageModalTitle) els.systemMessageModalTitle.textContent = notification.type === 'system_message' ? (isEnglish() ? notification.payload?.titleEn : notification.payload?.titleZh) : (isEnglish() ? 'Feedback reply' : 'Feedback 回复');
+      if (els.systemMessageModalBody) els.systemMessageModalBody.textContent = notification.type === 'system_message' ? (isEnglish() ? notification.payload?.bodyEn : notification.payload?.bodyZh) : (notification.payload?.message || '');
+      if (els.systemMessageModal) { delete els.systemMessageModal.dataset.notificationId; els.systemMessageModal.hidden = false; }
+      await syncUnreadCount();
+    }
     closeNotificationPopover();
     if (row.dataset.notificationAuthor) window.top.location.assign(`/authors/${encodeURIComponent(row.dataset.notificationAuthor)}`);
     else if (row.dataset.notificationCard) {
@@ -3601,6 +3704,26 @@ function bindEvents() {
     const button = event.target.closest('[data-review-action]');
     if (button) reviewCard(button.dataset.reviewId, button.dataset.reviewAction);
   });
+  els.systemMessageList?.addEventListener('click', async event => {
+    const button = event.target.closest('[data-publish-message]');
+    if (!button) return;
+    const response = await fetch(`/api/admin/messages?id=${encodeURIComponent(button.dataset.publishMessage)}`, { method: 'PATCH', credentials: 'same-origin' });
+    if (!response.ok) return toast('系统消息发布失败');
+    await loadSystemMessages();
+  });
+  els.feedbackInboxList?.addEventListener('change', async event => {
+    const select = event.target.closest('[data-feedback-status]');
+    const ticket = event.target.closest('[data-feedback-ticket]');
+    if (select && ticket) try { await updateFeedbackTicket(null, ticket, select.value, ''); } catch (error) { toast(`状态更新失败：${error.message}`); }
+  });
+  els.feedbackInboxList?.addEventListener('submit', async event => {
+    const form = event.target.closest('.feedback-reply-form');
+    const ticket = event.target.closest('[data-feedback-ticket]');
+    if (!form || !ticket) return;
+    event.preventDefault();
+    const textarea = form.querySelector('textarea');
+    try { await updateFeedbackTicket(form, ticket, 'reviewing', textarea.value.trim()); } catch (error) { toast(`回复失败：${error.message}`); }
+  });
   els.collageCanvas?.addEventListener('pointerdown', event => {
     if (bindBoardPen(event)) return;
     bindBoardDrag(event);
@@ -3720,7 +3843,7 @@ function init() {
       populateSettings();
       if (!profile.author_ready) console.warn('Public author profile is pending; account profile remains available.');
       updateReviewAccess();
-      if (serverReviewAccess && requestedTab === 'reviews') switchTab('reviews');
+      if (serverReviewAccess && ['reviews', 'messages', 'feedback-inbox'].includes(requestedTab || '')) switchTab(requestedTab);
       else if (serverReviewAccess && state.activeTab === 'reviews') loadReviewQueue();
       return true;
     })

@@ -74,19 +74,28 @@ async function toggle(cardId: string, shouldLike: boolean) {
     }
 
     if (insertedLikeId) {
-      const { data: author } = await admin.from('authors').select('profile_id').eq('id', authorId).maybeSingle();
-      if (author?.profile_id && author.profile_id !== user.id) {
+      const { data: author } = await admin.from('authors').select('profile_id, is_system').eq('id', authorId).maybeSingle();
+      let recipientIds: string[] = [];
+      if (author?.is_system) {
+        const { data: reviewers, error: reviewersError } = await admin.from('profiles').select('id').in('role', ['reviewer', 'admin']);
+        if (reviewersError) console.error('SYSTEM_LIKE_RECIPIENTS_FAILED', { requestId, databaseCode: reviewersError.code });
+        recipientIds = (reviewers || []).map((profile) => profile.id);
+      } else if (author?.profile_id && author.profile_id !== user.id) {
+        recipientIds = [author.profile_id];
+      }
+      if (recipientIds.length) {
         const title = ('title_zh' in target && target.title_zh) || target.title || '';
-        const { error: notificationError } = await admin.from('notifications').insert({
-          recipient_id: author.profile_id,
+        const notifications = recipientIds.map((recipientId) => ({
+          recipient_id: recipientId,
           actor_id: user.id,
           type: 'card_liked',
           card_id: uuidTarget ? targetKey : null,
           system_card_key: uuidTarget ? null : targetKey,
           author_id: authorId,
           like_id: insertedLikeId,
-          payload: { cardTitle: title },
-        });
+          payload: { cardTitle: title, systemCard: Boolean(author?.is_system) },
+        }));
+        const { error: notificationError } = await admin.from('notifications').insert(notifications);
         if (notificationError) console.error('LIKE_NOTIFICATION_FAILED', { requestId, databaseCode: notificationError.code });
       }
     }

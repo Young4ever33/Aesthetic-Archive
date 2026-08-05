@@ -13,7 +13,7 @@ export async function GET(request: Request) {
     const url = new URL(request.url);
     const limit = Math.min(50, Math.max(1, Number(url.searchParams.get('limit')) || 20));
     const before = url.searchParams.get('before');
-    let query = supabase.from('notifications').select('id, actor_id, type, card_id, system_card_key, author_id, payload, read_at, created_at').eq('recipient_id', user.id).order('created_at', { ascending: false }).limit(limit + 1);
+    let query = supabase.from('notifications').select('id, actor_id, type, card_id, system_card_key, author_id, system_message_id, feedback_id, payload, read_at, created_at').eq('recipient_id', user.id).order('created_at', { ascending: false }).limit(limit + 1);
     if (before) query = query.lt('created_at', before);
     const { data, error } = await query;
     if (error) return out(requestId, 500, { code: 'NOTIFICATIONS_QUERY_FAILED', message: 'Unable to load notifications' });
@@ -24,6 +24,8 @@ export async function GET(request: Request) {
       type: item.type,
       cardId: item.card_id || item.system_card_key || null,
       authorId: item.author_id,
+      systemMessageId: item.system_message_id || null,
+      feedbackId: item.feedback_id || null,
       payload: item.payload || {},
       read: Boolean(item.read_at),
       createdAt: item.created_at,

@@ -33,8 +33,8 @@ for (const id of detailIds) {
 }
 forbid(html, /detail-(?:negative|generation)-block/, 'card detail contains an unapproved extra content block');
 requireMatch(html, /id="detail-background-title">风格背景</, 'left detail column must contain 风格背景');
-requireMatch(html, /app-20260804-final-audit\.js/, 'workspace HTML is not loading the current fingerprinted script');
-requireMatch(html, /styles-20260804-review-ai\.css/, 'workspace HTML is not loading the current fingerprinted stylesheet');
+requireMatch(html, /app-20260805-review-history\.js/, 'workspace HTML is not loading the current fingerprinted script');
+requireMatch(html, /styles-20260805-review-history\.css/, 'workspace HTML is not loading the current fingerprinted stylesheet');
 forbid(html, /review-access-20260804\.js/, 'workspace still loads the obsolete review bootstrap race');
 
 forbid(app, /generateLocalAestheticDraft|模拟\s*AI|compressImageFile/, 'workspace still contains simulated AI or reference-image compression');

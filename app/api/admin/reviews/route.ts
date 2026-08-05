@@ -13,11 +13,51 @@ async function requireReviewer() {
   return { user, role };
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   const requestId = rid();
   try {
     const { user } = await requireReviewer();
     const admin = await createSupabaseAdminClient();
+    const view = new URL(request.url).searchParams.get('view') || 'queue';
+
+    if (view === 'history') {
+      const { data: reviewRows, error: historyError } = await admin
+        .from('publish_reviews')
+        .select('id, card_id, owner_id, reviewer_id, status, note, reviewed_at')
+        .not('reviewer_id', 'is', null)
+        .in('status', ['published', 'rejected'])
+        .order('reviewed_at', { ascending: false })
+        .limit(50);
+      if (historyError) {
+        console.error('REVIEW_HISTORY_QUERY_FAILED', { requestId, code: historyError.code, message: historyError.message });
+        return out(requestId, 500, { code: 'REVIEW_QUERY_FAILED', message: 'Unable to load review history', stage: 'history', databaseCode: historyError.code || null });
+      }
+      const rows = reviewRows || [];
+      const cardIds = [...new Set(rows.map(row => row.card_id).filter(Boolean))];
+      if (!cardIds.length) return out(requestId, 200, []);
+      const [{ data: historyCards, error: historyCardsError }, { data: historyImages, error: historyImagesError }] = await Promise.all([
+        admin.from('aesthetic_cards').select('id, title, title_zh, category, publish_status, visibility, owner_id, reviewed_at').in('id', cardIds),
+        admin.from('card_images').select('id, card_id, url, storage_path, alt, sort_order').in('card_id', cardIds).order('sort_order', { ascending: true }),
+      ]);
+      if (historyCardsError || historyImagesError) {
+        console.error('REVIEW_HISTORY_ATTACHMENTS_FAILED', { requestId, cardsCode: historyCardsError?.code, imagesCode: historyImagesError?.code });
+      }
+      const cardsById = new Map((historyCardsError ? [] : historyCards || []).map(card => [card.id, card]));
+      const historyImagesByCard = new Map<string, { id: string; card_id: string; url: string | null; storage_path: string | null; alt: string | null; sort_order: number | null }[]>();
+      (historyImagesError ? [] : historyImages || []).forEach(image => historyImagesByCard.set(image.card_id, [...(historyImagesByCard.get(image.card_id) || []), image]));
+      const history = await Promise.all(rows.map(async row => ({
+        ...row,
+        card: cardsById.get(row.card_id) || null,
+        card_images: await Promise.all((historyImagesByCard.get(row.card_id) || []).map(async image => ({
+          ...image,
+          url: image.storage_path
+            ? await admin.storage.from('card-images').createSignedUrl(image.storage_path, 3600).then(result => result.data?.signedUrl || image.url).catch(() => image.url)
+            : image.url,
+        }))),
+      })));
+      return out(requestId, 200, history);
+    }
+
     const { data, error } = await admin
       .from('aesthetic_cards')
       .select('*')
