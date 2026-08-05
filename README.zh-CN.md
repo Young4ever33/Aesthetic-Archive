@@ -6,6 +6,18 @@
 
 ![Aesthetic Archive 产品界面](docs/screenshots/marketing-what.png)
 
+## 产品截图
+
+### 广场卡片
+
+![广场卡片](docs/screenshots/public-card-mobile.png)
+
+### 卡片详情
+
+![复古数字终端机美学详情](docs/screenshots/card-detail-retro-digital.png)
+
+![侘寂室内有机材料主义详情](docs/screenshots/card-detail-wabi-sabi.png)
+
 ## 当前状态
 
 | 项目 | 状态 |

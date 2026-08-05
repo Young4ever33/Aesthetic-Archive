@@ -6,6 +6,18 @@
 
 ![Aesthetic Archive product](docs/screenshots/marketing-what.png)
 
+## Product Screenshots
+
+### Public Plaza
+
+![Public plaza card](docs/screenshots/public-card-mobile.png)
+
+### Card Detail
+
+![Retro-digital card detail](docs/screenshots/card-detail-retro-digital.png)
+
+![Wabi-sabi card detail](docs/screenshots/card-detail-wabi-sabi.png)
+
 ## Status
 
 | Item | Status |
