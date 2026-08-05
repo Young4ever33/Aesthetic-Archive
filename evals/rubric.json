@@ -1,0 +1,16 @@
+{
+  "scoreType": "human-rated controlled evaluation",
+  "dimensions": {
+    "style": { "weight": 0.3, "description": "Style language and visual rhythm" },
+    "composition": { "weight": 0.25, "description": "Composition and spatial hierarchy" },
+    "color": { "weight": 0.2, "description": "Color family and proportions" },
+    "materialLightFinish": { "weight": 0.25, "description": "Material, texture, light, and finish" }
+  },
+  "minimumDimensionScore": 70,
+  "weightedScore": "style * 0.30 + composition * 0.25 + color * 0.20 + materialLightFinish * 0.25",
+  "limitations": [
+    "Scores are human-rated, not an automated objective metric.",
+    "The current evidence covers one A-04 case.",
+    "Provider and model metadata are incomplete for the historical run."
+  ]
+}

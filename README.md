@@ -1,225 +1,108 @@
 # Aesthetic Archive
 
-[中文 README](./README.zh-CN.md)
+[中文 README](README.zh-CN.md) · [Live product](https://aesthetic-archive.laverneyue33.workers.dev) · [Evaluation evidence](evals/README.md) · [AI correction log](docs/ai-correction-log.md)
 
-**Product Website:** [https://aesthetic-archive.laverneyue33.workers.dev](https://aesthetic-archive.laverneyue33.workers.dev)
+> An AI-assisted aesthetic knowledge base that turns visual references into structured, explainable, and reusable design knowledge.
 
-![Aesthetic Archive marketing homepage](./docs/screenshots/marketing-what.png)
+![Aesthetic Archive product](docs/screenshots/marketing-what.png)
 
-> **Aesthetic Archive is an AI-powered aesthetic knowledge base for everyone who cares about aesthetics and design. It turns scattered visual references into a searchable, traceable, decomposable, and reusable system of design and aesthetic intelligence.**
+## Status
 
-## Product Introduction
+| Item | Status |
+|---|---|
+| Product stage | Public alpha |
+| Live product | Available |
+| Core workflow | Reference → analysis → editable card → Prompt reuse → review |
+| Prompt evaluation | One A-04 bilingual controlled case recorded |
+| Evaluation coverage | Case-level evidence; additional domains pending |
+| Known limitation | Image workflows may introduce commercial lighting or signage |
 
-Anyone who cares about aesthetics can accumulate more images than they can meaningfully understand. What is missing is a reliable way to remember why a reference matters, trace where it came from, break down what makes it work, and reuse that knowledge in the next creation, choice, or design project.
+## The Product Decision
 
-Aesthetic Archive treats a reference as more than an image. It turns a visual reference into a structured aesthetic card with design elements, cultural context, materials, lighting, geometry, typography, palette, composition, use cases, bilingual prompts, negative prompts, source, and rights information. Whether the context is professional work or personal taste, a one-off save can become knowledge that remains useful over time.
+Designers can save thousands of references and still lose the reasoning that made them useful. Aesthetic Archive treats each image as evidence: it separates visible facts, interpretation, uncertainty, design variables, source, and rights information, then turns that structure into an editable aesthetic card and reusable bilingual Prompt asset.
 
-The product connects four stages that are usually separated:
+The product is not a generic image folder or a one-click image generator. It is a knowledge layer between inspiration and production:
 
 ```text
 Reference → Understanding → Aesthetic System → Production Direction
 ```
 
-The result is not another image folder or a generic AI image generator. It is a working knowledge layer between inspiration and design production.
+Three boundaries shape the product:
 
-![From a reference image to reusable aesthetic knowledge](./docs/screenshots/marketing-how.png)
+- AI output remains editable; it is not treated as final fact.
+- Prompt quality is tested with controlled candidates and recorded failure reasons.
+- Private cards stay private, and public submissions require human review.
 
-## For Whom
+## What I Built
 
-Aesthetic Archive is for anyone who wants to build, understand, and reuse aesthetic knowledge:
+This is an independently built product developed with AI coding-agent assistance. My contribution covers problem framing, the card knowledge model, the four-stage workflow, Prompt evaluation criteria, privacy and review boundaries, acceptance testing, and release decisions.
 
-- **Spatial designers across planning, architecture, landscape, and interiors:** early research, material studies, spatial references, client presentations, and visual direction.
-- **Graphic, brand, and UI designers:** visual systems, editorial references, typography, interfaces, composition, color relationships, and brand moodboards.
-- **Photographers and image-makers:** references for lighting, color grading, visual narrative, lens language, atmosphere, and composition.
-- **AI visual creators:** repeatable style variables, bilingual prompts, negative constraints, and reference sets.
-- **Personal aesthetic collectors, design students, and emerging creators:** everyday inspiration, style breakdown, visual research, and long-term development of a personal aesthetic system.
-- **Small studios and creative teams:** a shared visual language with private project research kept separate from public inspiration.
+| Product decision | Implementation evidence |
+|---|---|
+| Turn references into reusable knowledge | Structured cards, bilingual Prompts, negative constraints, source and rights fields |
+| Keep generation accountable | Editable output, Provider Gateway, usage records, explicit failure states |
+| Test Prompt quality | Four-dimension weighted rubric and 70% per-dimension gate |
+| Protect private research | Supabase RLS, workspace isolation, private-by-default cards |
+| Prevent automatic public AI content | Reviewer/admin queue and audit trail |
 
-![Aesthetic Archive audience and research pain points](./docs/screenshots/marketing-who.png)
+## Evidence, Not Claims
 
-## Use Cases
+The current controlled evidence is the A-04 parametric-architecture case. The revised Prompt moved structural constraints into the positive description while retaining negative constraints.
 
-### Before a project starts
+| Version | Language | Best candidate | Interpretation |
+|---|---|---:|---|
+| v3.0 | Chinese | about 60% | Commercial and fantasy drift; weak parametric identity |
+| v3.0 | English | 79.0% | Better structure; unstable setting and skybridges |
+| v3.1 | Chinese | 81.2% | Stronger form; commercial lighting remained |
+| v3.1 | English | 82.8% | More stable palette, setting, and two-skybridge structure |
 
-Collect references from different sources and turn a vague direction such as “quiet, tactile, and architectural” into a vocabulary of materials, light, composition, color, and spatial relationships.
+These are human-rated best-candidate scores for one controlled case, not automated accuracy or a project-wide average. The rubric, metadata gaps, and limits are recorded in [`evals/`](evals/README.md).
 
-### During visual research
+![A-04 Chinese baseline](docs/prompt-v3/validation/A-04/zh-v1-best.webp)
+![A-04 Chinese revised](docs/prompt-v3/validation/A-04/zh-v31-best.webp)
 
-Use the Public Plaza to discover reviewed cases, search by aesthetic attributes, save useful references, and compare examples instead of browsing an unstructured image stream.
+The raw development images retain platform watermarks and are included only as evaluation evidence, not licensed production artwork.
 
-### During AI-assisted exploration
+## What the AI Got Wrong
 
-Upload a reference, ask the system to analyze what is visible, edit the resulting card, and reuse the generated bilingual Prompt as a starting point for visual exploration.
+The implementation process exposed the same product discipline repeatedly: the product must not replace a real failure with a plausible fiction.
 
-### During presentation and collaboration
+- An unvalidated extraction refactor was reverted in about 40 seconds because generation-quality changes must pass a representative sample before entering the main path.
+- Provider debugging produced a “solved” state without a verified upstream result; the resulting rule forbids fabricated local AI output as a fallback.
+- An account-isolation incident led to stricter RLS and workspace acceptance criteria.
+- The evaluation framework is structured with AI assistance, but candidate scoring is explicitly human-rated and case-level.
 
-Arrange references on a Collage Board, add notes and project intent, summarize the visual direction, and export a clearer brief for clients or teammates.
+The full, verifiable account is in [`docs/ai-correction-log.md`](docs/ai-correction-log.md).
 
-### After a project
+## Core Workflow
 
-Keep the reasoning behind successful references in a personal archive so the next project starts with accumulated knowledge rather than a blank folder.
+1. Collect or upload a visual reference.
+2. Choose an analysis template and generate through a configured Provider.
+3. Review visible facts, interpretations, materials, palette, composition, and confidence.
+4. Edit the card and its Chinese/English Prompts.
+5. Reuse it in generation or arrange it on a Collage Board.
+6. Keep it private or submit it to the moderated Public Plaza.
 
-## Prompt Evaluation in Practice
+## Product Surfaces
 
-Aesthetic Archive treats Prompt quality as an outcome to be tested, not a paragraph to be admired. The A-04 parametric architecture card was used as a controlled bilingual evaluation: the same three-image reference set, separate Chinese and English Prompts, the same text-to-image workflow, and four candidates per language.
+- **Public Plaza:** reviewed public cases with search, saves, and source context.
+- **My Archive:** private generation, manual cards, editing, and Provider configuration.
+- **Prompt reuse:** bilingual Prompts, negative constraints, and reusable templates.
+- **Collage Board:** references, notes, and project direction in one visual workspace.
+- **Review Queue:** reviewer/admin acceptance before public publication.
 
-### What Changed Across Iterations
+![Public Plaza](docs/screenshots/public-plaza.png)
+![Personal archive](docs/screenshots/my-archive.png)
+![Collage board](docs/screenshots/collage-board.png)
 
-The first version described the style, but left too much room for the image model to improvise. The early candidates drifted toward commercial complexes, gold facades, RGB lighting, advertisements, traffic, and unstable skybridges. The revised Prompt moved those constraints into the positive description as well as the Negative Prompt: a concrete civic building, two staggered towers, two complete enclosed skybridges, a continuous parametric rib system, cool gray materials, and a deliberately non-commercial setting.
+## Known Limits
 
-The result was a visible improvement in both control and visual language:
-
-| Version | Language | Best-candidate score | Observed result |
-| --- | --- | ---: | --- |
-| v3.0 baseline | Chinese | **about 60%** | Weak parametric identity; strong commercial and fantasy drift |
-| v3.0 baseline | English | **79.0%** | Better structure, but color, setting, and skybridge control remained unstable |
-| v3.1 revised | Chinese | **81.2%** | Stronger rib system, curved podium, and architectural identity; commercial lighting still appeared |
-| v3.1 revised | English | **82.8%** | More stable cool-gray palette, non-commercial setting, and two-skybridge composition |
-
-The weighted score is calculated as `style × 30% + composition × 25% + color × 20% + material/light/finish × 25%`. A strict Prompt gate also requires every dimension to reach at least 70%. The Chinese v3.1 result reached the required overall quality and became the stronger parametric-form reference, but the Jimeng Agent workflow still introduced commercial lighting and signage. The English v3.1 result was the more stable constraint-following candidate. This distinction is important: a visually strong image can still reveal a constraint that needs further work.
-
-#### Chinese: baseline → v3.1
-
-| v3.0 baseline · 60.0 | v3.1 best · 81.2 | v3.1 same-setting candidate |
-| --- | --- | --- |
-| ![A-04 Chinese baseline Prompt result](./docs/prompt-v3/validation/A-04/zh-v1-best.webp) | ![A-04 Chinese v3.1 best Prompt result](./docs/prompt-v3/validation/A-04/zh-v31-best.webp) | ![A-04 Chinese v3.1 additional candidate](./docs/prompt-v3/validation/A-04/zh-v31-candidate-01.webp) |
-
-The revised Chinese Prompt recovered the continuous rib system, flowing podium, and stronger parametric massing. Its remaining weakness was Agent-added commercial signage and colored lighting.
-
-#### English: baseline → v3.1
-
-| v3.0 baseline · 79.0 | v3.1 best · 82.8 | v3.1 same-setting candidate |
-| --- | --- | --- |
-| ![A-04 English baseline Prompt result](./docs/prompt-v3/validation/A-04/en-v1-best.webp) | ![A-04 English v3.1 best Prompt result](./docs/prompt-v3/validation/A-04/en-v31-best.webp) | ![A-04 English v3.1 additional candidate](./docs/prompt-v3/validation/A-04/en-v31-candidate-01.webp) |
-
-The revised English Prompt produced more stable cool-gray materials, non-commercial surroundings, and two complete skybridges across multiple candidates.
-
-The images above are raw Prompt-test evidence generated during development and retain platform watermarks. They are included to show the improvement in a real generation loop, not as licensed production artwork.
-
-### Multidimensional Review Rubric
-
-Every bilingual Prompt is reviewed against the same four dimensions:
-
-| Dimension | Weight | What we inspect |
-| --- | ---: | --- |
-| Style language and visual rhythm | 30% | Does the generation preserve the reference's geometry, rhythm, restraint, and visual grammar? |
-| Composition and spatial hierarchy | 25% | Are subject count, scale, foreground/midground/background, camera position, and spatial relationships stable? |
-| Color family and proportions | 20% | Are dominant, supporting, and accent colors preserved in the intended area proportions? |
-| Material, texture, light, and finish | 25% | Do surfaces, joints, roughness, reflections, light direction, atmosphere, and rendering finish remain coherent? |
-
-For a serious comparison, generate four candidates from each language Prompt with the same model, aspect ratio, and adapter settings. Save the raw images, score every candidate, keep the best weighted result, and record the reasons for failure. Static Prompt detail alone is not a generation pass.
-
-### Recommended AI Image Tools
-
-The archive is Provider-neutral. Copy a card's complete Prompt and its language-matched Negative Prompt into the tool that fits the job:
-
-- **Jimeng AI / 即梦 AI:** strong Chinese-language Agent workflow for fast architectural and visual exploration. Useful when you want the tool to help interpret a Chinese brief, search context, and produce several visual directions. Keep the Agent's added interpretation under review.
-- **Midjourney:** effective for visual direction, atmosphere, composition studies, and fast style exploration. Use the English Prompt for more predictable structural wording; use image references only when you intentionally want reference-image influence.
-- **Adobe Firefly:** useful for teams already working in Adobe workflows and for controlled commercial image exploration. Keep the Prompt concrete and use the tool's explicit reference and style controls when available.
-- **Stable Diffusion / ComfyUI:** best when reproducibility, seed control, checkpoints, ControlNet, LoRA, and local or hosted pipelines matter. Use the neutral Prompt as the semantic layer and keep model-specific syntax in a separate adapter layer.
-- **OpenAI image generation and other compatible image APIs:** useful for application-integrated tests. Use the card Prompt as the provider-neutral input and keep size, count, model, and endpoint options outside the Prompt.
-
-Availability, model names, copyright terms, and interface labels change by region and plan. Check the provider's current terms before public or commercial use.
-
-| Goal | Workflow | Reference image | Prompt changes | Generation settings |
-| --- | --- | --- | --- | --- |
-| Controlled Prompt evaluation | Text-to-image | Off | None between candidates | Lock model, aspect ratio, and all available controls; generate four candidates |
-| Reproduce a card's direction | Text-to-image first; add reference only when needed | Optional and explicitly recorded | Preserve subject, camera, palette, material, light, and constraints | Keep a baseline run before tuning reference strength |
-| Adapt to a project brief | Text-to-image or image-guided generation | Optional | Replace the subject/use state first; preserve visual grammar and failure constraints | Change one major variable per iteration and record it |
-
-### Jimeng Example: From Card to Image
-
-1. Open a reviewed card in Public Plaza or My Archive and copy the complete Chinese Prompt. Copy the Chinese Negative Prompt separately; do not merge the two fields.
-2. Decide whether the card should be reproduced or adapted. For reproduction, keep the concrete subject, camera, palette, material, and light unchanged. For adaptation, edit only the subject or project context first, then keep the style grammar and negative constraints stable.
-3. In Jimeng Agent, choose a text-to-image workflow. For a Prompt test, do not add a reference image, keep the same 16:9 canvas, use the same model and settings for all four candidates, and avoid adding generic boosters such as `masterpiece`, `best quality`, `8K`, or `cinematic`.
-4. Paste the positive Prompt into the main Prompt field and paste the language-matched Negative Prompt into the negative field. Keep the Prompt language consistent: Chinese with Chinese negative constraints, English with English negative constraints.
-5. Generate four consecutive candidates. Record the model, date, aspect ratio, settings, filenames, and four-dimensional scores. Do not select the prettiest image only; check whether the structural and color constraints actually held.
-6. Iterate one failure at a time. If towers become equal height, strengthen the measurable height relationship. If advertising appears, add a positive non-commercial setting and a specific negative exclusion. If a bridge disappears, define its count, height, enclosure, endpoints, and visible connection again.
-
-A practical adaptation pattern is:
-
-```text
-Card Prompt = stable visual grammar + concrete test scene
-Project edit = replace only the subject, use state, or setting
-Negative Prompt = preserve structural, material, color, identity, text, and watermark exclusions
-Tool settings = model, aspect ratio, count, seed, reference strength, and adapter controls
-```
-
-This separation keeps a reusable aesthetic card portable across tools while making each tool's settings explicit and reproducible.
-
-## Product Features
-
-### Public Plaza
-
-A moderated public library of aesthetic cases. Browse and search by style, color, composition, scene, use case, and prompt. Open a case, inspect its structured analysis, copy its prompts, save it, or add it to a Collage Board.
-
-![Public Plaza product interface](./docs/screenshots/public-plaza.png)
-
-### Personal Generation and My Archive
-
-Upload a reference or create a card manually in a private archive. Connect an AI Provider through the server-side gateway, generate an analysis, edit the result, and decide whether the card stays private or enters the review workflow.
-
-![Personal generation and My Archive interface](./docs/screenshots/my-archive.png)
-
-### Prompt Reuse
-
-Each analyzed card can produce Chinese and English prompts, negative prompts, and reusable style variables. The goal is to move from “write a new prompt every time” to a Prompt Pack that can be adapted across projects and tools. In Personal Settings, users can select an existing Prompt generation template or write and maintain their own template. The generation form and editable aesthetic card keep analysis, bilingual prompts, template reuse, and archive storage in one workflow.
-
-![Bilingual reusable prompts generated for an aesthetic card](./docs/screenshots/prompt-templates.png)
-
-### Collage Board
-
-Arrange references into a visual board, add notes, define a direction, and summarize the relationships between images. The board is designed to turn a moodboard into a project-ready visual argument.
-
-![Collage Board product interface](./docs/screenshots/collage-board.png)
-
-### Saved Cases and Templates
-
-Save public references for later, attach project context, and reuse analysis templates. Templates can be tuned to a discipline, studio method, or personal way of describing visual decisions.
-
-### Review Queue
-
-AI generation does not automatically make a case public. Admin and reviewer roles inspect submissions, approve or reject them, and preserve an audit trail before a card appears in the Public Plaza.
-
-## How Generation Works
-
-1. **Choose a reference.** Upload an image, import a project reference, or create a card manually.
-2. **Choose an analysis template.** Select the level of detail and the design vocabulary you need.
-3. **Generate with a configured Provider.** The authenticated server sends the request through the AI Gateway. Provider keys stay server-side.
-4. **Review the result.** Check visible facts, cultural context, inferences, materials, palette, composition, and confidence. Edit anything that needs correction.
-5. **Reuse the output.** Copy the Chinese or English Prompt, adjust the Negative Prompt, add the card to a board, or save it to your archive.
-6. **Publish only when ready.** Private cards remain private. Public submissions go through reviewer/admin approval before appearing in the Plaza.
-
-The generation loop is:
-
-```text
-Collect → Analyze → Edit → Generate Prompt → Arrange → Reuse or Share
-```
-
-## Long-Term Value
-
-Aesthetic Archive is designed to create compounding value rather than only produce one-off AI outputs.
-
-- **For individuals:** every structured reference makes personal taste more searchable and easier to explain.
-- **For projects:** visual direction becomes a reusable asset instead of disappearing after a presentation.
-- **For teams:** shared templates and reviewed cards create a consistent design vocabulary.
-- **For the design community:** high-signal public cases can form a more useful aesthetic knowledge layer than an unstructured image feed.
-- **For future products:** the archive can support design education, collaboration, research, and more disciplined AI-assisted creation.
-
-The long-term product loop is:
-
-**Collect references → build aesthetic knowledge → reuse in production → contribute better cases → strengthen the knowledge base.**
-
-![Aesthetic research as an ongoing practice](./public/marketing/why-editorial.png)
-
-## Product Principles
-
-- A reference is evidence, not decoration. Visible facts must be separated from interpretation and uncertainty.
-- AI assists judgment; it does not replace authorship. Designers control the template, edit the card, and decide what is reusable.
-- Private by default. Project research and Provider configuration remain protected unless explicitly shared.
-- Explainability over impressive output. A useful card should tell a designer what to notice and how to act on it.
-- Source and rights matter. Public cases need source and rights information, and uncertain claims should remain marked as uncertain.
-- Aesthetic knowledge should compound. Every structured reference should make the next project faster and more intentional.
+- Current Prompt evidence covers one validated case; landscape, interior, and graphic cases are pending.
+- Historical Provider and model metadata for A-04 was not fully recorded.
+- Human-rated scores make the protocol reviewable, not objectively universal.
+- Provider workflows may add unrequested commercial lighting, signage, or scene elements.
+- Public seed-image redistribution rights must be confirmed before commercial launch.
+- The architecture is intentionally broader than a static MVP because private workspaces, review, Provider secrets, and public content require separate trust boundaries.
 
 ## Run Locally
 
@@ -230,42 +113,24 @@ pnpm install --frozen-lockfile
 pnpm dev
 ```
 
-Before opening a pull request:
+Run the complete repository acceptance check:
 
 ```bash
 pnpm check
 ```
 
-This runs lint, type checking, repository safety checks, and the production build.
+This validates seed Prompts, workspace contracts, lint, types, repository safety, and the production build. Key framework and type dependencies are pinned to the versions resolved by the lockfile.
 
 ## Technical Foundation
 
-- `app/`: Next.js pages, server APIs, authentication callback, and marketing styles.
-- `lib/`: Supabase clients, validation, Provider vault, AI Gateway, and usage logging.
-- `public/local-mvp/`: browser workspace UI and public seed dataset.
-- `public/marketing/` and `public/brand/`: product assets and workflow visuals used by the application.
-- `supabase/migrations/`: schema, RLS, Storage, security, observability, and feedback migrations.
-- `docs/`: product contracts, setup, deployment, QA, and release documentation.
+- `app/`: Next.js pages, APIs, authentication, and product surfaces.
+- `lib/`: validation, Supabase clients, Provider vault, AI Gateway, and usage logging.
+- `supabase/migrations/`: schema, RLS, storage, review, and observability.
+- `evals/`: Prompt rubric, datasets, and results.
+- `docs/`: product contracts, deployment, QA, decisions, and correction evidence.
 
-The root directory is the only active application directory. There is no active `apps/web` path.
+Provider keys are encrypted and stored server-side. They must never appear in browser storage, API responses, logs, screenshots, or Git history. See `.env.example` and [`docs/ENVIRONMENT_TEMPLATE.md`](docs/ENVIRONMENT_TEMPLATE.md) for configuration.
 
-## Configuration and Security
+## License and Assets
 
-Copy `.env.example` to `.env.local` for local development. Never commit `.env.local` or any secret.
-
-Required server values:
-
-- `NEXT_PUBLIC_SUPABASE_URL`
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-- `SUPABASE_SERVICE_ROLE_KEY`
-- `PROVIDER_ENCRYPTION_KEY` (base64-encoded 32-byte key)
-
-Optional runtime value:
-
-- `AI_REQUEST_TIMEOUT_MS`
-
-Production Provider calls use Cloudflare outbound `fetch`; do not configure desktop proxy variables in the Worker. Provider API keys are encrypted and stored server-side. They must never appear in localStorage, browser backups, API responses, logs, or Git history. The browser receives only non-secret metadata such as `hasSecret`.
-
-## Assets and License
-
-See `LICENSE`. Before commercial launch, confirm that every public seed image is self-owned, licensed for redistribution, or replaced. Do not publish unverified reference images, private browser exports, screenshots, or temporary QA material.
+See [`LICENSE`](LICENSE). Code licensing does not grant rights to third-party reference images, generated platform outputs, seed content, or user uploads. Confirm redistribution rights before public or commercial use.

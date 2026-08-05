@@ -1,0 +1,25 @@
+{
+  "caseId": "A-04",
+  "title": "Parametric architecture",
+  "status": "validated-case",
+  "referenceSet": "docs/prompt-v3/A-04-parametric-architecture.sample.json",
+  "workflow": "text-to-image controlled bilingual comparison",
+  "languages": ["zh", "en"],
+  "versions": ["v3.0", "v3.1"],
+  "candidateCount": 4,
+  "provider": "unknown",
+  "model": "unknown",
+  "aspectRatio": "16:9",
+  "scoreType": "human-rated controlled evaluation",
+  "results": [
+    { "language": "zh", "version": "v3.0", "bestCandidateScore": 60.0, "notes": "Commercial-complex and fantasy drift; unstable parametric identity." },
+    { "language": "en", "version": "v3.0", "bestCandidateScore": 79.0, "notes": "Better structure, but color, setting, and skybridge control remained unstable." },
+    { "language": "zh", "version": "v3.1", "bestCandidateScore": 81.2, "notes": "Stronger rib system and architectural identity; commercial lighting and signage remained." },
+    { "language": "en", "version": "v3.1", "bestCandidateScore": 82.8, "notes": "More stable cool-gray palette, non-commercial setting, and two-skybridge composition." }
+  ],
+  "knownLimitations": [
+    "Jimeng Agent may add commercial lighting or signage even when the Prompt is structurally compliant.",
+    "The result is a single case and cannot support a project-wide average.",
+    "Historical Provider and model metadata was not recorded."
+  ]
+}
