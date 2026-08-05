@@ -134,7 +134,7 @@ function providerHeaders(provider: ProviderRecord, secret: string) {
     'User-Agent': 'Aesthetic-Archive/0.1',
   };
   if (normalizeProviderType(provider.type) === 'openrouter') {
-    headers['HTTP-Referer'] = 'https://aesthetic-archive.laverneyue33.workers.dev';
+    headers['HTTP-Referer'] = 'https://myaestheticarchive.com';
     headers['X-Title'] = 'Aesthetic Archive';
   }
   return headers;

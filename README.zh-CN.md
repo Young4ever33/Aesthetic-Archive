@@ -1,6 +1,6 @@
 # Aesthetic Archive
 
-[English README](README.md) · [在线产品](https://aesthetic-archive.laverneyue33.workers.dev) · [评测证据](evals/README.md) · [AI 纠偏记录](docs/ai-correction-log.md)
+[English README](README.md) · [在线产品](https://myaestheticarchive.com) · [评测证据](evals/README.md) · [AI 纠偏记录](docs/ai-correction-log.md)
 
 > 将视觉参考转化为结构化、可解释、可复用的审美知识与 Prompt 资产。
 

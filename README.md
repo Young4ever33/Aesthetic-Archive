@@ -1,6 +1,6 @@
 # Aesthetic Archive
 
-[中文 README](README.zh-CN.md) · [Live product](https://aesthetic-archive.laverneyue33.workers.dev) · [Evaluation evidence](evals/README.md) · [AI correction log](docs/ai-correction-log.md)
+[中文 README](README.zh-CN.md) · [Live product](https://myaestheticarchive.com) · [Evaluation evidence](evals/README.md) · [AI correction log](docs/ai-correction-log.md)
 
 > An AI-assisted aesthetic knowledge base that turns visual references into structured, explainable, and reusable design knowledge.
 

@@ -77,10 +77,10 @@ Do not configure `AI_REQUEST_TIMEOUT_MS`. Provider calls are submitted once and 
 Supabase Auth must use the final HTTPS product domain as its Site URL and allow:
 
 ```text
-https://aesthetic-archive.laverneyue33.workers.dev/auth/callback
+https://myaestheticarchive.com/auth/callback
 ```
 
-A custom domain is required before China-network release because `workers.dev` resolution and reachability are not reliable on affected networks. Add the custom domain to the Worker first, then add its exact `/auth/callback` URL to Supabase before moving traffic. Retain the `workers.dev` callback during rollout while both addresses remain active.
+The production custom domain is `https://myaestheticarchive.com`. Add its exact `/auth/callback` URL to Supabase Auth. Retain the `workers.dev` callback only if you still need the legacy address during rollout.
 
 ## Verification Commands
 
@@ -94,7 +94,7 @@ pnpm cloudflare:build
 After Cloudflare activates a deployment, run from a network that resolves `workers.dev` correctly:
 
 ```bash
-pnpm smoke:production -- https://aesthetic-archive.laverneyue33.workers.dev
+pnpm smoke:production -- https://myaestheticarchive.com
 ```
 
 Then complete authenticated checks for sign-in, Provider creation, connection testing, image analysis, Prompt generation, image generation where supported, card persistence, social interactions, review publication, and account isolation.
