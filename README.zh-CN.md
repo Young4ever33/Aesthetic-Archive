@@ -1,65 +1,121 @@
-# Aesthetic Archive
+<p align="center"><img src="./public/brand/archive-mark.svg" alt="Aesthetic Archive logo" width="72"></p>
+<h1 align="center">Aesthetic Archive</h1>
+<p align="center"><strong>把视觉参考变成可以理解、复用和持续积累的审美知识。</strong></p>
 
-[English README](README.md) · [在线产品](https://myaestheticarchive.com) · [评测证据](evals/README.md) · [AI 纠偏记录](docs/ai-correction-log.md)
+<p align="center"><a href="https://myaestheticarchive.com">打开在线产品</a> · <a href="./README.md">English README</a> · <a href="./evals/README.md">评测证据</a> · <a href="./docs/ai-correction-log.md">AI 纠偏记录</a></p>
 
-> 将视觉参考转化为结构化、可解释、可复用的审美知识与 Prompt 资产。
+![Aesthetic Archive 宣传页首屏](./docs/screenshots/marketing-what.png)
 
-![Aesthetic Archive 产品界面](docs/screenshots/marketing-what.png)
+> **Aesthetic Archive 是一个面向所有审美者与设计师的 AI 审美知识库：把分散的视觉参考转化为可搜索、可溯源、可拆分、可复用的设计审美智能系统。**
 
-## 产品截图
+## 产品介绍
 
-### 广场卡片
+每一个关注审美的人都可能收藏大量图片，真正缺少的是一种可靠的方法：记住一张参考图为什么重要，追溯它来自哪里，拆分它为什么有效，并把其中的知识带入下一次创作、选择或设计项目。
 
-![广场卡片](docs/screenshots/public-card-mobile.png)
+Aesthetic Archive 不把参考图当作单纯的图片，而是把它转化为结构化审美卡片，记录设计元素、文化语境、材料、光线、几何、字体、色彩、构图、使用场景、双语 Prompt、Negative Prompt、来源和版权信息。无论是专业项目还是个人审美积累，视觉参考都能从一次性收藏转化为可以持续使用的知识。
 
-### 卡片详情
-
-![复古数字终端机美学详情](docs/screenshots/card-detail-retro-digital.png)
-
-![侘寂室内有机材料主义详情](docs/screenshots/card-detail-wabi-sabi.png)
-
-## 当前状态
-
-| 项目 | 状态 |
-|---|---|
-| 产品阶段 | Public alpha |
-| 在线产品 | 可访问 |
-| 核心流程 | 参考 → 分析 → 可编辑卡片 → Prompt 复用 → 审核 |
-| Prompt 评测 | 已记录 1 个 A-04 双语受控案例 |
-| 评测覆盖 | 仅为案例级证据，其他领域待补 |
-| 已知限制 | 图像工作流可能自行加入商业灯光或招牌 |
-
-## 核心产品判断
-
-设计师可以收藏成千上万张图片，却仍然无法保留“这张图为什么有效”的判断。Aesthetic Archive 把参考图视为证据：区分可见事实、解释、不确定性、设计变量、来源和权利信息，再把这些内容转化为可编辑的审美卡片与可复用的中英双语 Prompt。
-
-它不是普通图片收藏夹，也不是一键生成图片工具，而是灵感和生产之间的知识层：
+产品连接了通常彼此分离的四个阶段：
 
 ```text
-视觉参考 → 理解 → 审美体系 → 生产方向
+参考图 → 理解 → 审美体系 → 设计生产方向
 ```
 
-产品有三条明确边界：
+它不是另一个图片文件夹，也不是泛化的 AI 生图工具，而是连接灵感与设计生产之间的一层可工作的知识系统。
 
-- AI 输出必须可编辑，不能被当成最终事实。
-- Prompt 质量必须通过受控候选和失败原因记录进行验证。
-- 私人卡片默认私有，公开内容必须经过人工审核。
+![从参考图到可复用审美知识](./docs/screenshots/marketing-how.png)
 
-## 我完成的工作
+## 针对用户
 
-这是一个由我独立负责、使用 AI coding agent 辅助实现的产品。我的工作包括问题定义、卡片知识模型、四阶段流程、Prompt 评测标准、隐私和审核边界、人工验收及发布决策。
+Aesthetic Archive 面向所有希望建立、理解和复用审美知识的人：
 
-| 产品判断 | 实现证据 |
-|---|---|
-| 将参考图变成可复用知识 | 结构化卡片、中英 Prompt、负向约束、来源和版权字段 |
-| 保持生成过程可信 | 可编辑结果、Provider Gateway、使用记录、明确失败状态 |
-| 验证 Prompt 质量 | 四维加权评分与 70% 单维最低门槛 |
-| 保护私人研究 | Supabase RLS、工作区隔离、默认私有 |
-| 阻止 AI 内容自动公开 | Reviewer/Admin 审核队列和记录 |
+- **空间设计师（规划、建筑、景观、室内）：** 前期研究、材料分析、空间参考、客户汇报和视觉方向。
+- **平面、品牌与 UI 设计师：** 视觉系统、编辑参考、字体、界面、构图、色彩关系和品牌 Moodboard。
+- **摄影师与影像创作者：** 积累光线、色调、镜头语言、叙事氛围和构图参考。
+- **AI 视觉创作者：** 建立可重复的风格变量、双语 Prompt、负向约束和参考集合。
+- **个人审美收藏者、设计学生与新晋创作者：** 整理日常灵感，拆解风格，进行视觉研究，并长期建立自己的审美体系。
+- **小型工作室与创意团队：** 建立共享视觉语言，同时将项目研究与公开灵感分开管理。
 
-## 可复核证据
+![Aesthetic Archive 目标用户与视觉研究痛点](./docs/screenshots/marketing-who.png)
 
-当前受控证据来自 A-04 参数化建筑案例。修订版将结构约束前移到正向 Prompt，同时保留负向限制。
+## 使用场景
+
+### 项目开始之前
+
+收集来自不同来源的参考图，把“安静、触感强、有建筑感”这类模糊方向，转化为材料、光线、构图、色彩和空间关系组成的视觉词汇。
+
+### 进行视觉研究时
+
+通过视觉库广场发现经过整理的案例，按审美属性搜索，保存有价值的参考，并进行对比，而不是在没有结构的图片流中反复浏览。
+
+### 进行 AI 辅助探索时
+
+上传参考图，让系统分析图中可观察到的内容，编辑生成的审美卡片，并将双语 Prompt 作为视觉探索的起点。
+
+### 进行汇报与协作时
+
+在 Collage 画板中排列参考图，添加笔记和项目意图，总结视觉方向，为客户或团队准备更清晰的设计 Brief。
+
+### 项目结束之后
+
+保留成功参考背后的判断逻辑，让下一次项目从不断积累的知识开始，而不是重新打开一个空文件夹。
+
+## 产品模块
+
+### 视觉库广场 / Public Plaza
+
+经过审核的公开审美案例库。可以按风格、色彩、构图、场景、使用场景和 Prompt 浏览与搜索，打开案例查看结构化分析，复制 Prompt、收藏案例或加入 Collage 画板。
+
+![Public Plaza 广场卡片](./docs/screenshots/public-card-mobile.png)
+![视觉库广场产品界面](./docs/screenshots/public-plaza.png)
+
+### 个人生成与个人审美库 / My Archive
+
+在私人审美库中上传参考图或手动创建卡片。通过服务端 AI Gateway 连接自定义 AI Provider，生成分析结果，编辑卡片内容，并决定保持私有或提交审核。
+
+![个人生成与个人审美库界面](./docs/screenshots/my-archive.png)
+
+### 审美卡片与 Prompt 复用
+
+每张分析卡片都把视觉参考、设计判断、文化语境、材料语言、色彩和构图组织在一起，并生成中文 Prompt、英文 Prompt、Negative Prompt 和可复用的风格变量。目标是从“每次重新写一遍 Prompt”转向可以跨项目、跨工具调整的 Prompt Pack。
+
+下面是实际产品中的两种卡片详情：一个偏复古数字终端视觉系统，一个偏侘寂室内与有机材料主义。它们展示了从公开广场进入详情后，如何查看结构化分析和可复用 Prompt。
+
+![复古数字终端机美学卡片详情](./docs/screenshots/card-detail-retro-digital.png)
+![侘寂室内有机材料主义卡片详情](./docs/screenshots/card-detail-wabi-sabi.png)
+![个人设置中的卡片生成模板](./docs/screenshots/prompt-templates.png)
+
+### 画板 / Collage Board
+
+将参考图排列为视觉画板，添加笔记，定义设计方向，并总结图片之间的关系。画板的目标不是停留在氛围展示，而是形成可以用于项目沟通的视觉论证。
+
+![Collage 画板产品界面](./docs/screenshots/collage-board.png)
+
+### 收藏与模板 / Saved and Templates
+
+保存公开案例，添加项目语境，并复用分析模板。模板可以按照专业方向、工作室方法或个人描述视觉判断的方式进行调整。
+
+### 审核队列与消息 / Review Queue
+
+AI 生成并不等于可以自动公开。Admin 和 Reviewer 可以查看提交内容、通过或驳回案例，并保留审核记录，之后卡片才会进入视觉库广场。系统公告、Feedback 回复、点赞、Follow 和审核结果也会进入统一消息流。
+
+## 如何使用生成
+
+1. **选择参考图。** 上传图片、导入项目参考，或手动创建卡片。
+2. **选择分析模板。** 根据需要选择分析深度和设计词汇。
+3. **使用已配置的 Provider 生成。** 认证后的服务端会通过 AI Gateway 发起请求，Provider 密钥只保留在服务端。
+4. **检查生成结果。** 核对可见事实、文化背景、推测、材料、色彩、构图和置信度，并修正需要调整的内容。
+5. **复用结果。** 复制中文或英文 Prompt，调整 Negative Prompt，将卡片加入画板，或保存到个人审美库。
+6. **确认后再公开。** 私有卡片保持私有，公开提交必须经过 reviewer/admin 审核后才能进入视觉库广场。
+
+生成循环是：
+
+```text
+收集 → 分析 → 编辑 → 生成 Prompt → 排列 → 复用或分享
+```
+
+## 评测与产品判断
+
+Aesthetic Archive 不把“模型生成了结果”当成质量证明。当前可复核证据来自 A-04 参数化建筑案例：修订版将结构约束前移到正向 Prompt，同时保留负向限制。
 
 | 版本 | 语言 | 最佳候选分数 | 解释 |
 |---|---|---:|---|
@@ -68,81 +124,63 @@
 | v3.1 | 中文 | 81.2% | 形体增强，仍出现商业灯光 |
 | v3.1 | 英文 | 82.8% | 色彩、场景和双连廊更稳定 |
 
-这些数字是单一受控案例中、经人工评分的最佳候选结果，不是自动准确率或项目整体平均值。评分规则、元数据缺口和限制见 [`evals/`](evals/README.md)。
+这些数字是单一受控案例中、经人工评分的最佳候选结果，不是自动准确率或项目整体平均值。评分规则、数据集和限制见 [`evals/`](evals/README.md)。
 
 ![A-04 中文基线](docs/prompt-v3/validation/A-04/zh-v1-best.webp)
 ![A-04 中文修订版](docs/prompt-v3/validation/A-04/zh-v31-best.webp)
 
-原始测试图片保留平台水印，仅用于展示真实评测过程，不作为已授权生产素材。
+实现过程中也建立了明确的产品纪律：不能用“看起来合理”的结果替代真实失败；Provider 没有真实上游结果时不能编造本地 AI 输出；账户隔离、隐私和公开审核必须成为产品边界，而不是上线后的补丁。完整记录见 [`docs/ai-correction-log.md`](docs/ai-correction-log.md)。
 
-## AI 做错了什么
+## 长期价值
 
-实现过程中反复出现同一条产品纪律：不能用“看起来合理”的结果替代真实失败。
+Aesthetic Archive 追求的是持续积累的价值，而不只是一次性的 AI 输出。
 
-- 未经单样本验证的提取链路重构在约 40 秒内被撤回，质量链路必须先通过代表性案例。
-- Provider 调试曾在没有真实上游结果时被标记为“已解决”，因此建立了禁止本地编造 AI 结果兜底的规则。
-- 账户隔离事故推动了更严格的 RLS 和工作区验收标准。
-- 评分框架由 AI 协助结构化，但候选评分明确属于人工评分和案例级证据。
+- **对个人：** 每一张结构化参考图都会让个人审美更容易搜索和解释。
+- **对项目：** 视觉方向会成为可以复用的设计资产，而不是在汇报结束后消失。
+- **对团队：** 共享模板和审核案例能够建立一致的设计语言。
+- **对设计社区：** 高信噪比的公开案例可以形成比无结构图片流更有用的审美知识层。
 
-完整记录见 [`docs/ai-correction-log.md`](docs/ai-correction-log.md)。
+长期产品循环是：**收集参考 → 建立审美知识 → 用于生产 → 贡献更好的案例 → 强化知识库。**
 
-## 核心流程
+![持续进行的审美研究](./public/marketing/why-editorial.png)
 
-1. 收藏或上传视觉参考。
-2. 选择分析模板，并通过已配置 Provider 生成。
-3. 审核可见事实、解释、材质、色彩、构图和置信度。
-4. 编辑卡片及中英文 Prompt。
-5. 在生成工具中复用，或加入 Collage Board。
-6. 保持私有，或提交到经过审核的 Public Plaza。
+## 产品原则
 
-## 产品模块
+- **参考图是证据，不是装饰。** 将可观察事实与判断、推测和不确定性分开。
+- **AI 辅助判断，不替代作者。** 设计师控制模板、编辑卡片，并决定什么值得复用。
+- **默认保护隐私。** 项目研究和 Provider 配置受到保护，只有明确分享后才会公开。
+- **解释优先于炫技。** 一张有用的卡片应该告诉设计师该观察什么，以及下一步如何行动。
+- **来源和版权同样重要。** 公开案例需要来源和版权信息，不确定的判断必须保持不确定标记。
 
-- **Public Plaza：** 经审核的公开案例、检索、收藏和来源信息。
-- **My Archive：** 私人生成、手工卡片、编辑和 Provider 配置。
-- **Prompt 复用：** 中英双语 Prompt、Negative Prompt 和模板。
-- **Collage Board：** 将参考、注释和项目方向组织在同一视觉工作区。
-- **Review Queue：** 内容公开前由 Reviewer/Admin 验收。
+## 当前状态
 
-![Public Plaza](docs/screenshots/public-plaza.png)
-![私人档案](docs/screenshots/my-archive.png)
-![Collage Board](docs/screenshots/collage-board.png)
-
-## 已知限制
-
-- 当前 Prompt 证据只覆盖 1 个案例，景观、室内和平面案例待补。
-- A-04 历史评测的 Provider 和模型元数据未完整记录。
-- 人工评分使流程可复核，但不代表客观通用指标。
-- Provider 工作流仍可能加入未请求的灯光、招牌和场景元素。
-- 商业发布前必须确认所有公开种子图片的再分发权利。
-- 架构复杂度来自私人工作区、审核、Provider 密钥和公开内容之间的信任边界。
+| 项目 | 状态 |
+|---|---|
+| 产品阶段 | Public alpha |
+| 在线产品 | [myaestheticarchive.com](https://myaestheticarchive.com) |
+| 核心流程 | 参考 → 分析 → 可编辑卡片 → Prompt 复用 → 审核 |
+| Prompt 评测 | 已记录 1 个 A-04 双语受控案例 |
+| 已知限制 | 图像工作流可能自行加入商业灯光或招牌 |
 
 ## 本地运行
 
-要求：Node.js 20+ 和 pnpm。
+要求：Node.js 20+、pnpm。
 
 ```bash
 pnpm install --frozen-lockfile
 pnpm dev
-```
-
-执行完整验收：
-
-```bash
 pnpm check
 ```
 
-该命令检查种子 Prompt、工作区契约、Lint、类型、仓库安全和生产构建。关键框架与类型依赖已固定到 lockfile 实际解析版本。
+`pnpm check` 会执行 Prompt、工作区契约、Lint、类型、仓库安全和生产构建检查。配置说明见 [`docs/ENVIRONMENT_TEMPLATE.md`](docs/ENVIRONMENT_TEMPLATE.md)。Provider API Key 只在服务端加密保存，绝不能出现在浏览器存储、API 响应、日志或 Git 历史中。
 
-## 技术基础
+## 技术基础与素材
 
-- `app/`：Next.js 页面、API、认证和产品界面。
-- `lib/`：校验、Supabase 客户端、Provider vault、AI Gateway 和使用记录。
-- `supabase/migrations/`：Schema、RLS、存储、审核和可观测性。
-- `evals/`：Prompt 评分规则、数据集和结果。
-- `docs/`：产品契约、部署、QA、决策与纠偏证据。
+- `app/`：Next.js 页面、服务端 API、认证、审核和消息。
+- `lib/`：Supabase 客户端、校验、Provider 加密存储、AI Gateway 和使用记录。
+- `public/local-mvp/`：工作台界面和公开案例数据。
+- `public/marketing/`、`public/brand/`：产品资源和工作流视觉素材。
+- `supabase/migrations/`：数据库、RLS、Storage、安全、可观测性和反馈迁移。
+- `docs/`、`evals/`：产品契约、部署、QA、评测和纠偏证据。
 
-Provider Key 在服务端加密保存，不得进入浏览器存储、API 响应、日志、截图或 Git 历史。配置说明见 [`docs/ENVIRONMENT_TEMPLATE.md`](docs/ENVIRONMENT_TEMPLATE.md)。
-
-## 许可证与素材
-
-代码许可证见 [`LICENSE`](LICENSE)。代码许可不自动涵盖第三方参考图、平台生成结果、种子内容或用户上传内容；公开或商业使用前必须确认对应权利。
+请阅读 [`LICENSE`](LICENSE)。代码许可证不自动涵盖第三方参考图、平台生成结果、种子内容或用户上传内容；公开或商业使用前必须确认对应权利。
